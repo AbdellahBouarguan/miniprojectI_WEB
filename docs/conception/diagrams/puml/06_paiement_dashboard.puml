@@ -1,0 +1,89 @@
+@startuml 06_paiement_dashboard
+!include _style.puml
+title UC 06 - Enregistrer le paiement d'une facture et consulter le tableau de bord
+' =====================================================================
+
+autonumber
+actor "Fournisseur" as FOU
+participant "Interface Web\n(UI)" as UI
+participant "Service\nPaiement" as PAY
+participant "Service\nTableauBord" as TDB
+database "Base de\ndonnees" as DB
+
+== Etape 1 : Authentification du fournisseur ==
+FOU -> UI : se connecter
+UI -> PAY : authentifier(login, motDePasse)
+PAY -> DB : verifierIdentifiants(login, motDePasse)
+alt Identifiants invalides
+  DB --> PAY : echec
+  PAY --> UI : erreur
+  UI --> FOU : message d'erreur
+  break Fin du cas d'utilisation
+else Identifiants valides et role = FOURNISSEUR
+  DB --> PAY : autorise
+  PAY --> UI : session ouverte
+end
+
+== Etape 2 : Enregistrement du paiement d'une facture ==
+FOU -> UI : enregistrer le paiement d'une facture
+UI --> FOU : afficher le formulaire (n facture, montant, date)
+FOU -> UI : saisir numeroFacture, montant, datePaiement
+UI -> PAY : enregistrerPaiement(numeroFacture, montant, datePaiement)
+activate PAY
+PAY -> DB : getFacture(numeroFacture)
+alt Facture introuvable
+  DB --> PAY : vide
+  PAY --> UI : erreur "Facture inexistante"
+  UI --> FOU : afficher "Facture introuvable"
+  break Fin du cas d'utilisation
+else Facture deja payee
+  DB --> PAY : statut=PAYEE
+  PAY --> UI : erreur "Facture deja reglee"
+  UI --> FOU : afficher "Facture deja payee"
+  break Fin du cas d'utilisation
+else Facture valide et non payee
+  DB --> PAY : facture(montantTTC, statut=EMISE)
+  alt Montant saisi != montantTTC
+    PAY --> UI : avertissement "Montant different du TTC"
+    UI --> FOU : demander confirmation / correction
+  else Montant correct
+    PAY -> PAY : poursuivre
+  end
+  PAY -> DB : insertPaiement(paiement) + statutFacture=PAYEE
+  alt Echec d'ecriture en base
+    DB --> PAY : erreur
+    PAY -> DB : rollback
+    PAY --> UI : erreur technique
+    UI --> FOU : "Veuillez reessayer"
+  else Paiement enregistre
+    DB --> PAY : idPaiement
+    PAY --> UI : paiement enregistre
+    UI --> FOU : "Paiement enregistre avec succes"
+  end
+end
+deactivate PAY
+
+== Etape 3 : Consultation du tableau de bord ==
+FOU -> UI : consulter le tableau de bord
+UI -> TDB : getIndicateurs(periode)
+activate TDB
+TDB -> DB : totalFacturesPayees(periode)
+DB --> TDB : montant total paye
+TDB -> DB : evolutionConsommationMensuelle(periode)
+DB --> TDB : serie de consommations
+TDB -> DB : autres statistiques (nb clients, nb impayes...)
+DB --> TDB : donnees
+alt Aucune donnee disponible
+  TDB --> UI : tableau vide + message
+  UI --> FOU : "Aucune donnee pour la periode"
+else Donnees disponibles
+  TDB --> UI : indicateurs + graphiques
+  UI --> FOU : afficher le tableau de bord
+end
+deactivate TDB
+
+note over FOU, DB
+  Erreurs couvertes : authentification, facture introuvable,
+  facture deja payee, montant divergent, echec en base, tableau vide.
+end note
+@enduml

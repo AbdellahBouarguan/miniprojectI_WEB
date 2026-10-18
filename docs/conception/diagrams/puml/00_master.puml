@@ -1,0 +1,31 @@
+@startuml 00_master
+!include _style.puml
+title Vue d'ensemble - Application web de gestion des factures d'eau et d'electricite
+
+autonumber
+actor "Client" as CLI
+actor "Fournisseur" as FOU
+actor "Agent" as AGE
+
+participant "Application Web\n(Systeme)" as SYS
+
+== Perimetre fonctionnel (vue d'ensemble) ==
+
+ref over CLI, SYS : Cas d'utilisation 01\nSaisir les consommations, televerser les photos\net generer automatiquement la facture
+
+ref over FOU, SYS : Cas d'utilisation 02\nTraiter les anomalies de saisie\n(apres correction -> generation de la facture)
+
+ref over CLI, FOU : Cas d'utilisation 03\nDeposer et traiter une reclamation,\npuis notifier le client
+
+ref over FOU, SYS : Cas d'utilisation 04\nGerer les clients (ajouter / modifier)
+
+ref over AGE, FOU : Cas d'utilisation 05\nImporter automatiquement les consommations\nannuelles et verifier les saisies mensuelles
+
+ref over FOU, SYS : Cas d'utilisation 06\nEnregistrer le paiement d'une facture\net consulter le tableau de bord
+
+note over CLI, AGE
+  Acteurs : Client (consultation + saisie), Fournisseur (back-office),
+  Agent (import annuel). Le systeme genere les factures et notifie les clients.
+end note
+
+@enduml

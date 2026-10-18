@@ -1,0 +1,86 @@
+@startuml 04_gestion_clients
+!include _style.puml
+title UC 04 - Gerer les clients (ajouter / modifier)
+' =====================================================================
+
+autonumber
+actor "Fournisseur" as FOU
+participant "Interface Web\n(UI)" as UI
+participant "Service\nClients" as SVC
+database "Base de\ndonnees" as DB
+
+== Etape 1 : Authentification du fournisseur ==
+FOU -> UI : se connecter
+UI -> SVC : authentifier(login, motDePasse)
+SVC -> DB : verifierIdentifiants(login, motDePasse)
+alt Identifiants invalides
+  DB --> SVC : echec
+  SVC --> UI : erreur
+  UI --> FOU : message d'erreur
+  break Fin du cas d'utilisation
+else Identifiants valides et role = FOURNISSEUR
+  DB --> SVC : autorise
+  SVC --> UI : session ouverte
+end
+
+== Etape 2 : Ajout d'un client ==
+FOU -> UI : ajouter un nouveau client
+UI --> FOU : afficher le formulaire
+FOU -> UI : saisir les informations (nom, prenom, adresse, email, tel...)
+UI -> SVC : creerClient(infos)
+SVC -> SVC : validerClient(infos)
+alt Champs obligatoires manquants ou invalides
+  SVC --> UI : erreur "Donnees invalides"
+  UI --> FOU : afficher les erreurs par champ
+else Email / identifiant deja existant (doublon)
+  SVC -> DB : verifierUnicite(email)
+  DB --> SVC : existant
+  SVC --> UI : erreur "Client deja existant"
+  UI --> FOU : afficher "Doublon detecte"
+else Donnees valides et uniques
+  SVC -> DB : insertClient(infos)
+  alt Echec d'ecriture en base
+    DB --> SVC : erreur
+    SVC -> DB : rollback
+    SVC --> UI : erreur technique
+    UI --> FOU : "Veuillez reessayer"
+  else Insertion reussie
+    DB --> SVC : idClient
+    SVC --> UI : client cree
+    UI --> FOU : afficher "Client ajoute avec succes"
+  end
+end
+
+== Etape 3 : Modification d'un client ==
+FOU -> UI : rechercher un client
+UI -> SVC : rechercherClient(critere)
+SVC -> DB : select client(s) selon le critere
+alt Aucun client trouve
+  DB --> SVC : vide
+  SVC --> UI : "Aucun resultat"
+  UI --> FOU : afficher "Aucun client trouve"
+  break Fin du cas d'utilisation
+else Client trouve
+  DB --> SVC : client(infos)
+  SVC --> UI : afficher les informations
+  UI --> FOU : afficher la fiche client
+end
+
+FOU -> UI : modifier les informations
+UI -> SVC : modifierClient(idClient, infos)
+SVC -> SVC : validerClient(infos)
+alt Donnees invalides
+  SVC --> UI : erreur "Donnees invalides"
+  UI --> FOU : corriger les champs
+else Donnees valides
+  SVC -> DB : updateClient(idClient, infos)
+  DB --> SVC : ok
+  SVC --> UI : modification enregistree
+  UI --> FOU : "Client mis a jour"
+end
+
+note over FOU, DB
+  Erreurs couvertes : authentification, droits insuffisants,
+  champs invalides, doublon d'email, client inexistant, echec en base.
+end note
+@enduml

@@ -1,0 +1,47 @@
+' =====================================================================
+'  Fichier de style commun (a inclure avec !include _style.puml)
+'  Application web de gestion des factures d'eau et d'electricite
+' =====================================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam dpi 130
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 13
+
+skinparam actor {
+  BackgroundColor #E8F4FD
+  BorderColor #1F6FB2
+  FontColor #0B3C5D
+  FontStyle bold
+}
+skinparam participant {
+  BackgroundColor #EAF7EE
+  BorderColor #2E8B57
+  FontColor #14532D
+}
+skinparam sequence {
+  ArrowColor #1F6FB2
+  ArrowThickness 1
+  LifeLineBorderColor #9AA5B1
+  ActorBorderColor #1F6FB2
+  ParticipantBorderColor #2E8B57
+  DividerBackgroundColor #DCE6F1
+  GroupBackgroundColor #F4F8FB
+  GroupBorderColor #1F6FB2
+  NoteBackgroundColor #FFF9DB
+  NoteBorderColor #D9B300
+  ReferenceBackgroundColor #F0E6FF
+  ReferenceBorderColor #6A3FB5
+  ReferenceFontColor #3B1D6E
+  ReferenceFontStyle bold
+  SequenceGroupBodyBackgroundColor #FBFDFF
+  SequenceGroupHeaderFontColor #0B3C5D
+}
+skinparam alt {
+  BorderColor #B23A48
+}
+skinparam title {
+  FontColor #0B3C5D
+  FontSize 18
+  FontStyle bold
+}

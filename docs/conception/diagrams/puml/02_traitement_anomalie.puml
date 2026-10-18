@@ -1,0 +1,84 @@
+@startuml 02_traitement_anomalie
+!include _style.puml
+title UC 02 - Traiter les anomalies de saisie puis generer la facture (apres correction)
+' =====================================================================
+'  Le fournisseur corrige la consommation ; apres correction la facture
+'  est generee automatiquement (lien "apres correction" du diagramme UC).
+' =====================================================================
+
+autonumber
+actor "Fournisseur" as FOU
+participant "Interface Web\n(UI)" as UI
+participant "Service\nAnomalies" as ANO
+participant "Service\nFacturation" as FAC
+participant "Service\nNotification" as NOT
+database "Base de\ndonnees" as DB
+
+== Etape 1 : Prise de connaissance des anomalies ==
+ANO -> FOU : notifier "Nouvelle anomalie de saisie"
+FOU -> UI : consulter les anomalies
+UI -> ANO : listerAnomalies(statut=NON_TRAITEE)
+ANO -> DB : select anomalies non traitees
+DB --> ANO : liste(idAnomalie, client, type, index, date)
+ANO --> UI : liste des anomalies
+UI --> FOU : afficher la liste
+
+== Etape 2 : Traitement de chaque anomalie ==
+loop Pour chaque anomalie de la liste
+  FOU -> UI : ouvrir l'anomalie
+  UI -> ANO : getDetailAnomalie(idAnomalie)
+  ANO -> DB : recupererSaisie(idAnomalie) + indexPrec + seuil
+  DB --> ANO : donnees de la saisie et contexte
+  ANO --> UI : detail (valeur saisie, index precedent, seuil, photos)
+  UI --> FOU : afficher le detail
+
+  FOU -> UI : saisir la consommation corrigee (indexEau, indexElec)
+  UI -> ANO : corrigerConsommation(idAnomalie, indexEau, indexElec)
+  ANO -> ANO : revalider(indexEau, indexElec, indexPrec, seuil)
+
+  alt Correction toujours invalide (index incoherent)
+    ANO --> UI : refus "Index toujours invalide, corriger a nouveau"
+    UI --> FOU : afficher le message d'erreur
+  else Correction validee
+    ANO -> DB : update consommation + statutAnomalie=RESOLUE
+    DB --> ANO : ok
+    ANO --> UI : correction enregistree
+
+    group <<apres correction>> Generation de la facture
+      ANO -> FAC : genererFacture(idClient, indexEau, indexElec)
+      activate FAC
+      FAC -> FAC : calcul des montants (tranches eau/electricite, TVA 18%)
+      FAC -> DB : enregistrerFacture(...)
+      alt Echec d'enregistrement
+        DB --> FAC : erreur
+        FAC -> DB : rollback
+        FAC --> ANO : erreur technique
+        ANO --> UI : erreur technique
+        UI --> FOU : afficher "Echec de generation"
+      else Facture enregistree
+        DB --> FAC : idFacture, numeroFacture
+        FAC --> ANO : facture generee
+        deactivate FAC
+
+        group <<include>> Notification du client
+          ANO -> NOT : notifierClient(idClient, correction, numeroFacture)
+          activate NOT
+          NOT -> DB : journaliserNotification(...)
+          DB --> NOT : ok
+          NOT --> FOU : notification envoyee
+          deactivate NOT
+        end
+
+        ANO --> UI : anomalie resolue et facture generee
+        UI --> FOU : afficher "Facture generee apres correction"
+      end
+    end
+  end
+end
+
+note over FOU, DB
+  Cas d'erreur : la correction peut elle-meme etre rejetee tant que
+  l'index ne respecte pas les regles (>= mois precedent, <= seuil).
+  La facture n'est generee qu'apres une correction valide.
+end note
+@enduml

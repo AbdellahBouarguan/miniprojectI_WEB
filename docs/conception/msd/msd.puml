@@ -1,0 +1,120 @@
+@startuml msd
+title Mini Projet 1 - Version Alpha - Modele de donnees
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #FFF8D6
+  BorderColor #8A6D3B
+}
+
+entity "FOURNISSEUR" as fournisseur {
+  * id_fournisseur : INT <<PK>>
+  --
+  nom : VARCHAR(100)
+  email : VARCHAR(150) <<UNIQUE>>
+  mot_de_passe : VARCHAR(255)
+  seuil_eau : DECIMAL(10,2)
+  seuil_elec : DECIMAL(10,2)
+  date_creation : DATETIME
+}
+
+entity "CLIENT" as client {
+  * id_client : INT <<PK>>
+  --
+  id_fournisseur : INT <<FK>>
+  cin : VARCHAR(20) <<UNIQUE>>
+  nom : VARCHAR(100)
+  prenom : VARCHAR(100)
+  adresse : VARCHAR(255)
+  email : VARCHAR(150) <<UNIQUE>>
+  mot_de_passe : VARCHAR(255)
+  telephone : VARCHAR(30)
+  date_creation : DATETIME
+}
+
+entity "TARIF" as tarif {
+  * id_tarif : INT <<PK>>
+  --
+  id_fournisseur : INT <<FK>>
+  type : ENUM EAU/ELEC
+  borne_min : DECIMAL(10,2)
+  borne_max : DECIMAL(10,2) NULL
+  prix_unitaire : DECIMAL(10,4)
+}
+
+entity "CONSOMMATION" as consommation {
+  * id_conso : INT <<PK>>
+  --
+  id_client : INT <<FK>>
+  periode_mois : TINYINT
+  periode_annee : SMALLINT
+  index_eau : DECIMAL(12,2)
+  index_elec : DECIMAL(12,2)
+  date_saisie : DATETIME
+  statut : ENUM
+}
+
+entity "PHOTO_CAPTEUR" as photo_capteur {
+  * id_photo : INT <<PK>>
+  --
+  id_conso : INT <<FK>>
+  type : ENUM EAU/ELEC
+  chemin : VARCHAR(255)
+  date_televersement : DATETIME
+}
+
+entity "ANOMALIE" as anomalie {
+  * id_anomalie : INT <<PK>>
+  --
+  id_conso : INT <<FK>>
+  id_fournisseur : INT <<FK>>
+  type_anomalie : ENUM
+  champ : ENUM EAU/ELEC
+  valeur_saisie : DECIMAL(12,2)
+  valeur_reference : DECIMAL(12,2)
+  statut : ENUM
+  valeur_corrigee : DECIMAL(12,2) NULL
+  date_detection : DATETIME
+  date_resolution : DATETIME NULL
+}
+
+entity "FACTURE" as facture {
+  * id_facture : INT <<PK>>
+  --
+  numero : VARCHAR(50) <<UNIQUE>>
+  id_client : INT <<FK>>
+  id_conso : INT <<FK>> <<UNIQUE>>
+  date_facture : DATE
+  periode_mois : TINYINT
+  periode_annee : SMALLINT
+  conso_eau : DECIMAL(10,2)
+  conso_elec : DECIMAL(10,2)
+  montant_ht : DECIMAL(12,2)
+  taux_tva : DECIMAL(5,2)
+  montant_tva : DECIMAL(12,2)
+  montant_ttc : DECIMAL(12,2)
+  etat : ENUM IMPAYEE/PAYEE
+}
+
+fournisseur ||--o{ client : "gere"
+fournisseur ||--o{ tarif : "definit"
+fournisseur ||--o{ anomalie : "suit"
+client ||--o{ consommation : "saisit"
+client ||--o{ facture : "recoit"
+consommation ||--o{ anomalie : "presente"
+consommation ||--o| facture : "genere"
+consommation ||--|{ photo_capteur : "contient"
+
+note right of photo_capteur
+  Exactement 2 photos par consommation :
+  une EAU et une ELEC.
+  Contrainte applicative + UNIQUE(id_conso, type).
+end note
+
+note bottom of anomalie
+  Alpha : le client confirme ou corrige.
+  Si confirme, la facture est generee automatiquement.
+  Le fournisseur consulte (correction fournisseur = V2).
+end note
+
+@enduml

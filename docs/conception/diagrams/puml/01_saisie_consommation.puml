@@ -1,0 +1,156 @@
+@startuml 01_saisie_consommation
+!include _style.puml
+title UC 01 - Saisir les consommations, televerser les photos et generer la facture
+' =====================================================================
+'  Scenario principal detaille + alternatives et erreurs
+'  Regles metier : saisie du 18 a la fin du mois ; index >= mois precedent ;
+'  index <= seuil fournisseur ; TVA = 18 % ; tranches eau / electricite.
+' =====================================================================
+
+autonumber
+actor "Client" as CLI
+participant "Interface Web\n(UI)" as UI
+participant "Controleur\nSaisie" as CTL
+participant "Service\nTarification" as TAR
+participant "Service\nFacturation" as FAC
+participant "Service\nNotification" as NOT
+participant "Stockage\nPhotos" as PHO
+database "Base de\ndonnees" as DB
+
+== Etape 1 : Authentification (pre-condition) ==
+group Authentification du client
+  CLI -> UI : saisir identifiants (login / mot de passe)
+  UI -> CTL : authentifier(login, motDePasse)
+  CTL -> DB : verifierIdentifiants(login, motDePasse)
+  alt Identifiants invalides
+    DB --> CTL : echec
+    CTL --> UI : erreur 401 "Identifiants invalides"
+    UI --> CLI : afficher message d'erreur
+    break Fin du cas d'utilisation (echec d'authentification)
+  else Identifiants valides
+    DB --> CTL : utilisateur(idClient, role=CLIENT)
+    CTL --> UI : session ouverte
+    UI --> CLI : afficher l'espace personnel
+  end
+end
+
+== Etape 2 : Ouverture du formulaire et controle de la periode ==
+group Controle de la periode de saisie (du 18 a la fin du mois)
+  CLI -> UI : demander le formulaire de saisie
+  UI -> CTL : getFormulaireSaisie(idClient)
+  CTL -> CTL : verifierPeriode(dateJour)
+  alt Jour < 18 (periode non encore ouverte)
+    CTL --> UI : refus "La saisie ouvre le 18 du mois"
+    UI --> CLI : afficher "Periode non ouverte"
+    break Fin du cas d'utilisation
+  else Mois deja cloture (periode terminee)
+    CTL --> UI : refus "Periode de saisie cloturee"
+    UI --> CLI : afficher "Periode cloturee"
+    break Fin du cas d'utilisation
+  else Periode ouverte
+    CTL --> UI : formulaire pret
+  end
+end
+
+== Etape 3 : Affichage du releve du mois precedent ==
+group Recuperation du mois precedent (index + photos)
+  CTL -> DB : getDerniereConsommation(idClient)
+  alt Aucune consommation precedente (premier releve)
+    DB --> CTL : vide
+    CTL --> UI : informer "Premier releve : aucun index precedent"
+    UI --> CLI : afficher (saisie libre encadree par le seuil)
+  else Consommation precedente existe
+    DB --> CTL : conso(indexEauPrec, indexElecPrec, moisPrec, refsPhotos)
+    CTL -> PHO : getPhotos(refsPhotos)
+    PHO --> CTL : urlPhotoEau, urlPhotoElec
+    CTL --> UI : index precedents + photos
+    UI --> CLI : afficher valeurs et images du mois dernier
+  end
+end
+
+== Etape 4 : Saisie et televersement par le client ==
+CLI -> UI : saisir indexEau, indexElec
+CLI -> UI : televerser photos des compteurs (eau, electricite)
+UI -> CTL : soumettreSaisie(idClient, indexEau, indexElec, photos)
+
+== Etape 5 : Validation technique des donnees ==
+group Validation des donnees saisies
+  CTL -> CTL : validerSaisie(indexEau, indexElec, photos)
+  alt Valeurs manquantes ou non numeriques
+    CTL --> UI : erreur "Valeurs d'index invalides"
+    UI --> CLI : demander une nouvelle saisie
+    break Fin du cas d'utilisation
+  else Photo absente / format non supporte / taille depassee
+    CTL --> UI : erreur "Photo invalide (format ou taille)"
+    UI --> CLI : demander un nouveau fichier
+    break Fin du cas d'utilisation
+  else Donnees techniquement valides
+    CTL -> PHO : enregistrerPhotos(photos)
+    PHO --> CTL : refsPhotos
+  end
+end
+
+== Etape 6 : Detection des anomalies de saisie ==
+group Detection des anomalies
+  CTL -> CTL : verifierAnomalies(indexEau, indexElec,\nindexPrec, seuilFournisseur)
+  alt Index < index du mois precedent
+    CTL -> DB : enregistrerAnomalie(INDEX_INFERIEUR)
+    DB --> CTL : idAnomalie
+    CTL --> UI : signaler l'anomalie au fournisseur
+    ref over CTL, DB : UC 02 - Traiter les anomalies de saisie\n(apres correction)
+  else Index > seuil defini par le fournisseur
+    CTL -> DB : enregistrerAnomalie(SEUIL_DEPASSE)
+    DB --> CTL : idAnomalie
+    CTL --> UI : signaler l'anomalie au fournisseur
+    ref over CTL, DB : UC 02 - Traiter les anomalies de saisie\n(apres correction)
+  else Aucune anomalie
+    note over CTL : Saisie conforme -> passage a la generation
+  end
+end
+
+== Etape 7 : Generation automatique de la facture ==
+group Generation de la facture (sans anomalie ou apres correction)
+  CTL -> FAC : genererFacture(idClient, indexEau, indexElec, refsPhotos)
+  activate FAC
+  FAC -> TAR : calculerMontants(consoEau, consoElec)
+  activate TAR
+  TAR -> TAR : appliquerTranchesEau(consoEau)\n0-6 m3=2,37 | 7-20=7,39\n21-35=10,98 | >35=11,03 DH/m3
+  TAR -> TAR : appliquerTranchesElec(consoElec)\n0-100 kWh=0,82 | 101-150=0,92\n>150 kWh=1,1 DH/kWh
+  TAR -> TAR : calculerHT()
+  TAR -> TAR : calculerTVA(18%)
+  TAR -> TAR : calculerTTC()
+  TAR --> FAC : montantHT, montantTVA, montantTTC
+  deactivate TAR
+
+  FAC -> DB : enregistrerFacture(numero, date, periode,\ninfosClient, conso, montants, refsPhotos)
+  alt Echec d'ecriture en base (technique)
+    DB --> FAC : erreur
+    FAC -> DB : rollback
+    FAC --> UI : erreur technique
+    UI --> CLI : afficher "Erreur, veuillez reessayer"
+    break Fin du cas d'utilisation
+  else Enregistrement reussi
+    DB --> FAC : idFacture, numeroFacture
+  end
+
+  group <<include>> Notification du client
+    FAC -> NOT : notifierClient(idClient, numeroFacture, montantTTC)
+    activate NOT
+    NOT -> DB : journaliserNotification(idClient, facture)
+    DB --> NOT : ok
+    NOT --> CLI : email / notification "Facture disponible"
+    deactivate NOT
+  end
+
+  FAC --> CTL : facture generee
+  deactivate FAC
+  CTL --> UI : facture + montants
+  UI --> CLI : afficher la facture (numero, date, periode, HT, TVA, TTC, photos)
+end
+
+note over CLI, DB
+  Contenu de la facture : numero, date, periode de consommation, informations
+  du client (nom, prenom, adresse...), consommations eau et electricite,
+  montants HT / TVA / TTC et photos des compteurs.
+end note
+@enduml

@@ -1,0 +1,120 @@
+@startuml 03_reclamation
+!include _style.puml
+title UC 03 - Deposer et traiter une reclamation, puis notifier le client
+' =====================================================================
+'  Types de reclamation : (i) fuite externe, (ii) fuite interne,
+'  (iii) facture, (iv) autre (a specifier).
+' =====================================================================
+
+autonumber
+actor "Client" as CLI
+actor "Fournisseur" as FOU
+participant "Interface Web\n(UI)" as UI
+participant "Service\nReclamations" as REC
+participant "Service\nNotification" as NOT
+database "Base de\ndonnees" as DB
+
+== Etape 1 : Depot de la reclamation par le client ==
+
+group Authentification du client
+  CLI -> UI : se connecter
+  UI -> REC : authentifierClient(login, motDePasse)
+  alt Identifiants invalides
+    REC --> UI : echec
+    UI --> CLI : message d'erreur
+    break Fin du cas d'utilisation
+  else Identifiants valides
+    REC --> UI : session ouverte
+  end
+end
+
+CLI -> UI : creer une reclamation
+UI --> CLI : afficher le formulaire (type, description, piece jointe)
+
+CLI -> UI : choisir le type + saisir la description + joindre un document
+note over CLI : Types : FUITE_EXTERNE, FUITE_INTERNE,\nFACTURE, AUTRE (a specifier)
+UI -> REC : soumettreReclamation(idClient, type, description, pieceJointe)
+
+group Validation de la reclamation
+  REC -> REC : validerReclamation(type, description, pieceJointe)
+  alt Type = AUTRE et description vide
+    REC --> UI : erreur "Merci de specifier le motif"
+    UI --> CLI : demander la description
+    break Fin du cas d'utilisation
+  else Piece jointe invalide (format/taille)
+    REC --> UI : erreur "Document invalide"
+    UI --> CLI : demander un nouveau document
+    break Fin du cas d'utilisation
+  else Reclamation valide
+    REC -> DB : enregistrerReclamation(numero, idClient, type,\ndescription, date, statut=OUVERTE)
+    DB --> REC : idReclamation, numero
+    REC -> NOT : notifierFournisseur(nouvelle reclamation)
+    activate NOT
+    NOT -> DB : journaliserNotification(fournisseur)
+    DB --> NOT : ok
+    deactivate NOT
+    REC --> UI : accuse de reception
+    UI --> CLI : "Votre reclamation a ete enregistree"
+  end
+end
+
+== Etape 2 : Traitement de la reclamation par le fournisseur ==
+
+FOU -> UI : consulter les reclamations
+UI -> REC : listerReclamations(statut=OUVERTE)
+REC -> DB : select reclamations ouvertes
+DB --> REC : liste
+REC --> UI : liste des reclamations
+UI --> FOU : afficher la liste
+
+loop Pour chaque reclamation
+  FOU -> UI : ouvrir la reclamation
+  UI -> REC : getDetailReclamation(idReclamation)
+  REC -> DB : recuperer reclamation + facture liee (si type=FACTURE)
+  DB --> REC : detail
+  REC --> UI : detail
+  UI --> FOU : afficher le detail
+
+  alt Reclamation liee a une facture (type=FACTURE)
+    FOU -> UI : demander une verification / correction de facture
+    UI -> REC : verifierFacture(idFacture)
+    REC -> DB : controler montants (tranches, TVA 18%)
+    alt Erreur de facturation confirmee
+      DB --> REC : anomalie de facturation
+      REC -> DB : marquer facture a corriger
+      REC --> UI : facture a corriger
+      UI --> FOU : signaler la correction necessaire
+    else Facture conforme
+      DB --> REC : facture conforme
+      REC --> UI : aucune erreur
+      UI --> FOU : "Facture conforme"
+    end
+  else Autre type (fuite externe / interne / autre)
+    FOU -> UI : saisir une reponse / action realisee
+    UI -> REC : repondreReclamation(idReclamation, reponse)
+  end
+
+  FOU -> UI : changer le statut (EN_COURS / RESOLUE / REJETEE)
+  UI -> REC : changerStatut(idReclamation, statut)
+  REC -> DB : update statut + reponse
+  DB --> REC : ok
+
+  group <<include>> Notification du client
+    REC -> NOT : notifierClient(idClient, statut, reponse)
+    activate NOT
+    NOT -> DB : journaliserNotification(client)
+    DB --> NOT : ok
+    NOT --> CLI : email "Statut de votre reclamation : ..."
+    deactivate NOT
+  end
+
+  REC --> UI : reclamation traitee
+  UI --> FOU : confirmation
+end
+
+note over CLI, DB
+  Erreurs couvertes : authentification, type AUTRE sans description,
+  piece jointe invalide, reclamation introuvable, mauvaise facture liee.
+  Toute reclamation traitee declenche une notification au client.
+end note
+@enduml

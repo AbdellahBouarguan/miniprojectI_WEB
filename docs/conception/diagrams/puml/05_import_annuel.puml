@@ -1,0 +1,87 @@
+@startuml 05_import_annuel
+!include _style.puml
+title UC 05 - Importer automatiquement les consommations annuelles et verifier les saisies
+' =====================================================================
+'  Fichier attendu : Consommation_Annuelle.txt
+'  Structure : ID_Client, ID_Agent, ConsommationEau, ConsommationElect,
+'              Annee, Date_Saisie
+'  La tournee de l'agent est effectuee une fois par an.
+' =====================================================================
+
+autonumber
+actor "Agent" as AGE
+actor "Fournisseur" as FOU
+participant "Interface Web\n(UI)" as UI
+participant "Service\nImport" as IMP
+participant "Service\nNotification" as NOT
+database "Base de\ndonnees" as DB
+collections "Fichier\nConsommation_Annuelle.txt" as FILE
+
+== Etape 1 : Depot et import automatique du fichier (fin d'annee) ==
+AGE -> UI : deposer / televerser le fichier Consommation_Annuelle.txt
+UI -> IMP : importerConsommations(fichier)
+activate IMP
+
+IMP -> IMP : validerFormatEntete(ID_Client, ID_Agent,\nConsommationEau, ConsommationElect, Annee, Date_Saisie)
+
+alt Fichier introuvable ou format d'entete invalide
+  IMP --> UI : rejet "Fichier invalide"
+  UI --> AGE : afficher le rapport d'erreur
+  break Fin de l'import
+else Format conforme
+  IMP -> FILE : lire ligne par ligne
+  loop Pour chaque ligne du fichier
+    FILE --> IMP : ligne
+    IMP -> IMP : parser(champs)
+    alt Ligne malformee (nombre de champs / type incorrect)
+      IMP -> IMP : rejeter la ligne + cumuler l'erreur
+    else ID_Client inconnu
+      IMP -> DB : verifierClient(ID_Client)
+      DB --> IMP : inexistant
+      IMP -> IMP : rejeter la ligne + cumuler l'erreur
+    else Annee deja importee pour ce client (doublon)
+      IMP -> DB : verifierImportExistant(ID_Client, Annee)
+      DB --> IMP : existant
+      IMP -> IMP : ignorer la ligne (doublon)
+    else Ligne valide
+      IMP -> DB : insertConsommationAnnuelle(ID_Client, ID_Agent,\nConsoEau, ConsoElect, Annee, Date_Saisie)
+      DB --> IMP : ok
+      IMP -> IMP : incrementer le compteur d'imports
+    end
+  end
+  IMP -> DB : enregistrerRapportImport(stats)
+  DB --> IMP : ok
+  IMP --> UI : rapport d'import (inseres / ignores / rejetes)
+  deactivate IMP
+  UI --> AGE : afficher le rapport d'import
+end
+
+== Etape 2 : Verification annuelle par le fournisseur ==
+FOU -> UI : consulter la verification annuelle des consommations
+UI -> IMP : verifierConsommationsMensuelles(annee)
+activate IMP
+IMP -> DB : consolider conso mensuelles vs conso annuelles
+DB --> IMP : donnees consolidees
+alt Ecart detecte entre mensuel et annuel
+  IMP -> DB : enregistrerEcart(idClient, annee, ecart)
+  DB --> IMP : ok
+  IMP -> NOT : notifierClientEcart(idClient, annee, ecart)
+  activate NOT
+  NOT -> DB : journaliserNotification(client)
+  DB --> NOT : ok
+  NOT --> FOU : signaler les clients concernes
+  deactivate NOT
+  IMP --> UI : liste des ecarts + clients notifies
+  UI --> FOU : afficher les ecarts
+else Consommations conformes
+  IMP --> UI : aucune anomalie
+  UI --> FOU : afficher "Consommations conformes"
+end
+deactivate IMP
+
+note over AGE, DB
+  Erreurs couvertes : fichier absent, entete invalide, lignes malformees,
+  ID_Client inconnu, doublon (Annee), echec d'ecriture, ecart mensuel/annuel.
+  L'import est automatique des le depot du fichier.
+end note
+@enduml
