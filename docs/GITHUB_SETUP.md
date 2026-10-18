@@ -16,7 +16,7 @@ Invitations envoyees avec le role `Write` :
 
 | Membre | Compte GitHub |
 |---|---|
-| Nafisa El Younoussi | `nafisaelyounoussi-byte` |
+| Nafisa El Younoussi | `nafisa-elyounoussi` |
 | Reda Zakaria | `reda465` |
 | Nizar Ben Yacoub | `nizarbenyacoub3` |
 | Aymen Ouggourni | `OuggourniAymen` |
