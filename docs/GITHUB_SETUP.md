@@ -1,33 +1,34 @@
 # Configuration GitHub
 
-## Creation du depot
+## Depot
 
-1. Creer un depot vide sur GitHub : `miniprojectI_WEB`.
-2. Ne pas ajouter de README ni de `.gitignore` sur GitHub.
-3. Dans le projet local :
+- URL : https://github.com/AbdellahBouarguan/miniprojectI_WEB
+- Visibilite : privee
+- Branche principale : `main`
 
 ```bash
-git remote add origin https://github.com/<compte>/miniprojectI_WEB.git
-git branch -M main
-git push -u origin main
+git clone https://github.com/AbdellahBouarguan/miniprojectI_WEB.git
 ```
 
 ## Collaborateurs
 
-GitHub > Settings > Collaborators > Add people.
+Invitations envoyees avec le role `Write` :
 
-Ajouter :
+| Membre | Compte GitHub |
+|---|---|
+| Nafisa El Younoussi | `nafisaelyounoussi-byte` |
+| Reda Zakaria | `reda465` |
+| Nizar Ben Yacoub | `nizarbenyacoub3` |
+| Aymen Ouggourni | `OuggourniAymen` |
 
-- Nafisa El Younoussi
-- Reda Zakaria
-- Nizar Ben Yacoub
-- Aymen Ouggourni
-
-Role : `Write`.
+Chaque membre doit accepter l'invitation recue par email ou sur GitHub.
 
 ## Protection de main
 
-GitHub > Settings > Branches ou Rulesets :
+La protection de branche GitHub n'est pas disponible sur un depot prive gratuit.
+Regle d'equipe : aucun push direct sur `main`, une branche par tache et une Pull Request par branche.
+
+Si le depot devient public ou passe en GitHub Pro, activer :
 
 - Require a pull request before merging
 - Require approvals : 1
