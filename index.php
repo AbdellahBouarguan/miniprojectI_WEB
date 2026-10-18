@@ -12,8 +12,8 @@ require_once ROOT . 'BD/Connexion.php';
 $url = trim((string) ($_GET['url'] ?? ''), '/');
 $segments = $url === '' ? [] : explode('/', $url);
 
-$controller = $segments[0] ?? 'Home';
-$action = $segments[1] ?? 'index';
+$controller = ucfirst(strtolower($segments[0] ?? 'Home'));
+$action = strtolower($segments[1] ?? 'index');
 $id = $segments[2] ?? null;
 
 $allowedControllers = ['Home', 'Auth', 'Client', 'Consommation', 'Facture', 'Anomalie'];

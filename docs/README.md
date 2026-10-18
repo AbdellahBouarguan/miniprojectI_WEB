@@ -17,6 +17,14 @@ docs/
 Le fichier source est `docs/conception/msd/msd.puml`.
 Le PNG et le SVG sont generes a partir de ce fichier.
 
+Telecharger PlantUML si necessaire :
+
+```bash
+curl -L -o plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+```
+
+Generer les images :
+
 ```bash
 java -jar plantuml.jar -tpng docs/conception/msd/msd.puml
 java -jar plantuml.jar -tsvg docs/conception/msd/msd.puml
