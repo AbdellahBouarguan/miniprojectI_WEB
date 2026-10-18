@@ -119,6 +119,16 @@ Client 3    : client3@example.ma     / client123
 - Nizar Ben Yacoub : saisie des consommations et generation de facture
 - Aymen Ouggourni : factures
 
+## Depot GitHub
+
+```text
+https://github.com/AbdellahBouarguan/miniprojectI_WEB
+```
+
+```bash
+git clone https://github.com/AbdellahBouarguan/miniprojectI_WEB.git
+```
+
 ## Git
 
 - `main` est la branche stable.
@@ -126,3 +136,5 @@ Client 3    : client3@example.ma     / client123
 - Une Pull Request par branche.
 - Au moins une approbation avant merge.
 - Merge en `Squash and merge`, puis supprimer la branche.
+- Le depot est prive. La protection de branche GitHub necessite GitHub Pro ou un depot public.
+- Regle d'equipe : aucun push direct sur `main`.
