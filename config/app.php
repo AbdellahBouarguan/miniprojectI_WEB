@@ -1,7 +1,7 @@
 <?php
 
 define('APP_NAME', 'Mini Projet 1 - Version Alpha');
-define('BASE_URL', '/');
+define('BASE_URL', '/miniprojectI_WEB/');
 define('TVA_RATE', 18.00);
 define('MAX_UPLOAD_SIZE', 2 * 1024 * 1024);
 define('UPLOAD_DIR', ROOT . 'uploads/compteurs/');

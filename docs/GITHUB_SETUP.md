@@ -78,3 +78,4 @@ Puis ouvrir une Pull Request, lier l'issue avec `Closes #N`, demander une review
 - Ne pas committer `config/database.php`.
 - Ne pas committer les photos televersees.
 - Ne pas committer les fichiers auxiliaires LaTeX.
+- Pas de IA
