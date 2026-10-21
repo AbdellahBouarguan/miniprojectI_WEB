@@ -39,6 +39,7 @@
     <?php if ($clients === []): ?>
         <p>Aucun client enregistré pour ce fournisseur.</p>
     <?php else: ?>
+        <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
@@ -61,37 +62,39 @@
                     <td><?= e($c['telephone'] ?? '—') ?></td>
                     <td><?= (int) $c['nb_conso'] ?></td>
                     <td>
-                        <a href="<?= e(url('Client/one/' . (int) $c['id_client'])) ?>">
-                            Détail
-                        </a>
-                        |
-                        <a href="<?= e(url('Client/update/' . (int) $c['id_client'])) ?>">
-                            Modifier
-                        </a>
+                        <div class="actions">
+                            <a class="button button-small button-secondary"
+                               href="<?= e(url('Client/one/' . (int) $c['id_client'])) ?>">
+                                Détail
+                            </a>
+                            <a class="button button-small"
+                               href="<?= e(url('Client/update/' . (int) $c['id_client'])) ?>">
+                                Modifier
+                            </a>
 
-                        <?php if ((int) $c['nb_conso'] === 0): ?>
-                            |
-                            <form
-                                method="post"
-                                action="<?= e(url('Client/delete/' . (int) $c['id_client'])) ?>"
-                                style="display:inline"
-                                onsubmit="return confirm('Supprimer ce client ?');"
-                            >
-                                <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
-                                <button class="button button-small button-danger" type="submit">
-                                    Supprimer
-                                </button>
-                            </form>
-                        <?php else: ?>
-                            <span class="muted" title="Ce client possède des consommations">
-                                (suppression bloquée)
-                            </span>
-                        <?php endif; ?>
+                            <?php if ((int) $c['nb_conso'] === 0): ?>
+                                <form
+                                    method="post"
+                                    action="<?= e(url('Client/delete/' . (int) $c['id_client'])) ?>"
+                                    onsubmit="return confirm('Supprimer ce client ?');"
+                                >
+                                    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                    <button class="button button-small button-danger" type="submit">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <span class="muted" title="Ce client possède des consommations">
+                                    Suppression bloquée
+                                </span>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </section>
 

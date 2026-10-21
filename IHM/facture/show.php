@@ -38,7 +38,11 @@ $role = $_SESSION['role'] ?? null;
         </tr>
         <tr>
             <th>État</th>
-            <td><span class="badge"><?= e($facture['etat']) ?></span></td>
+            <td>
+                <span class="badge <?= e(statut_badge($facture['etat'])) ?>">
+                    <?= e(statut_label($facture['etat'])) ?>
+                </span>
+            </td>
         </tr>
     </table>
 </section>
@@ -72,13 +76,12 @@ $role = $_SESSION['role'] ?? null;
 <?php if ($photos !== []): ?>
     <section class="card">
         <h2>Photos des compteurs</h2>
-        <div class="row">
+        <div class="photo-grid">
             <?php foreach (['EAU' => 'Compteur eau', 'ELEC' => 'Compteur électricité'] as $type => $label): ?>
                 <?php if (isset($photos[$type])): ?>
-                    <div class="col">
+                    <div>
                         <p><?= e($label) ?></p>
-                        <img src="<?= e(url($photos[$type])) ?>" alt="<?= e($label) ?>"
-                             style="max-width:320px">
+                        <img src="<?= e(url($photos[$type])) ?>" alt="<?= e($label) ?>">
                     </div>
                 <?php endif; ?>
             <?php endforeach; ?>

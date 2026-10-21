@@ -90,10 +90,20 @@ final class ConsommationTraitement
         $photos = [];
 
         foreach (['EAU' => 'photo_eau', 'ELEC' => 'photo_elec'] as $type => $champ) {
-            $photo = $this->lirePhoto($champ, $erreurs);
+            $photo = $this->lirePhoto($champ, $erreurs, $consoExistante === null);
 
             if ($photo !== null) {
                 $photos[$type] = $photo;
+            }
+        }
+
+        if ($consoExistante !== null) {
+            $photosExistantes = $this->bd->photosDe((int) $consoExistante['id_conso']);
+
+            foreach (['EAU' => 'photo_eau', 'ELEC' => 'photo_elec'] as $type => $champ) {
+                if (!isset($photos[$type]) && !isset($photosExistantes[$type])) {
+                    $erreurs[$champ] = 'Photo obligatoire.';
+                }
             }
         }
 
@@ -120,8 +130,7 @@ final class ConsommationTraitement
         $infos = $this->bd->clientEtSeuils($idClient);
 
         if ($infos === null) {
-            http_response_code(403);
-            exit('Client inconnu.');
+            erreur_page(403, 'Client inconnu', 'Impossible de retrouver le client associé à cette session.');
         }
 
         $precedent = $this->bd->derniereConsommationValidee($idClient, $mois, $annee);
@@ -341,6 +350,9 @@ final class ConsommationTraitement
         $annee = is_scalar($anneeBrut) ? (int) $anneeBrut : (int) date('Y');
 
         $precedent = $this->bd->derniereConsommationValidee($idClient, $mois, $annee);
+        $photosPrecedentes = $precedent !== null
+            ? $this->bd->photosDe((int) $precedent['id_conso'])
+            : [];
         $csrf = csrf_token();
 
         require __DIR__ . '/../IHM/consommation/saisie.php';
@@ -396,10 +408,13 @@ final class ConsommationTraitement
         return (float) $brut;
     }
 
-    private function lirePhoto(string $champ, array &$erreurs): ?array
+    private function lirePhoto(string $champ, array &$erreurs, bool $obligatoire = true): ?array
     {
         if (!isset($_FILES[$champ]) || $_FILES[$champ]['error'] === UPLOAD_ERR_NO_FILE) {
-            $erreurs[$champ] = 'Photo obligatoire.';
+            if ($obligatoire) {
+                $erreurs[$champ] = 'Photo obligatoire.';
+            }
+
             return null;
         }
 
@@ -459,8 +474,7 @@ final class ConsommationTraitement
     private function exigerPost(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-            http_response_code(405);
-            exit('Méthode non autorisée.');
+            erreur_page(405, 'Méthode non autorisée', 'Cette action n’est pas autorisée.');
         }
     }
 
@@ -470,8 +484,7 @@ final class ConsommationTraitement
         $recu = $_POST['csrf'] ?? '';
 
         if (!is_string($attendu) || !is_string($recu) || !hash_equals($attendu, $recu)) {
-            http_response_code(419);
-            exit('Session expirée. Rechargez la page.');
+            erreur_page(419, 'Session expirée', 'Rechargez la page et réessayez.');
         }
     }
 

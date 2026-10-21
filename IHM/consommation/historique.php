@@ -31,6 +31,7 @@
     <?php if ($consommations === []): ?>
         <p>Aucune consommation enregistrée pour le moment.</p>
     <?php else: ?>
+        <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
@@ -48,7 +49,11 @@
                     <td><?= (int) $c['periode_mois'] ?>/<?= (int) $c['periode_annee'] ?></td>
                     <td><?= e(number_format((float) $c['index_eau'], 2, ',', ' ')) ?></td>
                     <td><?= e(number_format((float) $c['index_elec'], 2, ',', ' ')) ?></td>
-                    <td><span class="badge"><?= e($c['statut']) ?></span></td>
+                    <td>
+                        <span class="badge <?= e(statut_badge($c['statut'])) ?>">
+                            <?= e(statut_label($c['statut'])) ?>
+                        </span>
+                    </td>
                     <td>
                         <?php if (!empty($c['facture_numero'])): ?>
                             <a href="<?= e(url('Facture/one/' . (int) $c['id_facture'])) ?>">
@@ -96,6 +101,7 @@
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </section>
 

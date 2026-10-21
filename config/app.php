@@ -167,3 +167,39 @@ function brand_mark(): string
         . '<path d="M22 13l-8 12h6l-1 9 9-13h-6l1-8z" fill="#f7b500"/>'
         . '</svg>';
 }
+
+function statut_label(string $statut): string
+{
+    return match ($statut) {
+        'EN_ATTENTE' => 'En attente',
+        'ANOMALIE' => 'Anomalie',
+        'VALIDEE' => 'Validée',
+        'FACTUREE' => 'Facturée',
+        'IMPAYEE' => 'Impayée',
+        'PAYEE' => 'Payée',
+        'SEUIL_DEPASSE' => 'Seuil dépassé',
+        'INDEX_INFERIEUR' => 'Index inférieur',
+        'CONFIRMEE' => 'Confirmée',
+        'CORRIGEE' => 'Corrigée',
+        default => ucfirst(strtolower(str_replace('_', ' ', $statut))),
+    };
+}
+
+function statut_badge(string $statut): string
+{
+    return match ($statut) {
+        'PAYEE', 'VALIDEE', 'CONFIRMEE', 'CORRIGEE' => 'badge-open',
+        'IMPAYEE', 'ANOMALIE', 'SEUIL_DEPASSE', 'EN_ATTENTE' => 'badge-warning',
+        'INDEX_INFERIEUR' => 'badge-danger',
+        default => '',
+    };
+}
+
+function erreur_page(int $code, string $titre, string $message): void
+{
+    http_response_code($code);
+    $titreErreur = $titre;
+    $messageErreur = $message;
+    require ROOT . 'IHM/erreur.php';
+    exit;
+}

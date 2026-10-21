@@ -12,6 +12,7 @@ $email = $email ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b2a4a">
     <title>Connexion — <?= e(APP_NAME) ?></title>
+    <link rel="icon" type="image/svg+xml" href="<?= url('assets/img/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261020">
 </head>
 <body class="auth-page">
