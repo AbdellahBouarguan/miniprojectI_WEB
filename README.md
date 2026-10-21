@@ -2,6 +2,8 @@
 
 Application web PHP de gestion des factures d'eau et d'electricite.
 
+Branche Alpha : `aymane`
+
 ## Perimetre Alpha
 
 - Gestion des clients
@@ -76,14 +78,24 @@ GET/POST /Client/add
 GET/POST /Client/update/{id}
 
 GET/POST /Consommation/add
+GET/POST /Consommation/add/{id}
 GET      /Consommation/all
 GET      /Consommation/one/{id}
+GET      /Consommation/confirmation/{id}
+POST     /Consommation/confirmer
+POST     /Consommation/facturer
 
 GET      /Facture/all
 GET      /Facture/one/{id}
 
 GET      /Anomalie/index
 ```
+
+Flux des anomalies :
+
+- `INDEX_INFERIEUR` : correction obligatoire.
+- `SEUIL_DEPASSE` : confirmation ou correction.
+- Après confirmation/correction valide : facture générée automatiquement.
 
 Le routeur appelle la fonction `{controleur}_{action}`, par exemple `client_all()` ou `facture_show()`.
 
