@@ -19,6 +19,7 @@ require_once ROOT . 'BD/ClientModel.php';
 
 function client_redirect(string $path): never
 {
+    //dit au navigateur : « va à cette autre adresse
     header('Location: ' . url($path));
     exit;
 }
@@ -32,10 +33,10 @@ function client_forbidden(): never
 }
 
 /** Exige une session connectee avec l'un des roles donnes. */
-function client_require_role(string ...$roles): void
+function client_require_role(string ...$roles): void // acceter plusieurs arguments car tes actions les accepte tous les deux : client_one.
 {
     $role = $_SESSION['role'] ?? null;
-
+    //s'il n'est pas connécté
     if ($role === null) {
         client_redirect('Auth/login');
     }
@@ -91,12 +92,12 @@ function client_validate(array $in, int $idClient = 0): array
     $password = (string) ($in['mot_de_passe'] ?? '');
 
     if ($data['cin'] === '' || !preg_match('/^[A-Z0-9]{1,20}$/', $data['cin'])) {
-        $errors['cin'] = 'CIN obligatoire (lettres et chiffres, 20 caracteres maximum).';
+        $errors['cin'] = 'CIN obligatoire (lettres et chiffres seulement, 20 caracteres maximum).';
     } elseif (client_model_cin_exists($data['cin'], $idClient)) {
         $errors['cin'] = 'Ce CIN est deja utilise.';
     }
 
-    if ($data['nom'] === '' || mb_strlen($data['nom']) > 100) {
+    if ($data['nom'] === '' || mb_strlen($data['nom']) > 100) { //mb_strlen compte les caractères
         $errors['nom'] = 'Nom obligatoire (100 caracteres maximum).';
     }
 
@@ -114,7 +115,7 @@ function client_validate(array $in, int $idClient = 0): array
         $errors['email'] = 'Cet email est deja utilise.';
     }
 
-    if ($data['telephone'] !== '' && !preg_match('/^[0-9+().\s-]{6,30}$/', $data['telephone'])) {
+    if ($data['telephone'] !== '' && !preg_match('/^[0-9+().\s-]{10,16}$/', $data['telephone'])) { //il se peut 0600000001, +212 600-00-00-01 et (0539) 12 34 56 passent, mais abc ou 06 ne passent pas.
         $errors['telephone'] = 'Numero de telephone invalide.';
     }
 

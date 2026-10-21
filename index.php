@@ -17,7 +17,7 @@ $action = strtolower($segments[1] ?? 'index');
 $id = $segments[2] ?? null;
 
 $allowedControllers = ['Home', 'Auth', 'Client', 'Consommation', 'Facture', 'Anomalie'];
-
+//on pouvait faire une liste des actions auusi :) asi abdelah , 7it il se peut la saisie d'une action sui n'est inclu dans notre traitement
 if (!in_array($controller, $allowedControllers, true) || !preg_match('/^[a-zA-Z0-9_]+$/', $action)) {
     http_response_code(404);
     require ROOT . 'IHM/404.php';
