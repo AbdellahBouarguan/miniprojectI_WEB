@@ -1,6 +1,7 @@
 <?php
 /**
  * @var array $clients
+ * @var string $search
  * @var string|null $erreur
  * @var string|null $succes
  */
@@ -26,6 +27,15 @@
 <?php endif; ?>
 
 <section class="card">
+    <form method="get" action="<?= e(url('Client/all')) ?>" class="search">
+        <input type="search" name="q" placeholder="Rechercher (CIN, nom, prénom, email)"
+               value="<?= e($search) ?>">
+        <button type="submit" class="button">Rechercher</button>
+        <?php if ($search !== ''): ?>
+            <a href="<?= e(url('Client/all')) ?>">Effacer</a>
+        <?php endif; ?>
+    </form>
+
     <?php if ($clients === []): ?>
         <p>Aucun client enregistré pour ce fournisseur.</p>
     <?php else: ?>

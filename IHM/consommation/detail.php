@@ -2,7 +2,6 @@
 /** @var array $conso @var array $calcul @var array $photos @var array $anomalies
  *  @var array|null $facture @var string|null $erreur @var string|null $succes
  */
-$base = defined('URL_BASE') ? rtrim(URL_BASE, '/') . '/' : '';
 ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
@@ -44,12 +43,12 @@ $base = defined('URL_BASE') ? rtrim(URL_BASE, '/') . '/' : '';
         <div class="row">
             <div class="col">
                 <p>Compteur eau</p>
-                <img src="<?= e($base . $photos['EAU']) ?>" alt="Compteur eau"
+                <img src="<?= e(url($photos['EAU'])) ?>" alt="Compteur eau"
                      style="max-width:300px">
             </div>
             <div class="col">
                 <p>Compteur électricité</p>
-                <img src="<?= e($base . $photos['ELEC']) ?>" alt="Compteur électricité"
+                <img src="<?= e(url($photos['ELEC'])) ?>" alt="Compteur électricité"
                      style="max-width:300px">
             </div>
         </div>
@@ -84,19 +83,23 @@ $base = defined('URL_BASE') ? rtrim(URL_BASE, '/') . '/' : '';
     <?php if ($facture !== null): ?>
         <h2>Facture</h2>
         <p>
-            Numéro : <?= e($facture['numero']) ?> —
+            Numéro :
+            <a href="<?= e(url('Facture/one/' . (int) $facture['id_facture'])) ?>">
+                <?= e($facture['numero']) ?>
+            </a>
+            —
             État : <?= e($facture['etat']) ?> —
-            Montant TTC : <?= e(number_format((float) $facture['montant_ttc'], 2, ',', ' ')) ?>
+            Montant TTC : <?= e(number_format((float) $facture['montant_ttc'], 2, ',', ' ')) ?> DH
         </p>
     <?php elseif ($conso['statut'] === 'VALIDEE'): ?>
-        <form method="post" action="index.php?action=conso.facturer">
+        <form method="post" action="<?= e(url('Consommation/facturer')) ?>">
             <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
             <input type="hidden" name="id_conso" value="<?= (int) $conso['id_conso'] ?>">
             <button type="submit" class="btn btn-primary">Générer la facture</button>
         </form>
     <?php endif; ?>
 
-    <a href="index.php?action=conso.historique">Retour à l’historique</a>
+    <a href="<?= e(url('Consommation/all')) ?>">Retour à l’historique</a>
 </div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

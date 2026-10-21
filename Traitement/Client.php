@@ -25,10 +25,22 @@ function client_exiger_fournisseur(): int
     return (int) $_SESSION['id_fournisseur'];
 }
 
+function client_csrf_valide(): bool
+{
+    $attendu = $_SESSION['csrf_token'] ?? '';
+    $recu = $_POST['csrf'] ?? '';
+
+    return is_string($attendu)
+        && $attendu !== ''
+        && is_string($recu)
+        && hash_equals($attendu, $recu);
+}
+
 function client_all($id = null): void
 {
     $idFournisseur = client_exiger_fournisseur();
-    $clients = client_bd()->lister($idFournisseur);
+    $search = trim((string) ($_GET['q'] ?? ''));
+    $clients = client_bd()->lister($idFournisseur, $search);
     $erreur = $_GET['erreur'] ?? null;
     $succes = $_GET['succes'] ?? null;
 
@@ -67,6 +79,11 @@ function client_add($id = null): void
     ];
 
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+        if (!client_csrf_valide()) {
+            http_response_code(419);
+            exit('Session expirée. Rechargez la page.');
+        }
+
         client_lire_formulaire($client, $erreurs, true);
 
         if ($erreurs === []) {
@@ -98,6 +115,10 @@ function client_add($id = null): void
     }
 
     $mode = 'add';
+    $old = $client;
+    $errors = $erreurs;
+    $isEdit = false;
+    $cancelUrl = url('Client/all');
     $csrf = csrf_token();
 
     require ROOT . 'IHM/client/form.php';
@@ -120,6 +141,11 @@ function client_update($id = null): void
     unset($client['mot_de_passe']);
 
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+        if (!client_csrf_valide()) {
+            http_response_code(419);
+            exit('Session expirée. Rechargez la page.');
+        }
+
         client_lire_formulaire($client, $erreurs, false);
 
         if ($erreurs === []) {
@@ -154,6 +180,10 @@ function client_update($id = null): void
     }
 
     $mode = 'update';
+    $old = $client;
+    $errors = $erreurs;
+    $isEdit = true;
+    $cancelUrl = url('Client/one/' . $idClient);
     $csrf = csrf_token();
 
     require ROOT . 'IHM/client/form.php';

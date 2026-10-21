@@ -42,17 +42,7 @@ function auth_login($id = null): void
 
                     $erreur = 'Email ou mot de passe incorrect.';
                 } else {
-                    if (auth_premier_fournisseur() === null) {
-                        $erreur = 'Base non initialisée : importez sql/seed.sql.';
-                    } else {
-                        $client = auth_creer_client_demo($email, $motDePasse);
-
-                        if ($client !== null) {
-                            auth_connecter_client($client);
-                        }
-
-                        $erreur = 'Impossible de créer le compte client. Réessayez.';
-                    }
+                    $erreur = 'Email ou mot de passe incorrect.';
                 }
             }
         }
@@ -157,6 +147,10 @@ function auth_connecter_fournisseur(array $fournisseur): void
  */
 function auth_demo($id = null): void
 {
+    http_response_code(404);
+    require ROOT . 'IHM/404.php';
+    exit;
+
     $role = $id === 'fournisseur' ? 'fournisseur' : 'client';
 
     // Destination de demonstration, limitee a une liste blanche.

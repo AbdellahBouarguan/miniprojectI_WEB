@@ -49,7 +49,15 @@
                     <td><?= e(number_format((float) $c['index_eau'], 2, ',', ' ')) ?></td>
                     <td><?= e(number_format((float) $c['index_elec'], 2, ',', ' ')) ?></td>
                     <td><span class="badge"><?= e($c['statut']) ?></span></td>
-                    <td><?= !empty($c['facture_numero']) ? e($c['facture_numero']) : '—' ?></td>
+                    <td>
+                        <?php if (!empty($c['facture_numero'])): ?>
+                            <a href="<?= e(url('Facture/one/' . (int) $c['id_facture'])) ?>">
+                                <?= e($c['facture_numero']) ?>
+                            </a>
+                        <?php else: ?>
+                            —
+                        <?php endif; ?>
+                    </td>
                     <td>
                         <a href="<?= e(url('Consommation/one/' . (int) $c['id_conso'])) ?>">
                             Détail

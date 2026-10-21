@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/helpers.php';
-require_once __DIR__ . '/AnomalieDetector.php';
+require_once __DIR__ . '/Anomalie.php';
 require_once __DIR__ . '/../BD/ConsommationBD.php';
 
 final class ConsommationTraitement
@@ -126,7 +126,7 @@ final class ConsommationTraitement
 
         $precedent = $this->bd->derniereConsommationValidee($idClient, $mois, $annee);
 
-        $anomalies = AnomalieDetector::detecter(
+        $anomalies = Anomalie::detecter(
             $precedent,
             (float) $indexEau,
             (float) $indexElec,
@@ -431,7 +431,7 @@ final class ConsommationTraitement
     private function deplacerPhoto(array $photo, int $idClient, string $type): string
     {
         $extension = self::MIMES[$photo['mime']];
-        $dossierRelatif = 'uploads/consommation/client_' . $idClient;
+        $dossierRelatif = 'uploads/compteurs/client_' . $idClient;
         $dossierAbsolu = dirname(__DIR__) . '/' . $dossierRelatif;
 
         if (!is_dir($dossierAbsolu) && !mkdir($dossierAbsolu, 0775, true) && !is_dir($dossierAbsolu)) {
@@ -449,8 +449,8 @@ final class ConsommationTraitement
 
     private function clientConnecte(): int
     {
-        if (empty($_SESSION['id_client'])) {
-            $this->rediriger('auth.login', ['erreur' => 'Veuillez vous connecter.']);
+        if (($_SESSION['role'] ?? null) !== 'client' || empty($_SESSION['id_client'])) {
+            $this->rediriger('auth.login', ['erreur' => 'Veuillez vous connecter comme client.']);
         }
 
         return (int) $_SESSION['id_client'];
@@ -477,8 +477,25 @@ final class ConsommationTraitement
 
     private function rediriger(string $action, array $parametres = []): void
     {
-        $parametres = array_merge(['action' => $action], $parametres);
-        header('Location: index.php?' . http_build_query($parametres));
+        $routes = [
+            'conso.historique' => 'Consommation/all',
+            'conso.confirmation' => 'Consommation/confirmation',
+            'conso.detail' => 'Consommation/one',
+            'conso.saisie' => 'Consommation/add',
+            'auth.login' => 'Auth/login',
+        ];
+
+        $route = $routes[$action] ?? 'Consommation/all';
+        $idConso = isset($parametres['id_conso']) ? (int) $parametres['id_conso'] : null;
+        unset($parametres['id_conso']);
+
+        $url = url($route . ($idConso !== null ? '/' . $idConso : ''));
+
+        if ($parametres !== []) {
+            $url .= '?' . http_build_query($parametres);
+        }
+
+        header('Location: ' . $url);
         exit;
     }
 

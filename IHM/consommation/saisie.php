@@ -33,7 +33,7 @@ $valeur = static function (string $cle, string $defaut = '') use ($anciennes): s
         </div>
     <?php endif; ?>
 
-    <form method="post" action="index.php?action=conso.enregistrer"
+    <form method="post" action="<?= e(url('Consommation/add')) ?>"
           enctype="multipart/form-data" novalidate>
         <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
 
@@ -101,7 +101,7 @@ $valeur = static function (string $cle, string $defaut = '') use ($anciennes): s
         </div>
 
         <button type="submit" class="btn btn-primary">Envoyer</button>
-        <a href="index.php?action=conso.historique" class="btn btn-link">Historique</a>
+        <a href="<?= e(url('Consommation/all')) ?>" class="btn btn-link">Historique</a>
     </form>
 </div>
 

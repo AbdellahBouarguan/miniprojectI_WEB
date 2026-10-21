@@ -13,6 +13,7 @@ $error = static function (string $name) use ($errors): string {
 <?php endif; ?>
 
 <form method="post" action="" class="form" novalidate>
+    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
 
     <label for="cin">CIN</label>
     <input type="text" id="cin" name="cin" maxlength="20" required value="<?= $field('cin') ?>">
@@ -44,6 +45,11 @@ $error = static function (string $name) use ($errors): string {
     <input type="password" id="mot_de_passe" name="mot_de_passe" minlength="8"
            autocomplete="new-password" <?= $isEdit ? '' : 'required' ?>>
     <?= $error('mot_de_passe') ?>
+
+    <label for="mot_de_passe_confirmation">Confirmer le mot de passe</label>
+    <input type="password" id="mot_de_passe_confirmation" name="mot_de_passe_confirmation"
+           minlength="8" autocomplete="new-password" <?= $isEdit ? '' : 'required' ?>>
+    <?= $error('mot_de_passe_confirmation') ?>
 
     <div class="form-actions">
         <button type="submit" class="button">Enregistrer</button>

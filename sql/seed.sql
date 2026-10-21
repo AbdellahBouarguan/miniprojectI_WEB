@@ -64,6 +64,16 @@ VALUES
    '0600000003');
 
 -- ------------------------------------------------------------
+-- CONSOMMATIONS DE DEMONSTRATION (mois precedent)
+-- ------------------------------------------------------------
+INSERT INTO consommation
+  (id_client, periode_mois, periode_annee, index_eau, index_elec, statut)
+VALUES
+  (1, 9, 2026, 100.00, 300.00, 'VALIDEE'),
+  (2, 9, 2026,  80.00, 250.00, 'VALIDEE'),
+  (3, 9, 2026, 120.00, 400.00, 'VALIDEE');
+
+-- ------------------------------------------------------------
 -- TARIFS
 -- Bornes continues : [borne_min, borne_max[
 -- Derniere tranche : borne_max = NULL

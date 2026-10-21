@@ -5,7 +5,7 @@ final class ClientBD
 {
     public function __construct(private mysqli $db) {}
 
-    public function lister(int $idFournisseur): array
+    public function lister(int $idFournisseur, string $search = ''): array
     {
         $sql = 'SELECT c.id_client, c.id_fournisseur, c.cin, c.nom, c.prenom,
                        c.adresse, c.email, c.telephone, c.date_creation,
@@ -15,11 +15,23 @@ final class ClientBD
                         WHERE co.id_client = c.id_client) AS nb_conso
                 FROM client c
                 JOIN fournisseur f ON f.id_fournisseur = c.id_fournisseur
-                WHERE c.id_fournisseur = ?
-                ORDER BY c.nom, c.prenom';
+                WHERE c.id_fournisseur = ?';
+
+        if ($search !== '') {
+            $sql .= ' AND (c.cin LIKE ? OR c.nom LIKE ? OR c.prenom LIKE ? OR c.email LIKE ?)';
+        }
+
+        $sql .= ' ORDER BY c.nom, c.prenom';
 
         $stmt = mysqli_prepare($this->db, $sql);
-        mysqli_stmt_bind_param($stmt, 'i', $idFournisseur);
+
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+            mysqli_stmt_bind_param($stmt, 'issss', $idFournisseur, $like, $like, $like, $like);
+        } else {
+            mysqli_stmt_bind_param($stmt, 'i', $idFournisseur);
+        }
+
         mysqli_stmt_execute($stmt);
 
         $resultat = mysqli_stmt_get_result($stmt);

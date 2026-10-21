@@ -77,16 +77,6 @@ $email = $email ?? '';
                 </button>
             </form>
 
-            <div class="auth-demo">
-                <a href="<?= e(url('Auth/demo/client')) ?>">Démo client</a>
-                <a href="<?= e(url('Auth/demo/fournisseur')) ?>">Démo fournisseur</a>
-                <span class="disabled" title="Bientôt disponible">Démo agent</span>
-            </div>
-
-            <p class="auth-note">
-                Nouvelle adresse e-mail : un compte client est créé automatiquement.
-                Réutilisez le même e-mail et le même code pour retrouver votre historique.
-            </p>
         </section>
 
         <p class="auth-footnote">© <?= date('Y') ?> <?= e(APP_NAME) ?> — ENSA Tétouan</p>

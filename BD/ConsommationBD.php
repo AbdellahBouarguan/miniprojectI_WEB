@@ -79,6 +79,16 @@ final class ConsommationBD
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function trouverParId(int $idConso): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM consommation WHERE id_conso = :id'
+        );
+        $stmt->execute(['id' => $idConso]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
     public function anomaliesDe(int $idConso): array
     {
         $stmt = $this->pdo->prepare(

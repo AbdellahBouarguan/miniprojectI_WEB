@@ -7,9 +7,9 @@ require_once __DIR__ . '/ConsommationTraitement.php';
  * Point d'entree appele par le routeur (index.php).
  * Le routeur transforme /Consommation/add en fonction consommation_add().
  */
-function consommation_controleur(): Consommation
+function consommation_controleur(): ConsommationTraitement
 {
-    return new Consommation(pdo());
+    return new ConsommationTraitement(pdo());
 }
 
 function consommation_add($id = null): void
