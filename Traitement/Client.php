@@ -80,8 +80,7 @@ function client_add($id = null): void
 
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         if (!client_csrf_valide()) {
-            http_response_code(419);
-            exit('Session expirée. Rechargez la page.');
+            erreur_page(419, 'Session expirée', 'Rechargez la page et réessayez.');
         }
 
         client_lire_formulaire($client, $erreurs, true);
@@ -115,13 +114,14 @@ function client_add($id = null): void
     }
 
     $mode = 'add';
+    $title = 'Ajouter un client';
     $old = $client;
     $errors = $erreurs;
     $isEdit = false;
     $cancelUrl = url('Client/all');
     $csrf = csrf_token();
 
-    require ROOT . 'IHM/client/form.php';
+    require ROOT . 'IHM/client/add.php';
 }
 
 function client_update($id = null): void
@@ -142,8 +142,7 @@ function client_update($id = null): void
 
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         if (!client_csrf_valide()) {
-            http_response_code(419);
-            exit('Session expirée. Rechargez la page.');
+            erreur_page(419, 'Session expirée', 'Rechargez la page et réessayez.');
         }
 
         client_lire_formulaire($client, $erreurs, false);
@@ -180,13 +179,14 @@ function client_update($id = null): void
     }
 
     $mode = 'update';
+    $title = 'Modifier un client';
     $old = $client;
     $errors = $erreurs;
     $isEdit = true;
     $cancelUrl = url('Client/one/' . $idClient);
     $csrf = csrf_token();
 
-    require ROOT . 'IHM/client/form.php';
+    require ROOT . 'IHM/client/update.php';
 }
 
 function client_delete($id = null): void
@@ -194,8 +194,7 @@ function client_delete($id = null): void
     $idFournisseur = client_exiger_fournisseur();
 
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        http_response_code(405);
-        exit('Méthode non autorisée.');
+        erreur_page(405, 'Méthode non autorisée', 'Cette action n’est pas autorisée.');
     }
 
     $csrf = $_POST['csrf'] ?? '';
@@ -207,8 +206,7 @@ function client_delete($id = null): void
         || !is_string($csrf)
         || !hash_equals($attendu, $csrf)
     ) {
-        http_response_code(419);
-        exit('Session expirée. Rechargez la page.');
+        erreur_page(419, 'Session expirée', 'Rechargez la page et réessayez.');
     }
 
     $idClient = (int) ($id ?? 0);

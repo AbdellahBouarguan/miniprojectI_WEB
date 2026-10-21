@@ -9,8 +9,8 @@
 
 <div class="page-head">
     <div>
-        <h1>Traitement des anomalies de saisie</h1>
-        <p>Une correction est requise avant la génération de la facture.</p>
+        <h1>Anomalies de saisie</h1>
+        <p>Consultez les relevés signalés. Le client confirme ou corrige depuis son espace.</p>
     </div>
 </div>
 
@@ -33,6 +33,7 @@
             Aucune anomalie en attente de traitement.
         </div>
     <?php else: ?>
+        <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
@@ -44,7 +45,6 @@
                     <th>Index préc.</th>
                     <th>Seuil</th>
                     <th>Détectée le</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,7 +62,7 @@
                     <td><?= $a['champ'] === 'EAU' ? 'Eau' : 'Électricité' ?></td>
                     <td>
                         <span class="type-badge <?= $a['type_anomalie'] === 'INDEX_INFERIEUR' ? 'type-danger' : 'type-warning' ?>">
-                            <?= e($a['type_anomalie']) ?>
+                            <?= e(statut_label($a['type_anomalie'])) ?>
                         </span>
                     </td>
                     <td><?= e(format_nombre((float) $a['index_saisi'])) ?></td>
@@ -73,18 +73,11 @@
                     </td>
                     <td><?= e(format_nombre((float) $a['seuil'], 0)) ?></td>
                     <td><?= e(format_date_fr($a['date_detection'])) ?></td>
-                    <td>
-                        <a
-                            class="btn btn-outline btn-small"
-                            href="<?= e(url('Anomalie/corriger/' . (int) $a['id_anomalie'])) ?>"
-                        >
-                            Corriger
-                        </a>
-                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </section>
 

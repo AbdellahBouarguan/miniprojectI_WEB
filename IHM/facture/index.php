@@ -23,6 +23,7 @@ $role = $_SESSION['role'] ?? null;
     <?php if ($factures === []): ?>
         <p>Aucune facture enregistrée pour le moment.</p>
     <?php else: ?>
+        <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
@@ -54,7 +55,11 @@ $role = $_SESSION['role'] ?? null;
                     <td><?= e(number_format((float) $f['conso_eau'], 2, ',', ' ')) ?> m³</td>
                     <td><?= e(number_format((float) $f['conso_elec'], 2, ',', ' ')) ?> kWh</td>
                     <td><?= e(number_format((float) $f['montant_ttc'], 2, ',', ' ')) ?> DH</td>
-                    <td><span class="badge"><?= e($f['etat']) ?></span></td>
+                    <td>
+                        <span class="badge <?= e(statut_badge($f['etat'])) ?>">
+                            <?= e(statut_label($f['etat'])) ?>
+                        </span>
+                    </td>
                     <td>
                         <a href="<?= e(url('Facture/one/' . (int) $f['id_facture'])) ?>">
                             Détail
@@ -64,6 +69,7 @@ $role = $_SESSION['role'] ?? null;
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </section>
 

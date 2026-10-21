@@ -34,7 +34,7 @@ $unite = $anomalie['champ'] === 'EAU' ? 'm³' : 'kWh';
         <div class="stat-value" style="font-size: 1.1rem;">
             <?= $anomalie['champ'] === 'EAU' ? 'Eau' : 'Électricité' ?>
         </div>
-        <div class="stat-note"><?= e($anomalie['type_anomalie']) ?></div>
+        <div class="stat-note"><?= e(statut_label($anomalie['type_anomalie'])) ?></div>
     </div>
 
     <div class="stat-card">

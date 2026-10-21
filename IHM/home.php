@@ -121,7 +121,7 @@ $joursRestants = max(0, (int) $aujourdhui->diff($finMois)->days);
                 <?php endif; ?>
             </div>
             <div class="stat-note">
-                <?= $derniereConso !== null ? e($derniereConso['statut']) : 'Aucun relevé enregistré' ?>
+                <?= $derniereConso !== null ? e(statut_label($derniereConso['statut'])) : 'Aucun relevé enregistré' ?>
             </div>
         </div>
 
