@@ -131,6 +131,14 @@ Client 3    : client3@example.ma     / client123
 - Nizar Ben Yacoub : saisie des consommations et generation de facture
 - Aymen Ouggourni : factures
 
+## Rapport final
+
+```text
+docs/latex/rapport_mini_projet_1_alpha.pdf
+```
+
+Sources LaTeX : `docs/latex/main.tex` et `docs/latex/sections/`.
+
 ## Depot GitHub
 
 ```text

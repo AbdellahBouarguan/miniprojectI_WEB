@@ -1,0 +1,106 @@
+\section{Architecture et technologies}
+
+\subsection{Architecture MVC}
+
+Le projet suit l'architecture \textbf{MVC} (Modèle--Vue--Contrôleur), qui sépare l'accès aux données, la logique métier et la présentation. Cette organisation facilite la maintenance, les tests et l'ajout de nouvelles fonctionnalités.
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Modèle} : couche d'accès aux données. Elle contient les classes et fonctions qui exécutent les requêtes SQL. Les fichiers principaux sont :
+  \begin{itemize}
+    \item \texttt{BD/Connexion.php} ;
+    \item \texttt{BD/ClientBD.php} ;
+    \item \texttt{BD/ConsommationBD.php} ;
+    \item \texttt{BD/AnomalieBD.php} ;
+    \item \texttt{BD/Facture.php}.
+  \end{itemize}
+  \item \textbf{Contrôleur} : couche de traitement. Il reçoit la requête, vérifie les droits, valide les données, applique les règles métier, appelle le modèle puis transmet les résultats à la vue. Les contrôleurs sont dans \texttt{Traitement/}.
+  \item \textbf{Vue} : couche de présentation. Elle contient le HTML et le PHP d'affichage. Les vues sont dans \texttt{IHM/} et ne réalisent aucune requête SQL.
+\end{itemize}
+
+\subsection{Routeur et point d'entrée}
+
+Toutes les requêtes passent par \texttt{index.php}. Le fichier \texttt{.htaccess} redirige vers ce point d'entrée les URLs qui ne correspondent pas à un fichier réel. Le routeur découpe l'adresse sous la forme \texttt{/Contrôleur/action/id}.
+
+{\sloppy
+Par exemple, \texttt{/Client/update/5} charge \texttt{Traitement/Client.php} et appelle la fonction \texttt{client\_update(5)}. Avant l'appel, le routeur vérifie que le contrôleur appartient à une liste autorisée, que le nom de l'action est valide et que la fonction existe. Dans le cas contraire, il affiche une page 404.\par
+}
+
+\begin{lstlisting}[language=PHP,caption={Extrait simplifié du routeur},label={lst:routeur}]
+$url = trim((string) ($_GET['url'] ?? ''), '/');
+$segments = $url === '' ? [] : explode('/', $url);
+
+$controller = ucfirst(strtolower($segments[0] ?? 'Home'));
+$action = strtolower($segments[1] ?? 'index');
+$id = $segments[2] ?? null;
+
+$allowed = ['Home', 'Auth', 'Client', 'Consommation', 'Facture', 'Anomalie'];
+
+if (!in_array($controller, $allowed, true)) {
+    http_response_code(404);
+    require ROOT . 'IHM/404.php';
+    exit;
+}
+
+require_once ROOT . 'Traitement/' . $controller . '.php';
+$function = strtolower($controller) . '_' . $action;
+$function($id);
+\end{lstlisting}
+
+\subsection{Organisation des fichiers}
+
+Le dossier \texttt{BD/} contient le modèle, \texttt{Traitement/} les contrôleurs et \texttt{IHM/} les vues. Les ressources statiques sont dans \texttt{assets/}, les photos dans \texttt{uploads/compteurs/}, le schéma SQL dans \texttt{sql/} et la documentation dans \texttt{docs/}.
+
+\subsection{Technologies utilisées}
+
+\begin{table}[H]
+\centering
+\caption{Technologies du projet}
+\label{tab:technologies}
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.72\textwidth}}
+\toprule
+\textbf{Technologie} & \textbf{Utilisation} \\
+\midrule
+PHP 8 & Logique métier, contrôleurs, sessions et traitement des requêtes. \\
+MariaDB / MySQL & Stockage des clients, consommations, anomalies et factures. \\
+PDO et mysqli & Accès aux données avec requêtes préparées. \\
+HTML / CSS & Structure et mise en forme de l'interface responsive. \\
+JavaScript & Interactions légères et aperçu des images. \\
+Apache ou serveur PHP & Exécution locale de l'application. \\
+Git / GitHub & Versionnement, branches, Pull Requests et collaboration. \\
+PlantUML / Figma & Diagrammes de conception et maquettes d'interface. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Authentification et sessions}
+
+L'authentification repose sur les tables \texttt{client} et \texttt{fournisseur}. Les mots de passe sont hachés avec \texttt{password\_hash()} et vérifiés avec \texttt{password\_verify()}. Après connexion, la session contient le rôle et l'identifiant correspondant :
+
+Après connexion, la session contient le rôle, l'identifiant du client ou du fournisseur, le nom, le prénom et l'email. Les contrôleurs vérifient le rôle avant chaque action sensible. Un client ne peut accéder qu'à ses propres consommations et factures ; le fournisseur accède aux clients et aux factures de son périmètre.
+
+\subsection{Organisation Git et GitHub}
+
+Le projet est versionné avec Git et hébergé sur GitHub. Les branches principales sont :
+
+\begin{table}[H]
+\centering
+\caption{Branches, Pull Requests et versions}
+\label{tab:git}
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.70\textwidth}}
+\toprule
+\textbf{Élément} & \textbf{Rôle} \\
+\midrule
+\texttt{main} & Branche stable contenant la version Alpha finale. \\
+\texttt{nizar} & Branche de développement des modules clients, consommation et anomalies. \\
+\texttt{reda} & Branche de travail sur la gestion des clients ; non fusionnée en l'état. \\
+\texttt{aymane} & Branche de finalisation de l'Alpha et de la facturation. \\
+\texttt{fix/alpha-ui} & Branche des corrections UI/UX et responsive. \\
+PR \#1 & Fusion de la version Alpha dans \texttt{main}. \\
+PR \#2 & Fusion des corrections UI/UX dans \texttt{main}. \\
+\texttt{v0.1-alpha} & Première version Alpha. \\
+\texttt{v0.1.1-alpha} & Version Alpha avec corrections UI/UX. \\
+\bottomrule
+\end{tabular}
+\end{table}

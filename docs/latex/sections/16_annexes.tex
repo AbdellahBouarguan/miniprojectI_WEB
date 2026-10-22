@@ -1,0 +1,45 @@
+\appendix
+
+\clearpage
+\section{Routes de l'application}
+
+\begin{longtable}{p{0.34\textwidth}p{0.14\textwidth}p{0.42\textwidth}}
+\caption{Routes principales et contrôleurs associés}\label{tab:routes}\\
+\toprule
+\textbf{URL} & \textbf{Méthode} & \textbf{Rôle / fonction} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{URL} & \textbf{Méthode} & \textbf{Rôle / fonction} \\
+\midrule
+\endhead
+\texttt{/Auth/login} & GET/POST & Connexion client ou fournisseur \\
+\texttt{/Auth/logout} & GET & Déconnexion \\
+\texttt{/Client/all} & GET & Liste et recherche des clients (fournisseur) \\
+\texttt{/Client/one/\{id\}} & GET & Fiche client (fournisseur) \\
+\texttt{/Client/add} & GET/POST & Ajout d'un client (fournisseur) \\
+\texttt{/Client/update/\{id\}} & GET/POST & Modification d'un client (fournisseur) \\
+\texttt{/Client/delete/\{id\}} & POST & Suppression conditionnelle (fournisseur) \\
+\texttt{/Consommation/add} & GET/POST & Saisie d'une consommation (client) \\
+\texttt{/Consommation/add/\{id\}} & GET/POST & Correction d'une consommation (client) \\
+\texttt{/Consommation/all} & GET & Historique des consommations (client) \\
+\texttt{/Consommation/one/\{id\}} & GET & Détail d'une consommation (client) \\
+\texttt{/Consommation/confirmation/\{id\}} & GET & Confirmation ou correction d'une anomalie (client) \\
+\texttt{/Consommation/confirmer} & POST & Confirmer ou corriger une anomalie (client) \\
+\texttt{/Consommation/facturer} & POST & Génération manuelle d'une facture (client) \\
+\texttt{/Facture/all} & GET & Liste des factures (client/fournisseur) \\
+\texttt{/Facture/one/\{id\}} & GET & Détail d'une facture (client/fournisseur) \\
+\texttt{/Anomalie/index} & GET & Consultation des anomalies (fournisseur) \\
+\texttt{/Anomalie/corriger/\{id\}} & GET/POST & Correction fournisseur (non utilisée dans le flux Alpha) \\
+\bottomrule
+\end{longtable}
+
+\section{Schéma SQL}
+
+Le schéma complet de la base de données est fourni ci-dessous. Il crée la base \texttt{miniproject\_version\_alpha}, les sept tables, les clés étrangères et les contraintes d'intégrité.
+
+\begingroup
+\lstset{basicstyle=\ttfamily\scriptsize,numbers=none}
+\lstinputlisting[language=SQL,caption={Schéma SQL de la base Alpha}]{../../sql/schema.sql}
+\endgroup
+

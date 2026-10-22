@@ -1,0 +1,89 @@
+\section{Tests et résultats}
+
+\subsection{Méthodologie}
+
+Les tests ont été réalisés manuellement et à l'aide d'un navigateur automatisé sur la version Alpha. Ils couvrent les parcours fonctionnels, les calculs de facturation, le contrôle d'accès, la sécurité des formulaires et le rendu responsive. La syntaxe de tous les fichiers PHP a également été vérifiée avec \texttt{php -l}.
+
+\subsection{Tests fonctionnels}
+
+\begin{longtable}{p{0.52\textwidth}p{0.16\textwidth}p{0.22\textwidth}}
+\caption{Synthèse des tests fonctionnels}\label{tab:tests}\\
+\toprule
+\textbf{Test} & \textbf{Résultat} & \textbf{Observation} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Test} & \textbf{Résultat} & \textbf{Observation} \\
+\midrule
+\endhead
+Connexion client et fournisseur & Réussi & Redirection selon le rôle. \\
+Refus d'un mot de passe incorrect & Réussi & Message d'erreur affiché. \\
+Accès sans session & Réussi & Redirection vers la connexion. \\
+Accès client à une page fournisseur & Réussi & Accès refusé. \\
+Facture d'un autre client & Réussi & Erreur 404. \\
+Ajout d'un client valide & Réussi & Message de succès. \\
+Refus d'un CIN ou email en doublon & Réussi & Erreurs sous les champs. \\
+Modification d'un client & Réussi & Mot de passe conservé si vide. \\
+Recherche d'un client & Réussi & Recherche CIN, nom, prénom, email. \\
+Suppression d'un client avec consommation & Réussi & Suppression bloquée. \\
+Saisie avant le 18 ou hors mois courant & Réussi & Refus serveur. \\
+Valeurs négatives ou non numériques & Réussi & Refus serveur. \\
+Photos manquantes ou invalides & Réussi & Refus serveur. \\
+Saisie valide avec photos & Réussi & Consommation enregistrée. \\
+Détection d'un index inférieur & Réussi & Anomalie \texttt{INDEX\_INFERIEUR}. \\
+Détection d'un dépassement de seuil & Réussi & Anomalie \texttt{SEUIL\_DEPASSE}. \\
+Confirmation d'une anomalie de seuil & Réussi & Facture générée. \\
+Correction d'un index inférieur & Réussi & Revalidation puis facture. \\
+Génération d'une facture & Réussi & Numéro unique et montants enregistrés. \\
+Consultation client/fournisseur & Réussi & Contrôle d'accès respecté. \\
+CSRF invalide & Réussi & Erreur 419 stylée. \\
+Vérification syntaxique PHP & Réussi & Aucune erreur. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Calculs de référence}
+
+Les montants suivants ont été vérifiés :
+
+\begin{itemize}[leftmargin=*]
+  \item 25 m\textsuperscript{3} d'eau et 200 kWh : HT = 355,58 DH, TVA = 64,00 DH, TTC = 419,58 DH ;
+  \item 10 m\textsuperscript{3} d'eau et 50 kWh : HT = 84,78 DH, TVA = 15,26 DH, TTC = 100,04 DH ;
+  \item 0 m\textsuperscript{3} d'eau et 50 kWh : HT = 41,00 DH, TVA = 7,38 DH, TTC = 48,38 DH.
+\end{itemize}
+
+\subsection{Tests de sécurité}
+
+Les tests de sécurité ont vérifié :
+
+\begin{itemize}[leftmargin=*]
+  \item l'impossibilité d'accéder aux données d'un autre client ;
+  \item le refus d'un jeton CSRF absent ou invalide ;
+  \item l'échappement des valeurs affichées ;
+  \item le contrôle du type MIME des photos ;
+  \item l'absence de scripts de connexion de démonstration ;
+  \item l'utilisation de requêtes préparées pour les accès à la base.
+\end{itemize}
+
+\subsection{Audit UI et responsive}
+
+Un audit visuel a été réalisé sur desktop, tablette et mobile, puis comparé à la maquette Figma. Les problèmes détectés et corrigés sont les suivants :
+
+\begin{itemize}[leftmargin=*]
+  \item rétablissement du layout des pages d'ajout et de modification d'un client ;
+  \item reconstruction du formulaire de consommation avec cartes compteur, photos et boutons cohérents ;
+  \item affichage des photos du mois précédent ;
+  \item correction de la navigation mobile avec une barre fixe en bas ;
+  \item ajout de wrappers horizontaux pour les tableaux ;
+  \item correction des pages d'erreur CSRF et 404 ;
+  \item traduction des statuts et ajout de badges colorés ;
+  \item correction de la grille des photos ;
+  \item suppression du bouton de correction des anomalies côté fournisseur, conformément au flux retenu.
+\end{itemize}
+
+Les tests responsive ont été effectués aux largeurs 1440 px, 1024 px et 390 px. Après corrections, aucune page ne présente de débordement horizontal.
+
+Les éléments restant à améliorer sont principalement l'alignement typographique exact avec la maquette Figma, les filtres et la pagination des listes, ainsi que l'enrichissement des tableaux de bord.
+
+\subsection{Limites des tests}
+
+Les tests sont principalement manuels et fonctionnels. La version Alpha ne dispose pas encore de tests unitaires automatisés pour la tarification et la génération de facture. Ces tests pourraient être ajoutés dans une version ultérieure.

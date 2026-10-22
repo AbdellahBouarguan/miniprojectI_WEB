@@ -12,7 +12,6 @@ $basePath = ($basePath === '/' || $basePath === '.') ? '' : rtrim($basePath, '/'
 
 define('BASE_URL', $basePath . '/');
 define('TVA_RATE', 18.00);
-define('TAUX_ANOMALIE', 0.40);
 define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024);
 define('UPLOAD_DIR', ROOT . 'uploads/compteurs/');
 define('UPLOAD_URL', BASE_URL . 'uploads/compteurs/');
@@ -101,26 +100,6 @@ function format_nombre(float $valeur, int $decimales = 2): string
     }
 
     return $texte === '' ? '0' : $texte;
-}
-
-/**
- * Seuil de vigilance exprime en index.
- * La maquette applique +40 % par rapport a l'index precedent,
- * avec le seuil du fournisseur comme plancher.
- */
-function seuil_effectif(float $seuilFournisseur, ?float $indexPrecedent): float
-{
-    if ($indexPrecedent === null) {
-        return round(max(0.0, $seuilFournisseur), 2);
-    }
-
-    return round(
-        max(
-            $seuilFournisseur,
-            $indexPrecedent * (1 + TAUX_ANOMALIE)
-        ),
-        2
-    );
 }
 
 function icon(string $name, string $class = 'icon'): string

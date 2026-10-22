@@ -1,36 +1,131 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[10pt,a4paper]{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+\else
+  \usepackage{fontspec}
+\fi
+
 \usepackage[french]{babel}
 \usepackage{geometry}
+\geometry{margin=2.2cm}
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
 \usepackage{hyperref}
 
-\geometry{margin=2.5cm}
-
-\title{Mini Projet 1 - Version Alpha\\Gestion des factures d'eau et d'electricite}
-\author{
-  Abdellah Bouarguan\\
-  Nafisa El Younoussi\\
-  Reda Zakaria\\
-  Nizar Ben Yacoub\\
-  Aymen Ouggourni
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!60!black,
+  citecolor=blue!50!black,
+  pdftitle={Gestion des factures d'eau et d'electricite - Version Alpha},
+  pdfauthor={Abdellah Bouarguan, Nafisa El Younoussi, Reda Zakaria, Nizar Ben Yacoub, Aymen Ouggourni}
 }
-\date{2026--2027}
+
+\setlength{\parskip}{0.2em}
+\setlength{\headheight}{14pt}
+\renewcommand{\refname}{Bibliographie}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small AquaVolt}
+\fancyhead[R]{\small Version Alpha}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}[hang]
+  {\bfseries\Large\color{blue!45!black}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{-4pt}{14pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{red!60!black},
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b
+}
+
+\newcommand{\projecttitle}{Gestion des factures d'eau et d'électricité}
+\newcommand{\projectversion}{Version Alpha}
+\newcommand{\projectname}{AquaVolt}
 
 \begin{document}
 
-\maketitle
-\tableofcontents
-\newpage
+\begin{titlepage}
+  \centering
+  {\large École Nationale des Sciences Appliquées de Tétouan\par}
+  {\large Filière : Génie Informatique\par}
+  \vspace{2.2cm}
 
-\input{sections/00_intro}
-\input{sections/01_setup}
-\input{sections/02_clients}
-\input{sections/03_consommation}
-\input{sections/04_facturation}
-\input{sections/05_tests}
-\input{sections/06_conclusion}
+  {\Huge\bfseries \projecttitle\par}
+  \vspace{0.5cm}
+  {\LARGE \projectversion\par}
+  \vspace{0.3cm}
+  {\large Mini Projet 1 -- \projectname\par}
+
+  \vspace{2.2cm}
+  {\large Réalisé par :\par}
+  \vspace{0.3cm}
+  {\large
+    Abdellah Bouarguan\\
+    Nafisa El Younoussi\\
+    Reda Zakaria\\
+    Nizar Ben Yacoub\\
+    Aymen Ouggourni\par
+  }
+
+  \vfill
+  {\large Encadrant : Mohammed AL ACHHAB\par}
+  \vspace{0.3cm}
+  {\large Année universitaire : 2026--2027\par}
+  {\large Date de remise : 22/10/2026\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\input{sections/00_remerciements}
+\input{sections/01_resume}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/02_introduction}
+\clearpage
+\input{sections/03_presentation}
+\input{sections/04_besoins}
+\input{sections/05_architecture}
+\input{sections/06_basededonnees}
+\input{sections/07_clients}
+\input{sections/08_consommation}
+\input{sections/09_facturation}
+\input{sections/10_securite}
+\input{sections/11_tests}
+\input{sections/12_bilan}
+\input{sections/13_conclusion}
+\input{sections/14_bibliographie}
+\input{sections/15_glossaire}
+\input{sections/16_annexes}
 
 \end{document}
