@@ -3,7 +3,7 @@
 ## Depot
 
 - URL : https://github.com/AbdellahBouarguan/miniprojectI_WEB
-- Visibilite : privee
+- Visibilite : publique
 - Branche principale : `main`
 
 ```bash
@@ -25,16 +25,17 @@ Chaque membre doit accepter l'invitation recue par email ou sur GitHub.
 
 ## Protection de main
 
-La protection de branche GitHub n'est pas disponible sur un depot prive gratuit.
-Regle d'equipe : aucun push direct sur `main`, une branche par tache et une Pull Request par branche.
+Le depot est public : la protection de branche GitHub peut etre activee.
 
-Si le depot devient public ou passe en GitHub Pro, activer :
+Configuration recommandee :
 
 - Require a pull request before merging
 - Require approvals : 1
 - Dismiss stale pull request approvals
 - Require conversation resolution
 - Interdire le push direct sur `main`
+
+Regle d'equipe : aucun push direct sur `main`, une branche par tache et une Pull Request par branche.
 
 ## Labels
 

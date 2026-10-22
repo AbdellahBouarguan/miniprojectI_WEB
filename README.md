@@ -156,5 +156,6 @@ git clone https://github.com/AbdellahBouarguan/miniprojectI_WEB.git
 - Une Pull Request par branche.
 - Au moins une approbation avant merge.
 - Merge en `Squash and merge`, puis supprimer la branche.
-- Le depot est prive. La protection de branche GitHub necessite GitHub Pro ou un depot public.
+- Le depot est public.
 - Regle d'equipe : aucun push direct sur `main`.
+- La protection de branche GitHub peut etre activee sur un depot public.
