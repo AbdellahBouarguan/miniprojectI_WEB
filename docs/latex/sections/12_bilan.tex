@@ -1,0 +1,71 @@
+\section{Bilan et perspectives}
+
+\subsection{Difficultés rencontrées}
+
+Plusieurs difficultés ont été rencontrées durant le projet :
+
+\begin{itemize}[leftmargin=*]
+  \item problèmes de routage et d'URL de base entre le serveur PHP intégré et Apache ;
+  \item coexistence de connexions PDO et mysqli dans le projet ;
+  \item fonctions déclarées plusieurs fois lors de la fusion des branches ;
+  \item vues manquantes ou incomplètes au moment de l'intégration ;
+  \item base de données initialement vide et absence de données de démonstration ;
+  \item harmonisation des seuils de vigilance et de la règle d'anomalie ;
+  \item génération réelle des factures à finaliser après la phase de simulation ;
+  \item corrections de mise en page et de responsive sur les formulaires et les tableaux ;
+  \item gestion des conflits Git entre les branches de travail.
+\end{itemize}
+
+Ces difficultés ont été traitées progressivement par la correction du routage, l'organisation des fichiers, la stabilisation des branches, la reprise des données de départ et la réalisation de tests de bout en bout.
+
+\subsection{Compétences acquises}
+
+Le projet a permis de mobiliser et de renforcer les compétences suivantes :
+
+\begin{itemize}[leftmargin=*]
+  \item développement web avec PHP 8 ;
+  \item conception d'une application selon l'architecture MVC ;
+  \item modélisation et manipulation d'une base MariaDB ;
+  \item utilisation de PDO et mysqli avec requêtes préparées ;
+  \item gestion des sessions, des rôles et du contrôle d'accès ;
+  \item validation de formulaires et protection CSRF ;
+  \item téléversement sécurisé de fichiers ;
+  \item transactions SQL et contraintes d'intégrité ;
+  \item calcul de tranches tarifaires et de TVA ;
+  \item conception d'interfaces HTML/CSS responsive ;
+  \item utilisation de Git, GitHub, des branches et des Pull Requests ;
+  \item rédaction d'une documentation technique et d'un rapport LaTeX.
+\end{itemize}
+
+\subsection{Limites de la version Alpha}
+
+La version Alpha est fonctionnelle sur les trois modules principaux, mais elle présente les limites suivantes :
+
+\begin{itemize}[leftmargin=*]
+  \item pas d'enregistrement de paiement ni de passage automatique à l'état \texttt{PAYEE} ;
+  \item pas d'export PDF des factures ;
+  \item pas de réclamations ;
+  \item pas d'import annuel ni de gestion de l'acteur Agent ;
+  \item pas de tableau de bord avancé avec graphiques ;
+  \item pas de filtres ni de pagination sur les listes ;
+  \item pas de notifications par e-mail ;
+  \item pas d'inscription autonome ni de réinitialisation de mot de passe ;
+  \item pas de gestion multi-fournisseurs dans l'interface ;
+  \item pas de tests unitaires automatisés.
+\end{itemize}
+
+\subsection{Perspectives d'amélioration}
+
+Les évolutions envisagées sont les suivantes :
+
+\begin{enumerate}[leftmargin=*]
+  \item ajouter l'enregistrement des paiements et le passage des factures à l'état \texttt{PAYEE} ;
+  \item générer un PDF téléchargeable pour chaque facture ;
+  \item ajouter des filtres par période et par état, ainsi que la pagination ;
+  \item mettre en place des notifications par e-mail ;
+  \item implémenter les réclamations et leur traitement ;
+  \item implémenter l'import annuel des consommations et l'espace Agent ;
+  \item enrichir le tableau de bord avec des indicateurs et des graphiques ;
+  \item ajouter des tests unitaires et des tests de non-régression ;
+  \item aligner plus finement l'interface sur la maquette Figma.
+\end{enumerate}

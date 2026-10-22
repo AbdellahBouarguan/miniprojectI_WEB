@@ -1,0 +1,22 @@
+\section{Sécurité et qualité}
+
+Plusieurs mécanismes ont été intégrés pour renforcer la sécurité et la cohérence de l'application :
+
+\begin{itemize}[leftmargin=*]
+  \item utilisation de requêtes préparées avec PDO ou mysqli ;
+  \item hachage des mots de passe avec \texttt{password\_hash()} et vérification avec \texttt{password\_verify()} ;
+  \item régénération de l'identifiant de session après connexion ;
+  \item contrôle du rôle avant l'accès aux pages protégées ;
+  \item vérification de l'appartenance des consommations et factures au client connecté ;
+  \item protection CSRF des formulaires sensibles ;
+  \item échappement du contenu HTML avec \texttt{htmlspecialchars()} ;
+  \item validation des champs côté serveur ;
+  \item contrôle du type MIME réel des photos avec \texttt{finfo} ;
+  \item génération de noms de fichiers aléatoires ;
+  \item limitation de l'exécution PHP dans le dossier des uploads ;
+  \item utilisation de transactions SQL pour les opérations multiples ;
+  \item contraintes d'unicité et clés étrangères dans la base ;
+  \item suppression des scripts de connexion de démonstration.
+\end{itemize}
+
+Ces mécanismes limitent les erreurs de saisie, les accès non autorisés et les incohérences de données. La version Alpha ne met pas encore en place de limitation du nombre de tentatives de connexion, de vérification d'adresse email ni de réinitialisation de mot de passe.

@@ -182,7 +182,7 @@ final class AnomalieBD
 
         $ligne['index_precedent'] = $indexPrecedent;
         $ligne['index_saisi'] = $indexSaisi;
-        $ligne['seuil'] = seuil_effectif($seuilBase, $indexPrecedent);
+        $ligne['seuil'] = round($seuilBase, 2);
     }
 
     private function indexPrecedent(

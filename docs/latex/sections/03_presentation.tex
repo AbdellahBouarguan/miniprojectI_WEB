@@ -1,0 +1,132 @@
+\section{Présentation du projet}
+
+\subsection{Contexte}
+
+Le suivi des consommations d'eau et d'électricité nécessite la relève mensuelle des index des compteurs. Une saisie incorrecte peut entraîner des écarts importants et conduire à une facturation erronée. Le fournisseur doit donc disposer d'un outil fiable pour enregistrer les relevés, conserver les photos justificatives, détecter les valeurs incohérentes et préparer les factures.
+
+L'application \projectname{} propose une plateforme centralisée permettant au client de saisir ses index et au fournisseur de gérer les abonnés, de contrôler les anomalies et de consulter les factures.
+
+\subsection{Problématique}
+
+La problématique principale consiste à garantir la fiabilité des consommations déclarées et à organiser leur validation avant la facturation. L'application doit notamment répondre aux questions suivantes :
+
+\begin{itemize}[leftmargin=*]
+  \item comment enregistrer les index mensuels des compteurs ?
+  \item comment vérifier la cohérence des valeurs saisies ?
+  \item comment conserver les photos des compteurs ?
+  \item comment permettre la correction des relevés incorrects ?
+  \item comment générer et consulter les factures de manière fiable ?
+\end{itemize}
+
+\subsection{Objectifs}
+
+Les objectifs de la version Alpha sont les suivants :
+
+\begin{itemize}[leftmargin=*]
+  \item authentifier les clients et le fournisseur ;
+  \item gérer les clients : ajout, modification, recherche et consultation ;
+  \item permettre la saisie mensuelle des index d'eau et d'électricité ;
+  \item téléverser et conserver les photos des compteurs ;
+  \item détecter les anomalies de saisie et proposer un flux de confirmation ou de correction ;
+  \item calculer les montants selon les tranches tarifaires et la TVA ;
+  \item générer automatiquement les factures et permettre leur consultation ;
+  \item contrôler l'accès aux données selon le rôle connecté.
+\end{itemize}
+
+\subsection{Périmètre de la version Alpha}
+
+\begin{table}[H]
+\centering
+\caption{Fonctionnalités incluses et exclues de la version Alpha}
+\label{tab:perimetre}
+\begin{tabular}{p{0.46\textwidth}p{0.46\textwidth}}
+\toprule
+\textbf{Inclus dans l'Alpha} & \textbf{Exclu de l'Alpha} \\
+\midrule
+Authentification client et fournisseur & Inscription autonome du client \\
+Gestion des clients & Gestion multi-fournisseurs \\
+Saisie des consommations & Import annuel des consommations \\
+Téléversement des photos & Réclamations \\
+Détection et confirmation des anomalies & Paiements \\
+Génération automatique des factures & Export PDF des factures \\
+Consultation des factures & Notifications par e-mail \\
+Contrôle d'accès par rôle & Tableau de bord avancé \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Acteurs du système}
+
+Deux acteurs interviennent dans la version Alpha :
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Client} : il se connecte, consulte son tableau de bord, saisit ses index mensuels, téléverse les photos de ses compteurs, confirme ou corrige une anomalie et consulte ses factures.
+  \item \textbf{Fournisseur} : il se connecte, gère les clients, consulte les anomalies et les factures de ses abonnés.
+\end{itemize}
+
+L'acteur \textit{Agent}, chargé de l'import annuel, est prévu dans la conception mais n'est pas implémenté dans l'Alpha.
+
+\subsection{Déroulement du projet et réunions}
+
+Le projet a été mené à travers plusieurs réunions de conception et d'implémentation. Les dates et durées sont récapitulées dans le tableau~\ref{tab:reunions}. Toutes les réunions ont réuni l'ensemble de l'équipe.
+
+\begin{longtable}{p{0.15\textwidth}p{0.12\textwidth}p{0.17\textwidth}p{0.46\textwidth}}
+\caption{Réunions de travail du projet}\label{tab:reunions}\\
+\toprule
+\textbf{Date} & \textbf{Durée} & \textbf{Canal} & \textbf{Objet} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Date} & \textbf{Durée} & \textbf{Canal} & \textbf{Objet} \\
+\midrule
+\endhead
+10/10/2026 & 2 h & Google Meet & Analyse de l'énoncé et attribution du diagramme de cas d'utilisation. \\
+11/10/2026 & 2 h & Google Meet & Revue du diagramme de cas d'utilisation et des approches de diagrammes de séquence. \\
+12/10/2026 & 4 h & Présentiel & Critique croisée des diagrammes, maquettes et schéma entité-relation. \\
+14/10/2026 & 3 h & Présentiel & Validation de la conception et démarrage de la rédaction du rapport. \\
+16/10/2026 & 2 h & Présentiel & Réunion de validation de la conception et du rapport. \\
+18/10/2026 & 2 h & Google Meet & Lancement de l'implémentation de la version Alpha. \\
+19/10/2026 & 30 min & Google Meet & Revue de code et intégration des branches. \\
+20/10/2026 & 1 h & Google Meet & Intégration des modules clients et consommation. \\
+21/10/2026 & 2 h & Google Meet & Finalisation des factures et tests de bout en bout. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Planning d'implémentation}
+
+\begin{table}[H]
+\centering
+\caption{Planning d'implémentation sur quatre jours}
+\label{tab:planning}
+\small
+\begin{tabular}{p{0.08\textwidth}p{0.48\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Jour} & \textbf{Objectif principal} & \textbf{Livrable} \\
+\midrule
+J1 & Dépôt Git, structure du projet, schéma SQL, routeur et layout. & Application qui démarre et base créée. \\
+J2 & Authentification, gestion des clients, validation et CSRF. & Connexion et CRUD clients fonctionnels. \\
+J3 & Saisie des consommations, photos, anomalies et facturation. & Flux saisie $\rightarrow$ anomalie $\rightarrow$ facture. \\
+J4 & Intégration, tests, corrections UI, documentation et release. & Version Alpha stable et documentée. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Répartition des tâches}
+
+\begin{table}[H]
+\centering
+\caption{Répartition des tâches entre les membres}
+\label{tab:taches}
+\small
+\begin{tabular}{p{0.20\textwidth}p{0.26\textwidth}p{0.46\textwidth}}
+\toprule
+\textbf{Membre} & \textbf{Rôle principal} & \textbf{Contribution} \\
+\midrule
+Abdellah Bouarguan & Coordination, architecture, Git & Modèle de données, SQL, structure, intégration, facturation, corrections UI et documentation. \\
+Nafisa El Younoussi & Conception et interface & Travail conjoint sur l'authentification, la consommation, les anomalies, l'interface et le rapport. \\
+Reda Zakaria & Gestion des clients & Modèle \texttt{ClientBD}, contrôleur client, vues, validation et recherche. \\
+Nizar Ben Yacoub & Conception et développement & Travail conjoint sur l'authentification, la consommation, les anomalies, l'interface et le rapport. \\
+Aymen Ouggourni & Conception et documentation & Diagrammes de séquence, participation aux vues et tests de facturation, vérifications et rapport. \\
+\bottomrule
+\end{tabular}
+\end{table}
