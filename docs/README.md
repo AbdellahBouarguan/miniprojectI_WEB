@@ -9,6 +9,7 @@ docs/
 │   ├── diagrams/        Diagrammes de sequence PlantUML, PNG et SVG
 │   └── msd/             Modele de donnees : msd.puml, msd.png, msd.svg
 ├── latex/               Rapport LaTeX du projet
+├── presentation/        Presentation du sprint final (Markdown, HTML, PDF)
 └── reunions/            Comptes rendus des reunions
 ```
 
@@ -47,6 +48,16 @@ docs/latex/rapport_mini_projet_1_alpha.pdf
 
 Chaque partie du rapport est rédigée dans un fichier distinct de `docs/latex/sections/`.
 Les captures desktop sont dans `docs/latex/figures/`.
+
+## Présentation du sprint final
+
+La présentation de préparation du sprint final est dans `docs/presentation/`.
+
+| Fichier | Usage |
+|---|---|
+| `sprint_final_5_jours.md` | Version détaillée avec les guides par membre |
+| `sprint_final_5_jours.pdf` | Version projetable, 22 slides 16:9 |
+| `sprint_final_5_jours.html` | Source HTML du PDF |
 
 ## Comptes rendus
 

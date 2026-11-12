@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sprint final 5 jours — Présentation</title>
+<style>
+  :root{
+    --navy:#0b2a4a;
+    --blue:#0b6bcb;
+    --cyan:#38bdf8;
+    --yellow:#f7b500;
+    --ink:#0f172a;
+    --muted:#475569;
+    --line:#dbe4ef;
+    --bg:#f8fafc;
+    --green:#0f766e;
+    --red:#b91c1c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:"DejaVu Sans",Arial,sans-serif;color:var(--ink);background:#fff}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;counter-reset:slide}
+  .slide{
+    width:13.333in;height:7.5in;padding:0.48in 0.62in 0.42in;position:relative;
+    page-break-after:always;overflow:hidden;background:#fff;counter-increment:slide;
+  }
+  .slide:last-child{page-break-after:auto}
+  .slide::after{
+    content:counter(slide);
+    position:absolute;right:0.55in;bottom:0.22in;font-size:9pt;color:#94a3b8;
+  }
+  .dark{background:linear-gradient(135deg,#06182b 0%,#0b2a4a 55%,#0b3d6e 100%);color:#fff}
+  .dark::after{color:#9cc9ff}
+  .kicker{font-size:10pt;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:700;margin:0 0 .07in}
+  .dark .kicker{color:var(--cyan)}
+  h1{font-size:40pt;line-height:1.04;margin:.12in 0 .18in;letter-spacing:-.02em}
+  h2{font-size:27pt;line-height:1.1;margin:.02in 0 .1in;color:var(--navy);letter-spacing:-.01em}
+  h3{font-size:14pt;margin:.12in 0 .05in;color:var(--navy)}
+  p{font-size:12.5pt;line-height:1.32;margin:.06in 0;color:var(--muted)}
+  .lead{font-size:14pt;color:#334155;margin:.02in 0 .18in}
+  .dark p{color:#dbeafe}
+  .accent{color:var(--yellow)}
+  .subtitle{font-size:18pt;color:#cfe7ff;margin:.1in 0 .2in}
+  .meta{font-size:11.5pt;color:#bfdbfe;line-height:1.5}
+  .tag{display:inline-block;background:#e0f2fe;color:#075985;border-radius:999px;padding:.05in .14in;font-size:10pt;font-weight:700;margin:0 .06in .06in 0}
+  .tag.yellow{background:#fff3cd;color:#7c4a00}
+  .tag.green{background:#dcfce7;color:#166534}
+  .tag.red{background:#fee2e2;color:#991b1b}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:.16in}
+  .cards.three{grid-template-columns:1fr 1fr 1fr}
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.14in .17in}
+  .card h3{margin:.01in 0 .04in;font-size:12.5pt}
+  .card p{font-size:10.8pt;line-height:1.28;margin:.02in 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:.32in}
+  .cols.wide{grid-template-columns:1.15fr .85fr}
+  .callout{background:#fff8e6;border-left:5px solid var(--yellow);padding:.12in .17in;font-size:11.5pt;line-height:1.3;color:#3b2f00;margin-top:.16in}
+  .callout.blue{background:#eff6ff;border-left-color:var(--blue);color:#0c2d57}
+  .callout.red{background:#fef2f2;border-left-color:var(--red);color:#4c0519}
+  table{width:100%;border-collapse:collapse;font-size:10.5pt;line-height:1.22;margin-top:.08in}
+  th{background:#eef4fb;color:var(--navy);text-align:left;padding:.055in .08in;border-bottom:1px solid #bcd0e6;font-size:10pt}
+  td{padding:.045in .08in;border-bottom:1px solid #e2e8f0;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .small{font-size:9.6pt;color:#64748b}
+  .check{list-style:none;padding:0;margin:.04in 0}
+  .check li{font-size:10.7pt;line-height:1.3;margin:.045in 0;padding-left:.24in;position:relative}
+  .check li::before{content:"□";position:absolute;left:0;top:-.01in;color:var(--blue);font-size:12pt}
+  .flow{display:flex;align-items:center;gap:.08in;flex-wrap:wrap;margin:.12in 0}
+  .flow .step{background:#eef4fb;border:1px solid #bcd0e6;border-radius:8px;padding:.1in .14in;font-size:10.5pt;font-weight:700;color:var(--navy)}
+  .flow .arrow{font-size:16pt;color:var(--blue)}
+  .big{font-size:30pt;font-weight:800;color:var(--navy);line-height:1}
+  .muted{color:var(--muted)}
+  .dark .muted{color:#bfdbfe}
+  .footer-line{position:absolute;left:.62in;right:.62in;bottom:.18in;border-top:1px solid #e2e8f0;font-size:9pt;color:#94a3b8;padding-top:.04in}
+  .dark .footer-line{border-top-color:#1e4b7a;color:#9cc9ff}
+  .pill-row{display:flex;gap:.08in;flex-wrap:wrap;margin:.06in 0 .12in}
+  .pill{background:#eef4fb;color:#0b2a4a;border-radius:999px;padding:.05in .12in;font-size:9.5pt;font-weight:700}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:.28in;height:.28in;border-radius:50%;background:var(--blue);color:#fff;font-size:11pt;font-weight:800;margin-right:.08in}
+  .dark .num{background:var(--yellow);color:#1f2937}
+  .slide-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:.2in}
+  .slide-title-row .badge{font-size:9.5pt;color:#64748b;white-space:nowrap;margin-top:.1in}
+  .dark .slide-title-row .badge{color:#bfdbfe}
+  .two-col-list{columns:2;column-gap:.3in}
+  .two-col-list li{break-inside:avoid}
+  .member-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:.28in}
+  .member-grid h3{margin-top:0}
+  .member-grid ul{margin:.04in 0 .08in .18in;padding:0}
+  .member-grid li{font-size:10.5pt;line-height:1.3;margin:.035in 0;color:#334155}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:.14in;margin:.12in 0}
+  .kpi .box{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:.12in .14in}
+  .kpi .n{font-size:22pt;font-weight:800;color:var(--navy);line-height:1}
+  .kpi .l{font-size:9.5pt;color:#64748b;margin-top:.04in}
+  .table-compact td,.table-compact th{padding-top:.035in;padding-bottom:.035in}
+  .nowrap{white-space:nowrap}
+  @page{size:13.333in 7.5in;margin:0}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide dark">
+  <div class="kicker">Réunion d’équipe — sprint final</div>
+  <h1>5 jours pour livrer<br><span class="accent">la version finale</span></h1>
+  <p class="subtitle">Application web de gestion des factures d’eau et d’électricité</p>
+  <div class="pill-row">
+    <span class="tag yellow">J1 → J5</span>
+    <span class="tag">5 membres</span>
+    <span class="tag green">Version finale + rapport + démo</span>
+    <span class="tag red">Feature freeze J3 18:00</span>
+  </div>
+  <div class="callout" style="background:#0f3b66;border-left-color:#38bdf8;color:#e0f2fe">
+    <strong>Objectif :</strong> compléter l’Alpha, intégrer les modules manquants, tester et livrer une version finale utilisable.<br>
+    <span style="color:#bfdbfe">Les libellés « Membre 1 à 5 » seront remplacés manuellement par les prénoms.</span>
+  </div>
+  <div class="footer-line">Présentation de préparation — document détaillé disponible dans <strong>docs/presentation/</strong></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="slide-title-row">
+    <div>
+      <div class="kicker">Objectif de la réunion</div>
+      <h2>Ce que nous devons décider aujourd’hui</h2>
+      <p class="lead">Une réunion de 45 minutes pour sortir avec un périmètre clair, des rôles attribués et un planning verrouillé.</p>
+    </div>
+    <div class="badge">45 min</div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Décisions</h3>
+      <ul class="check">
+        <li>Valider le périmètre des 5 jours.</li>
+        <li>Trancher le flux des anomalies.</li>
+        <li>Valider : notifications internes, paiement total, Agent séparé.</li>
+        <li>Attribuer les 5 rôles.</li>
+        <li>Fixer le freeze J3 18:00.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Ordre du jour</h3>
+      <table class="table-compact">
+        <tr><th>Durée</th><th>Sujet</th></tr>
+        <tr><td>5 min</td><td>Contexte et objectif</td></tr>
+        <tr><td>10 min</td><td>Ce qui est déjà fait</td></tr>
+        <tr><td>10 min</td><td>Ce qui reste et priorités</td></tr>
+        <tr><td>10 min</td><td>Planning et répartition</td></tr>
+        <tr><td>5 min</td><td>Risques et replis</td></tr>
+        <tr><td>5 min</td><td>Décisions à voter</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="callout blue"><strong>Message clé :</strong> à la fin de la réunion, chacun doit savoir ce qu’il fait demain matin, sur quels fichiers, avec quel critère d’acceptation.</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">État actuel</div>
+  <h2>Ce que nous avons déjà fait</h2>
+  <p class="lead">Une Alpha stable couvre le socle métier : clients, consommations, photos, anomalies et factures.</p>
+  <div class="kpi">
+    <div class="box"><div class="n">7</div><div class="l">tables SQL</div></div>
+    <div class="box"><div class="n">3</div><div class="l">modules métier</div></div>
+    <div class="box"><div class="n">28</div><div class="l">pages de rapport</div></div>
+    <div class="box"><div class="n">3</div><div class="l">PR mergées</div></div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Fonctionnel</h3>
+      <ul class="check">
+        <li>Authentification client / fournisseur.</li>
+        <li>Gestion des clients : ajout, modification, recherche.</li>
+        <li>Saisie des consommations + photos.</li>
+        <li>Affichage du relevé précédent : valeur + photo.</li>
+        <li>Détection index inférieur / seuil fournisseur.</li>
+        <li>Facture : tranches, TVA 18 %, HT / TVA / TTC.</li>
+        <li>Consultation des factures et contrôle d’accès.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Référence validée</h3>
+      <div class="card">
+        <p><strong>25 m³ d’eau + 200 kWh</strong></p>
+        <p>HT = <strong>355,58 DH</strong></p>
+        <p>TVA = <strong>64,00 DH</strong></p>
+        <p>TTC = <strong>419,58 DH</strong></p>
+      </div>
+      <div class="callout"><strong>Message clé :</strong> nous ne repartons pas de zéro. Le socle est déjà là.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Écart avec l’énoncé</div>
+  <h2>Ce qui reste à faire</h2>
+  <table>
+    <tr><th>Exigence</th><th>État</th><th>Reste à faire</th></tr>
+    <tr><td>Client consulte ses factures</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Saisie des consommations + photos</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Mois précédent affiché</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Facture automatique sans anomalie</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Facture complète : numéro, date, période, client, consommations, HT/TVA/TTC, photos</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Fournisseur gère les clients</td><td><span class="tag green">Fait</span></td><td>—</td></tr>
+    <tr><td>Fournisseur traite les anomalies</td><td><span class="tag yellow">Partiel</span></td><td>Correction fournisseur + facture après correction</td></tr>
+    <tr><td>Réclamations client</td><td><span class="tag red">Manquant</span></td><td>Module complet</td></tr>
+    <tr><td>Traitement des réclamations + notification</td><td><span class="tag red">Manquant</span></td><td>Module complet</td></tr>
+    <tr><td>Paiement d’une facture</td><td><span class="tag red">Manquant</span></td><td>Module complet</td></tr>
+    <tr><td>Dashboard : impayés + évolution</td><td><span class="tag yellow">Partiel</span></td><td>Requêtes + graphique</td></tr>
+    <tr><td>Import annuel par Agent</td><td><span class="tag red">Manquant</span></td><td>Module complet</td></tr>
+    <tr><td>Vérification annuelle</td><td><span class="tag red">Manquant</span></td><td>Page fournisseur</td></tr>
+    <tr><td>Notifications client</td><td><span class="tag red">Manquant</span></td><td>Table + cloche + événements</td></tr>
+  </table>
+  <div class="callout red"><strong>Il reste 5 blocs :</strong> anomalies, réclamations, paiements, import/Agent, dashboard/notifications.</div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">Périmètre du sprint</div>
+  <h2>Ce que l’on fait — et ce que l’on ne fait pas</h2>
+  <div class="cards three">
+    <div class="card">
+      <h3 style="color:var(--red)">P0 — obligatoire</h3>
+      <ul class="check">
+        <li>Anomalies : correction + facture.</li>
+        <li>Réclamations client + traitement.</li>
+        <li>Paiement total d’une facture.</li>
+        <li>Dashboard impayés + évolution.</li>
+        <li>Agent + import annuel.</li>
+        <li>Vérification annuelle.</li>
+        <li>Notifications internes.</li>
+        <li>Rapport final.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#a16207">P1 — si avance</h3>
+      <ul class="check">
+        <li>Pièce jointe réclamation.</li>
+        <li>Filtres et pagination.</li>
+        <li>Notification e-mail.</li>
+        <li>Impression / export PDF.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#475569">P2 — reporté</h3>
+      <ul class="check">
+        <li>Paiements partiels.</li>
+        <li>Multi-fournisseurs.</li>
+        <li>Dashboard avancé.</li>
+        <li>Réinitialisation mot de passe.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout"><strong>Règle :</strong> on livre d’abord tout le P0. Le P1 n’est pas bloquant. Le P2 est abandonné pour cette version.</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Planning</div>
+  <h2>J1 → J5 : objectifs et livrables</h2>
+  <table>
+    <tr><th>Jour</th><th>Objectif principal</th><th>Résultat attendu</th><th>Point de contrôle</th></tr>
+    <tr><td><strong>J1</strong></td><td>Décisions, schéma, auth Agent, démarrage modules</td><td>Base cible + login Agent + branches prêtes</td><td>18:00 : schéma et auth Agent OK</td></tr>
+    <tr><td><strong>J2</strong></td><td>Backend et écrans des modules</td><td>Réclamations, paiements, import : première version</td><td>18:00 : chaque module démarre</td></tr>
+    <tr><td><strong>J3</strong></td><td>Intégration, notifications, dashboard, vérification</td><td>Parcours complet utilisable</td><td><strong>18:00 : feature freeze</strong></td></tr>
+    <tr><td><strong>J4</strong></td><td>Tests, corrections, captures, documentation</td><td>Checklist validée + captures</td><td>18:00 : zéro bloquant</td></tr>
+    <tr><td><strong>J5</strong></td><td>Rapport final, release, démo</td><td>PDF final + tag <code>v1.0-final</code></td><td>16:00 : démo répétée</td></tr>
+  </table>
+  <div class="callout red"><strong>Règle d’or :</strong> J3 18:00, on arrête les fonctionnalités. J4 = corrections. J5 = documentation et démonstration.</div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Organisation</div>
+  <h2>Qui fait quoi</h2>
+  <table>
+    <tr><th>Membre</th><th>Rôle</th><th>Modules principaux</th><th>Review</th></tr>
+    <tr><td><strong>Membre 1</strong></td><td>Socle, base, Agent, intégration</td><td>Schéma SQL, seed, auth Agent, navigation, merge</td><td>Membre 5</td></tr>
+    <tr><td><strong>Membre 2</strong></td><td>Réclamations et notifications</td><td>Dépôt, traitement, statuts, cloche</td><td>Membre 3</td></tr>
+    <tr><td><strong>Membre 3</strong></td><td>Paiements et dashboard</td><td>Paiement, état <code>PAYEE</code>, impayés, graphique</td><td>Membre 2</td></tr>
+    <tr><td><strong>Membre 4</strong></td><td>Import annuel et vérification</td><td>Fichier Agent, parsing, rapport, écarts</td><td>Membre 1</td></tr>
+    <tr><td><strong>Membre 5</strong></td><td>Anomalies, facturation, QA, rapport</td><td>Flux anomalies, facture après correction, tests, PDF</td><td>Membre 1</td></tr>
+  </table>
+  <div class="callout blue"><strong>Principe :</strong> un propriétaire unique par module. Les autres ne modifient pas ses fichiers sans accord.</div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Membre 1</div>
+  <h2>Socle, base de données, Agent et intégration</h2>
+  <div class="member-grid">
+    <div>
+      <h3>J1 — Base et Agent</h3>
+      <ul>
+        <li>Figer le schéma cible : <strong>12 tables</strong>.</li>
+        <li>Créer les migrations : <code>agent</code>, <code>conso_annuelle</code>, <code>reclamation</code>, <code>paiement</code>, <code>notification</code>.</li>
+        <li>Ajouter le rôle <code>agent</code> dans <code>Traitement/Auth.php</code>.</li>
+        <li>Session <code>id_agent</code> + redirection espace Agent.</li>
+        <li>Mettre à jour <code>index.php</code> avec les nouveaux contrôleurs.</li>
+      </ul>
+      <h3>J2 — Intégration</h3>
+      <ul>
+        <li>Fusionner les DDL dans <code>sql/schema.sql</code>.</li>
+        <li>Mettre à jour <code>sql/seed.sql</code> + Agent de démo.</li>
+        <li>Préparer les routes et la navigation.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>J3 → J5</h3>
+      <ul>
+        <li><strong>J3 :</strong> activer Réclamations, Paiements, Vérification, Agent ; merger les PR ; résoudre les conflits.</li>
+        <li><strong>J4 :</strong> reset base, login 3 rôles, <code>php -l</code>, 404 et accès interdits.</li>
+        <li><strong>J5 :</strong> tag <code>v1.0-final</code>, README, démo.</li>
+      </ul>
+      <h3>Critères d’acceptation</h3>
+      <ul class="check">
+        <li><code>schema.sql</code> et <code>seed.sql</code> s’importent.</li>
+        <li>Un Agent peut se connecter.</li>
+        <li>Un client ne peut pas accéder à l’Agent.</li>
+        <li>Toutes les routes sont protégées.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-line">Fichiers : sql/schema.sql · sql/seed.sql · sql/migrations/ · Traitement/Auth.php · IHM/layout/header.php · index.php · MSD</div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">Membre 2</div>
+  <h2>Réclamations et notifications</h2>
+  <div class="member-grid">
+    <div>
+      <h3>J1 — Base et écrans</h3>
+      <ul>
+        <li>Créer <code>reclamation</code> et <code>notification</code>.</li>
+        <li>Préparer les vues : dépôt client, liste client, liste fournisseur, détail.</li>
+      </ul>
+      <h3>J2 — Fonctionnel</h3>
+      <ul>
+        <li>Contrôleur <code>Traitement/Reclamation.php</code>.</li>
+        <li>Types : <code>FUITE_EXTERNE</code>, <code>FUITE_INTERNE</code>, <code>FACTURE</code>, <code>AUTRE</code>.</li>
+        <li>Description obligatoire pour <code>AUTRE</code>.</li>
+        <li>Lien vers une facture si type <code>FACTURE</code>.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>J3 — Traitement + notifications</h3>
+      <ul>
+        <li>Statuts : <code>OUVERTE</code>, <code>EN_COURS</code>, <code>RESOLUE</code>, <code>REJETEE</code>.</li>
+        <li>Réponse fournisseur.</li>
+        <li>Service <code>notification_creer(...)</code>.</li>
+        <li>Cloche + compteur non lu + marquage lu.</li>
+      </ul>
+      <h3>J4 → J5</h3>
+      <ul>
+        <li>Tests : 4 types, <code>AUTRE</code> vide refusé, accès, notification.</li>
+        <li>Capture + section rapport.</li>
+        <li>Buffer corrections.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-line">Fichiers : BD/Reclamation.php · BD/Notification.php · Traitement/Reclamation.php · IHM/reclamation/ · IHM/notification/</div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">Membre 3</div>
+  <h2>Paiements et tableau de bord</h2>
+  <div class="member-grid">
+    <div>
+      <h3>J1 — Base et requêtes</h3>
+      <ul>
+        <li>Créer <code>paiement</code> : <code>id_facture</code>, <code>montant</code>, <code>date_paiement</code>, <code>mode_paiement</code>, <code>reference</code>.</li>
+        <li><code>UNIQUE(id_facture)</code>.</li>
+        <li>Requêtes : total impayé, total encaissé, évolution mensuelle.</li>
+      </ul>
+      <h3>J2 — Paiement</h3>
+      <ul>
+        <li>Formulaire fournisseur : facture impayée, montant, date, mode.</li>
+        <li>Contrôles : existe, non payée, montant = TTC.</li>
+        <li>Transaction : paiement + passage à <code>PAYEE</code>.</li>
+        <li>Affichage du paiement sur la facture.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>J3 — Dashboard</h3>
+      <ul>
+        <li>Total impayé + total encaissé.</li>
+        <li>Évolution mensuelle eau / électricité.</li>
+        <li>Filtre par année.</li>
+        <li>Graphique CSS/SVG simple.</li>
+      </ul>
+      <h3>J4 → J5</h3>
+      <ul>
+        <li>Tests : paiement correct, double refusé, montant incorrect refusé, totaux.</li>
+        <li>Capture + section rapport.</li>
+        <li>Buffer corrections.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-line">Fichiers : BD/Paiement.php · Traitement/Paiement.php · IHM/paiement/ · IHM/home.php · sql/migrations/003_paiement.sql</div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">Membre 4</div>
+  <h2>Import annuel, Agent et vérification</h2>
+  <div class="member-grid">
+    <div>
+      <h3>J1 — Base et parser</h3>
+      <ul>
+        <li>Créer <code>conso_annuelle</code> : client, agent, eau, élec, année, date.</li>
+        <li><code>UNIQUE(id_client, annee)</code>.</li>
+        <li>Format : <code>ID_Client,ID_Agent,ConsommationEau,ConsommationElect,Annee,Date_Saisie</code>.</li>
+        <li>Valider l’entête + rejeter les lignes malformées.</li>
+      </ul>
+      <h3>J2 — Espace Agent</h3>
+      <ul>
+        <li>Upload <code>.txt</code>, vérifier le client.</li>
+        <li>Ignorer les doublons.</li>
+        <li>Rapport : insérés / ignorés / rejetés.</li>
+        <li>Fichier d’exemple.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>J3 — Vérification annuelle</h3>
+      <ul>
+        <li>Page fournisseur + choix de l’année.</li>
+        <li>Comparaison mensuel vs annuel.</li>
+        <li>Écarts par client.</li>
+        <li>Notification via le service du Membre 2.</li>
+      </ul>
+      <h3>J4 → J5</h3>
+      <ul>
+        <li>Tests : fichier valide, entête invalide, ligne malformée, client inconnu, doublon.</li>
+        <li>Capture + section rapport.</li>
+        <li>Buffer corrections.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-line">Fichiers : BD/ConsoAnnuelle.php · Traitement/Import.php · Traitement/Verification.php · IHM/import/ · IHM/verification/</div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">Membre 5</div>
+  <h2>Anomalies, facturation, QA et rapport</h2>
+  <div class="member-grid">
+    <div>
+      <h3>J1 — Flux anomalies</h3>
+      <ul>
+        <li>Toute anomalie bloque la facture.</li>
+        <li>Correction obligatoire + correction fournisseur.</li>
+        <li>Revalidation + contrôle du seuil.</li>
+        <li>Corriger <code>AnomalieBD::corriger()</code>.</li>
+      </ul>
+      <h3>J2 — Facture après correction</h3>
+      <ul>
+        <li>Intégrer <code>FactureService</code>.</li>
+        <li>Transaction : correction + validation + facture.</li>
+        <li>Refuser une correction invalide.</li>
+        <li>Mettre à jour les vues.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>J3 → J5</h3>
+      <ul>
+        <li><strong>J3 :</strong> tests index inférieur, seuil, correction valide/invalide, doublon ; checklist.</li>
+        <li><strong>J4 :</strong> QA, <code>php -l</code>, reset, desktop/mobile, captures, sections rapport.</li>
+        <li><strong>J5 :</strong> compilation Tectonic, relecture, PDF final, démo.</li>
+      </ul>
+      <h3>Critères d’acceptation</h3>
+      <ul class="check">
+        <li>Aucune facture avant correction.</li>
+        <li>Correction valide = facture.</li>
+        <li>Pas de doublon.</li>
+        <li>PDF final compilé.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-line">Fichiers : Traitement/Anomalie.php · BD/AnomalieBD.php · Traitement/ConsommationTraitement.php · Traitement/FactureService.php · docs/latex/</div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">Dépendances</div>
+  <h2>Le chemin critique</h2>
+  <div class="flow">
+    <span class="step">J1 · schéma + auth Agent</span><span class="arrow">→</span>
+    <span class="step">J2 · modules backend</span><span class="arrow">→</span>
+    <span class="step">J3 · intégration</span><span class="arrow">→</span>
+    <span class="step">J4 · tests</span><span class="arrow">→</span>
+    <span class="step">J5 · rapport + release</span>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Dépendances fortes</h3>
+      <ul class="check">
+        <li>Membre 2 → schéma <code>reclamation</code> / <code>notification</code>.</li>
+        <li>Membre 3 → schéma <code>paiement</code>.</li>
+        <li>Membre 4 → schéma <code>conso_annuelle</code> + auth Agent.</li>
+        <li>Membre 5 → <code>FactureService</code> + décision anomalies.</li>
+        <li>Rapport → captures de J4.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Règle de déblocage</h3>
+      <div class="callout red">
+        Si le schéma n’est pas prêt <strong>J1 midi</strong>, toute l’équipe est bloquée.<br>
+        Le Membre 1 doit livrer le schéma avant <strong>12:00 J1</strong>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">Méthode</div>
+  <h2>Rythme, Git et qualité</h2>
+  <div class="cols">
+    <div>
+      <h3>Rythme quotidien</h3>
+      <table>
+        <tr><th>Heure</th><th>Action</th></tr>
+        <tr><td>09:00</td><td>Stand-up 15 min</td></tr>
+        <tr><td>13:00</td><td>Point d’intégration</td></tr>
+        <tr><td>18:00</td><td>Merge + démo rapide</td></tr>
+      </table>
+      <h3 style="margin-top:.18in">Règles Git</h3>
+      <ul class="check">
+        <li>Une branche par membre.</li>
+        <li>Une PR par module.</li>
+        <li>Review par un pair + Membre 1.</li>
+        <li>Pas de push direct sur <code>main</code>.</li>
+        <li><code>php -l</code> avant chaque PR.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Branches</h3>
+      <div class="card" style="font-size:9.8pt;line-height:1.45;font-family:monospace">
+        feat/final-socle<br>
+        feat/reclamations-notifications<br>
+        feat/paiements-dashboard<br>
+        feat/import-annuel<br>
+        feat/anomalies-final<br>
+        docs/final-report
+      </div>
+      <h3 style="margin-top:.18in">Qualité</h3>
+      <div class="card" style="font-size:9.4pt;line-height:1.45;font-family:monospace">
+        mysql -u root &lt; sql/schema.sql<br>
+        mysql -u root &lt; sql/seed.sql<br><br>
+        find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="kicker">Recette</div>
+  <h2>Tests et démonstration finale</h2>
+  <div class="cards three">
+    <div class="card">
+      <h3>Agent</h3>
+      <ul class="check">
+        <li>Connexion.</li>
+        <li>Import du fichier annuel.</li>
+        <li>Rapport d’import.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Fournisseur</h3>
+      <ul class="check">
+        <li>Dashboard impayés + évolution.</li>
+        <li>Client : ajout / modification.</li>
+        <li>Anomalie : correction.</li>
+        <li>Facture générée.</li>
+        <li>Paiement.</li>
+        <li>Vérification annuelle.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Client</h3>
+      <ul class="check">
+        <li>Consultation facture.</li>
+        <li>Dépôt réclamation.</li>
+        <li>Notification après traitement.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout blue"><strong>Contrôles :</strong> accès inter-role refusé · CSRF · upload invalide · montants HT/TVA/TTC · absence de doublon de facture · responsive desktop/mobile.</div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="kicker">Risques</div>
+  <h2>Ce qui peut nous faire rater J5</h2>
+  <table>
+    <tr><th>Risque</th><th>Plan de repli</th></tr>
+    <tr><td>Schéma en retard</td><td>Membre 1 livre les tables minimales J1 midi</td></tr>
+    <tr><td>Import trop long</td><td>Parser CSV strict, UI simple, rapport basique</td></tr>
+    <tr><td>Notifications trop longues</td><td>Notification interne uniquement, pas d’e-mail</td></tr>
+    <tr><td>Dashboard en retard</td><td>Total impayé + un seul graphique</td></tr>
+    <tr><td>Anomalies ambiguës</td><td>Appliquer strictement l’énoncé</td></tr>
+    <tr><td>Rapport trop long</td><td>Compresser les sections existantes</td></tr>
+    <tr><td>Conflits Git</td><td>Un propriétaire par fichier, PR petites</td></tr>
+    <tr><td>Retard global</td><td>P0 d’abord, P1 abandonné</td></tr>
+  </table>
+  <div class="callout red"><strong>Le risque principal n’est pas le code, c’est le périmètre.</strong> On protège les P0.</div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="kicker">Livraison</div>
+  <h2>Definition of Done</h2>
+  <div class="cols">
+    <div>
+      <ul class="check">
+        <li>12 tables créées et seedées.</li>
+        <li>Login Client / Fournisseur / Agent.</li>
+        <li>Anomalies : correction obligatoire + facture.</li>
+        <li>Réclamations : dépôt + traitement + notification.</li>
+        <li>Paiement : facture passée à <code>PAYEE</code>.</li>
+        <li>Dashboard : impayés + évolution.</li>
+      </ul>
+    </div>
+    <div>
+      <ul class="check">
+        <li>Import annuel + vérification.</li>
+        <li>Notifications internes.</li>
+        <li>Checklist de tests complète.</li>
+        <li>Rapport final compilé.</li>
+        <li>README à jour.</li>
+        <li>Tag <code>v1.0-final</code> + démo répétée.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout"><strong>Si une case n’est pas cochée, ce n’est pas une version finale.</strong></div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="kicker">Décisions</div>
+  <h2>À voter maintenant</h2>
+  <div class="cards">
+    <div class="card"><h3>1. Anomalies</h3><p><strong>Flux strict :</strong> toute anomalie impose une correction avant facture.</p><p class="small">Oui / Non</p></div>
+    <div class="card"><h3>2. Notifications</h3><p><strong>Interne uniquement</strong> pour cette version ; e-mail en P1.</p><p class="small">Oui / Non</p></div>
+    <div class="card"><h3>3. Paiement</h3><p><strong>Paiement total uniquement</strong>, une fois par facture.</p><p class="small">Oui / Non</p></div>
+    <div class="card"><h3>4. Agent</h3><p><strong>Rôle Agent séparé</strong> avec login et espace dédié.</p><p class="small">Oui / Non</p></div>
+    <div class="card"><h3>5. Rapport</h3><p><strong>Autorisé à dépasser 30 pages</strong> si nécessaire.</p><p class="small">Oui / Non</p></div>
+    <div class="card"><h3>6. Freeze</h3><p><strong>Aucune fonctionnalité après J3 18:00.</strong></p><p class="small">Oui / Non</p></div>
+  </div>
+  <div class="callout red"><strong>Si désaccord :</strong> on applique la recommandation par défaut, on note la décision, et on ne rouvre pas le débat après J1.</div>
+</section>
+
+<!-- 19 -->
+<section class="slide dark">
+  <div class="kicker">Prochaines étapes</div>
+  <h1 style="font-size:34pt">Ce que l’on fait<br><span class="accent">immédiatement après la réunion</span></h1>
+  <div class="cols">
+    <div>
+      <h3 style="color:#fff">Actions</h3>
+      <ul class="check">
+        <li style="color:#e0f2fe">Attribuer les 5 rôles aux membres.</li>
+        <li style="color:#e0f2fe">Créer les branches.</li>
+        <li style="color:#e0f2fe">Le Membre 1 publie le schéma cible.</li>
+        <li style="color:#e0f2fe">Chaque membre ouvre sa PR vide avec checklist.</li>
+        <li style="color:#e0f2fe">Premier stand-up : demain 09:00.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:#fff">Objectif de fin J1</h3>
+      <ul class="check">
+        <li style="color:#e0f2fe">Base cible disponible.</li>
+        <li style="color:#e0f2fe">Login Agent fonctionnel.</li>
+        <li style="color:#e0f2fe">Chaque module a un squelette qui démarre.</li>
+        <li style="color:#e0f2fe">Aucun blocage non signalé.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" style="background:#0f3b66;border-left-color:#38bdf8;color:#e0f2fe">
+    <strong>Message de clôture :</strong> nous avons 5 jours. Le socle est solide. Si nous respectons le périmètre, le freeze J3 et les points de contrôle quotidiens, la version finale est atteignable.
+  </div>
+  <div class="footer-line">Prochaine étape : stand-up J1 — 09:00</div>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <div class="kicker">Annexe — Base de données</div>
+  <h2>Les 12 tables cibles</h2>
+  <div class="cols">
+    <div>
+      <h3>Existant</h3>
+      <div class="pill-row">
+        <span class="pill">fournisseur</span><span class="pill">client</span><span class="pill">tarif</span>
+        <span class="pill">consommation</span><span class="pill">photo_capteur</span><span class="pill">anomalie</span>
+        <span class="pill">facture</span>
+      </div>
+      <h3>Nouvelles relations</h3>
+      <table class="table-compact">
+        <tr><th>Relation</th><th>Cardinalité</th></tr>
+        <tr><td>Agent — Conso_Annuelle</td><td>1..1 — 0..n</td></tr>
+        <tr><td>Client — Conso_Annuelle</td><td>1..1 — 0..n</td></tr>
+        <tr><td>Client — Reclamation</td><td>1..1 — 0..n</td></tr>
+        <tr><td>Facture — Reclamation</td><td>0..1 — 0..n</td></tr>
+        <tr><td>Facture — Paiement</td><td>1..1 — 0..1</td></tr>
+        <tr><td>Client — Notification</td><td>1..1 — 0..n</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>À ajouter</h3>
+      <div class="pill-row">
+        <span class="tag red">agent</span><span class="tag red">conso_annuelle</span>
+        <span class="tag red">reclamation</span><span class="tag red">paiement</span>
+        <span class="tag red">notification</span>
+      </div>
+      <div class="callout blue"><strong>Règle :</strong> un seul propriétaire par table. Chaque module fournit son DDL dans <code>sql/migrations/</code> ; le Membre 1 fusionne dans <code>schema.sql</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide">
+  <div class="kicker">Annexe — Routes</div>
+  <h2>Routes cibles des nouveaux modules</h2>
+  <div class="cols">
+    <div>
+      <h3>Réclamations</h3>
+      <div class="card" style="font-family:monospace;font-size:9.6pt;line-height:1.45">
+        GET/POST /Reclamation/add<br>
+        GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /Reclamation/all<br>
+        GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /Reclamation/one/{id}<br>
+        GET/POST /Reclamation/traiter/{id}
+      </div>
+      <h3>Paiements</h3>
+      <div class="card" style="font-family:monospace;font-size:9.6pt;line-height:1.45">
+        GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /Paiement/all<br>
+        GET/POST /Paiement/add/{idFacture}
+      </div>
+      <h3>Notifications</h3>
+      <div class="card" style="font-family:monospace;font-size:9.6pt;line-height:1.45">
+        GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /Notification/all<br>
+        POST&nbsp;&nbsp;&nbsp;&nbsp; /Notification/lire/{id}
+      </div>
+    </div>
+    <div>
+      <h3>Import annuel</h3>
+      <div class="card" style="font-family:monospace;font-size:9.6pt;line-height:1.45">
+        GET/POST /Import/index<br>
+        POST&nbsp;&nbsp;&nbsp;&nbsp; /Import/upload
+      </div>
+      <h3>Vérification</h3>
+      <div class="card" style="font-family:monospace;font-size:9.6pt;line-height:1.45">
+        GET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /Verification/index
+      </div>
+      <div class="callout"><strong>À ajouter dans <code>index.php</code> :</strong> Reclamation, Paiement, Import, Verification, Notification.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <div class="kicker">Annexe — Démo</div>
+  <h2>Scénario de démonstration minuté</h2>
+  <table>
+    <tr><th>Temps</th><th>Action</th><th>Preuve attendue</th></tr>
+    <tr><td>0:00</td><td>Connexion Agent</td><td>Espace Agent</td></tr>
+    <tr><td>0:30</td><td>Import du fichier annuel</td><td>Rapport insérés / ignorés / rejetés</td></tr>
+    <tr><td>1:30</td><td>Connexion Fournisseur</td><td>Dashboard impayés + évolution</td></tr>
+    <tr><td>2:30</td><td>Correction d’une anomalie</td><td>Facture générée</td></tr>
+    <tr><td>4:00</td><td>Paiement de la facture</td><td>Statut PAYEE + total mis à jour</td></tr>
+    <tr><td>5:00</td><td>Vérification annuelle</td><td>Écarts affichés</td></tr>
+    <tr><td>5:30</td><td>Connexion Client</td><td>Facture + réclamation</td></tr>
+    <tr><td>7:00</td><td>Traitement fournisseur</td><td>Notification client</td></tr>
+    <tr><td>8:00</td><td>Conclusion</td><td>Parcours complet</td></tr>
+  </table>
+  <div class="callout blue"><strong>Objectif :</strong> prouver le parcours Agent → Fournisseur → Client en moins de 8 minutes.</div>
+</section>
+
+</body>
+</html>
