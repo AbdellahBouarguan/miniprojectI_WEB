@@ -15,9 +15,11 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS facture;
 DROP TABLE IF EXISTS anomalie;
 DROP TABLE IF EXISTS photo_capteur;
+DROP TABLE IF EXISTS conso_annuelle;
 DROP TABLE IF EXISTS consommation;
 DROP TABLE IF EXISTS tarif;
 DROP TABLE IF EXISTS client;
+DROP TABLE IF EXISTS agent;
 DROP TABLE IF EXISTS fournisseur;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -36,6 +38,23 @@ CREATE TABLE fournisseur (
   PRIMARY KEY (id_fournisseur),
   UNIQUE KEY uk_fournisseur_email (email),
   CONSTRAINT chk_fournisseur_seuils CHECK (seuil_eau >= 0 AND seuil_elec >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- AGENT
+-- L'agent effectue une seule tournée par an et dépose le fichier
+-- Consommation_Annuelle.txt (import annuel).
+-- ------------------------------------------------------------
+CREATE TABLE agent (
+  id_agent INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nom VARCHAR(100) NOT NULL,
+  prenom VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  mot_de_passe VARCHAR(255) NOT NULL,
+  telephone VARCHAR(30) NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_agent),
+  UNIQUE KEY uk_agent_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
@@ -105,6 +124,35 @@ CREATE TABLE consommation (
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT chk_conso_mois CHECK (periode_mois BETWEEN 1 AND 12),
   CONSTRAINT chk_conso_index CHECK (index_eau >= 0 AND index_elec >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- CONSO_ANNUELLE
+-- Relevé annuel issu de la tournée de l'agent.
+-- UNIQUE(id_client, annee) : un seul relevé par client et par an,
+-- ce qui permet de détecter les doublons à l'import.
+-- ------------------------------------------------------------
+CREATE TABLE conso_annuelle (
+  id_conso_annuelle INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_client INT UNSIGNED NOT NULL,
+  id_agent INT UNSIGNED NOT NULL,
+  conso_eau DECIMAL(12,2) NOT NULL,
+  conso_elec DECIMAL(12,2) NOT NULL,
+  annee SMALLINT UNSIGNED NOT NULL,
+  date_saisie DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_conso_annuelle),
+  UNIQUE KEY uk_conso_annuelle_client_annee (id_client, annee),
+  KEY idx_conso_annuelle_agent (id_agent),
+  CONSTRAINT fk_conso_annuelle_client
+    FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_conso_annuelle_agent
+    FOREIGN KEY (id_agent) REFERENCES agent (id_agent)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT chk_conso_annuelle_valeurs
+    CHECK (conso_eau >= 0 AND conso_elec >= 0),
+  CONSTRAINT chk_conso_annuelle_annee
+    CHECK (annee BETWEEN 2000 AND 2100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------

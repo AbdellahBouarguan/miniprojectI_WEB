@@ -13,7 +13,7 @@ $email = $email ?? '';
     <meta name="theme-color" content="#0b2a4a">
     <title>Connexion — <?= e(APP_NAME) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= url('assets/img/favicon.svg') ?>">
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261020">
+    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261113">
 </head>
 <body class="auth-page">
     <div class="auth-shell">
@@ -77,6 +77,13 @@ $email = $email ?? '';
                     Se connecter
                 </button>
             </form>
+
+            <p class="auth-note">
+                Comptes de démonstration :
+                <strong>fournisseur@example.ma</strong> / fournisseur123 ·
+                <strong>agent@example.ma</strong> / agent123 ·
+                <strong>client1@example.ma</strong> / client123
+            </p>
 
         </section>
 

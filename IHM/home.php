@@ -6,9 +6,6 @@ $prenom = trim((string) ($_SESSION['prenom'] ?? ''));
 
 $derniereConso = null;
 $nbFactures = 0;
-$nbClients = 0;
-$nbAnomalies = 0;
-$nbFacturesFournisseur = 0;
 
 if ($role === 'client') {
     $idClient = (int) ($_SESSION['id_client'] ?? 0);
@@ -32,39 +29,6 @@ if ($role === 'client') {
     $resultat = mysqli_stmt_get_result($stmt);
     $ligne = mysqli_fetch_row($resultat);
     $nbFactures = (int) ($ligne[0] ?? 0);
-} elseif ($role === 'fournisseur') {
-    $idFournisseur = (int) ($_SESSION['id_fournisseur'] ?? 0);
-
-    $stmt = mysqli_prepare(db(), 'SELECT COUNT(*) FROM client WHERE id_fournisseur = ?');
-    mysqli_stmt_bind_param($stmt, 'i', $idFournisseur);
-    mysqli_stmt_execute($stmt);
-    $resultat = mysqli_stmt_get_result($stmt);
-    $ligne = mysqli_fetch_row($resultat);
-    $nbClients = (int) ($ligne[0] ?? 0);
-
-    $stmt = mysqli_prepare(
-        db(),
-        "SELECT COUNT(*) FROM anomalie
-         WHERE id_fournisseur = ? AND statut = 'EN_ATTENTE'"
-    );
-    mysqli_stmt_bind_param($stmt, 'i', $idFournisseur);
-    mysqli_stmt_execute($stmt);
-    $resultat = mysqli_stmt_get_result($stmt);
-    $ligne = mysqli_fetch_row($resultat);
-    $nbAnomalies = (int) ($ligne[0] ?? 0);
-
-    $stmt = mysqli_prepare(
-        db(),
-        'SELECT COUNT(*)
-         FROM facture f
-         JOIN client c ON c.id_client = f.id_client
-         WHERE c.id_fournisseur = ?'
-    );
-    mysqli_stmt_bind_param($stmt, 'i', $idFournisseur);
-    mysqli_stmt_execute($stmt);
-    $resultat = mysqli_stmt_get_result($stmt);
-    $ligne = mysqli_fetch_row($resultat);
-    $nbFacturesFournisseur = (int) ($ligne[0] ?? 0);
 }
 
 $aujourdhui = new DateTimeImmutable('today');
@@ -155,30 +119,100 @@ $joursRestants = max(0, (int) $aujourdhui->diff($finMois)->days);
         </a>
     </div>
 <?php else: ?>
+    <?php
+    /** @var array{dashboard: array} $dashboard */
+    $totaux = $dashboard['totaux'];
+    $globaux = $dashboard['totaux_globaux'];
+    $annee = (int) $dashboard['annee'];
+    $nbImpayees = (int) $totaux['nb_impayees'];
+    $nbPayees = (int) $totaux['nb_payees'];
+    $aDesDonnees = (int) $totaux['nb_factures'] > 0;
+    ?>
     <div class="page-head">
         <div>
             <h1>Tableau de bord</h1>
-            <p>Suivi de votre régie eau et électricité.</p>
+            <p>Suivi des impayés et de l’évolution mensuelle des consommations.</p>
+        </div>
+
+        <form class="filters" method="get" action="<?= e(url('')) ?>">
+            <label for="annee">Année</label>
+            <select id="annee" name="annee">
+                <?php if ($dashboard['annees'] === []): ?>
+                    <option value="<?= $annee ?>"><?= $annee ?></option>
+                <?php endif; ?>
+                <?php foreach ($dashboard['annees'] as $anneeDisponible): ?>
+                    <option value="<?= (int) $anneeDisponible ?>"<?= (int) $anneeDisponible === $annee ? ' selected' : '' ?>>
+                        <?= (int) $anneeDisponible ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button class="button button-small" type="submit">Afficher</button>
+        </form>
+    </div>
+
+    <div class="stats stats-4">
+        <div class="stat-card stat-alert">
+            <div class="stat-label">Total impayé <?= $annee ?></div>
+            <div class="stat-value"><?= e(format_nombre($totaux['impaye'])) ?> DH</div>
+            <div class="stat-note">
+                <?= $nbImpayees ?> facture<?= $nbImpayees > 1 ? 's' : '' ?> impayée<?= $nbImpayees > 1 ? 's' : '' ?>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Total encaissé <?= $annee ?></div>
+            <div class="stat-value"><?= e(format_nombre($totaux['encaisse'])) ?> DH</div>
+            <div class="stat-note">
+                <?= $nbPayees ?> facture<?= $nbPayees > 1 ? 's' : '' ?> payée<?= $nbPayees > 1 ? 's' : '' ?>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Clients</div>
+            <div class="stat-value"><?= (int) $dashboard['nb_clients'] ?></div>
+            <div class="stat-note">Abonnés enregistrés</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Anomalies en attente</div>
+            <div class="stat-value"><?= (int) $dashboard['nb_anomalies'] ?></div>
+            <div class="stat-note">Relevés à vérifier</div>
         </div>
     </div>
 
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-label">Clients</div>
-            <div class="stat-value"><?= $nbClients ?></div>
-            <div class="stat-note">Abonnés enregistrés</div>
+    <section class="card">
+        <div class="card-head">
+            <div>
+                <h2>Évolution mensuelle des consommations</h2>
+                <p class="muted">Volumes facturés par mois pour l’année <?= $annee ?>.</p>
+            </div>
+            <span class="muted">
+                Toutes années : <?= e(format_nombre($globaux['impaye'])) ?> DH impayés
+            </span>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Anomalies en attente</div>
-            <div class="stat-value"><?= $nbAnomalies ?></div>
-            <div class="stat-note">Relevés à vérifier</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Factures</div>
-            <div class="stat-value"><?= $nbFacturesFournisseur ?></div>
-            <div class="stat-note">Factures émises</div>
-        </div>
-    </div>
+
+        <?php if (!$aDesDonnees): ?>
+            <div class="empty-state">Aucune donnée pour la période.</div>
+        <?php else: ?>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-head">
+                        <h3>Eau</h3>
+                        <span class="muted">max <?= e(format_nombre($dashboard['max_eau'])) ?> m³</span>
+                    </div>
+                    <?= chart_barres($dashboard['evolution'], 'eau', 'm³', '#0b6bcb', (float) $dashboard['max_eau']) ?>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-head">
+                        <h3>Électricité</h3>
+                        <span class="muted">max <?= e(format_nombre($dashboard['max_elec'])) ?> kWh</span>
+                    </div>
+                    <?= chart_barres($dashboard['evolution'], 'elec', 'kWh', '#f7b500', (float) $dashboard['max_elec']) ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    </section>
 
     <div class="grid">
         <a class="card link-card" href="<?= e(url('Client/all')) ?>">

@@ -1,6 +1,6 @@
 <?php
 $role = $_SESSION['role'] ?? null;
-$estConnecte = in_array($role, ['client', 'fournisseur'], true);
+$estConnecte = in_array($role, ['client', 'fournisseur', 'agent'], true);
 
 $nom = trim((string) ($_SESSION['nom'] ?? ''));
 $prenom = trim((string) ($_SESSION['prenom'] ?? ''));
@@ -19,6 +19,8 @@ if (str_contains($path, '/Consommation')) {
     $active = 'anomalies';
 } elseif (str_contains($path, '/Facture')) {
     $active = 'factures';
+} elseif (str_contains($path, '/Import')) {
+    $active = 'import';
 }
 ?>
 <!DOCTYPE html>
@@ -29,7 +31,7 @@ if (str_contains($path, '/Consommation')) {
     <meta name="theme-color" content="#0b2a4a">
     <title><?= e(APP_NAME) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= url('assets/img/favicon.svg') ?>">
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261020">
+    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261113">
 </head>
 <body class="<?= $estConnecte ? 'app-body' : 'public-body' ?>">
 <?php if ($estConnecte): ?>
@@ -56,6 +58,13 @@ if (str_contains($path, '/Consommation')) {
                     </a>
                     <a class="disabled" href="#" title="Bientôt disponible">
                         <?= icon('message') ?> Réclamations
+                    </a>
+                <?php elseif ($role === 'agent'): ?>
+                    <a class="<?= $active === 'import' ? 'active' : '' ?>" href="<?= url('Import/index') ?>">
+                        <?= icon('file') ?> Import annuel
+                    </a>
+                    <a href="<?= url('Import/index') ?>#releves">
+                        <?= icon('grid') ?> Relevés importés
                     </a>
                 <?php else: ?>
                     <a class="<?= $active === 'dashboard' ? 'active' : '' ?>" href="<?= url('') ?>">
