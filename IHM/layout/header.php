@@ -19,6 +19,8 @@ if (str_contains($path, '/Consommation')) {
     $active = 'anomalies';
 } elseif (str_contains($path, '/Facture')) {
     $active = 'factures';
+} elseif (str_contains($path, '/Verification')) {
+    $active = 'verification';
 }
 ?>
 <!DOCTYPE html>
@@ -76,7 +78,7 @@ if (str_contains($path, '/Consommation')) {
                     <a class="disabled" href="#" title="Bientôt disponible">
                         <?= icon('card') ?> Paiements
                     </a>
-                    <a class="disabled" href="#" title="Bientôt disponible">
+                    <a class="<?= $active === 'verification' ? 'active' : '' ?>" href="<?= url('Verification/index') ?>">
                         <?= icon('check') ?> Vérification annuelle
                     </a>
                 <?php endif; ?>

@@ -1,0 +1,2 @@
+ID_Client;ID_Agent;ConsommationEau;ConsommationElect;Annee;Date_Saisie
+4;1;121;1210;2025;2025-12-20
