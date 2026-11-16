@@ -39,6 +39,15 @@ CREATE TABLE fournisseur (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
+-- QUARTIER
+-- ------------------------------------------------------------
+CREATE TABLE quartier (
+  id_quartier INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nom VARCHAR(100) NOT NULL,
+  type_activite ENUM('RESIDENTIEL', 'COMMERCIAL', 'INDUSTRIEL') NOT NULL,
+  PRIMARY KEY (id_quartier)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- CLIENT
 -- ------------------------------------------------------------
 CREATE TABLE client (
