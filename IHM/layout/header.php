@@ -2,6 +2,25 @@
 $role = $_SESSION['role'] ?? null;
 $estConnecte = in_array($role, ['client', 'fournisseur'], true);
 
+$notificationsNonLues = 0;
+
+if ($estConnecte) {
+    require_once ROOT . 'BD/Notification.php';
+
+    $notificationRole = (string) $role;
+    $notificationId = $role === 'client'
+        ? (int) ($_SESSION['id_client'] ?? 0)
+        : (int) ($_SESSION['id_fournisseur'] ?? 0);
+
+    if ($notificationId > 0) {
+        try {
+            $notificationsNonLues = notification_compter_non_lues($notificationRole, $notificationId);
+        } catch (Throwable $e) {
+            $notificationsNonLues = 0;
+        }
+    }
+}
+
 $nom = trim((string) ($_SESSION['nom'] ?? ''));
 $prenom = trim((string) ($_SESSION['prenom'] ?? ''));
 $nomComplet = trim($prenom . ' ' . $nom);
@@ -97,10 +116,17 @@ if (str_contains($path, '/Consommation')) {
                     </span>
                 </a>
 
-                <button class="icon-button" type="button" aria-label="Notifications">
+                <a
+                    class="icon-button notification-button"
+                    href="<?= e(url('Notification/all')) ?>"
+                    aria-label="Notifications<?= $notificationsNonLues > 0 ? ' (' . $notificationsNonLues . ' non lues)' : '' ?>"
+                    title="Notifications"
+                >
                     <?= icon('bell') ?>
-                    <span class="notif-dot"></span>
-                </button>
+                    <?php if ($notificationsNonLues > 0): ?>
+                        <span class="notif-count"><?= $notificationsNonLues > 99 ? '99+' : (int) $notificationsNonLues ?></span>
+                    <?php endif; ?>
+                </a>
             </header>
 
             <main class="dash-main">

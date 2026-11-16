@@ -51,6 +51,19 @@
 - [ ] Client voit uniquement ses factures.
 - [ ] Fournisseur voit les factures de ses clients.
 
+## Notifications
+
+- [ ] Table `notification` creee.
+- [ ] Page `/Notification/all` accessible.
+- [ ] Compteur non lu correct.
+- [ ] Client ne voit que ses notifications.
+- [ ] Fournisseur ne voit que ses notifications.
+- [ ] Marquage comme lu.
+- [ ] Tout marquer comme lu.
+- [ ] CSRF refuse un jeton invalide.
+- [ ] Lien interne uniquement.
+- [ ] Notification creee apres generation d'une facture.
+
 ## Securite
 
 - [ ] Requetes SQL preparees.

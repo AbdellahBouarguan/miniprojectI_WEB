@@ -10,6 +10,7 @@ Branche Alpha : `aymane`
 - Saisie des consommations et televersement des photos
 - Detection et confirmation des anomalies
 - Generation automatique et consultation des factures
+- Notifications internes client / fournisseur
 
 ## Pre-requis
 
@@ -89,6 +90,10 @@ GET      /Facture/all
 GET      /Facture/one/{id}
 
 GET      /Anomalie/index
+
+GET      /Notification/all
+POST     /Notification/lire/{id}
+POST     /Notification/lire_tout
 ```
 
 Flux des anomalies :

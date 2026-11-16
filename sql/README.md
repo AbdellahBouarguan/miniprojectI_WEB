@@ -43,6 +43,7 @@ SELECT * FROM tarif ORDER BY type, borne_min;
 - `photo_capteur`
 - `anomalie`
 - `facture`
+- `notification`
 
 ## Remarque
 
