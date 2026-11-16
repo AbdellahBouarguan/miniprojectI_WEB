@@ -64,7 +64,7 @@ $compteurs = [
     <div class="period-banner">
         <div>
             <strong>Période de saisie ouverte — <?= e(mois_francais($mois)) ?> <?= $annee ?></strong>
-            <span>Ouverte du 18 du mois jusqu’à la fin du mois.</span>
+            <span>Ouverte du <?= CONSUMPTION_OPEN_DAY ?> du mois jusqu’à la fin du mois.</span>
         </div>
         <span class="badge badge-open">Ouverte</span>
     </div>

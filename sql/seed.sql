@@ -1,8 +1,9 @@
 -- ============================================================
 -- Mini Projet 1 - Version Alpha
--- Donnees de depart : fournisseur, clients, tarifs
+-- Donnees de depart : fournisseurs, clients, tarifs
 -- Mots de passe :
 --   fournisseur@example.ma / fournisseur123
+--   admin@example.ma       / 12345
 --   client1@example.ma     / client123
 --   client2@example.ma     / client123
 --   client3@example.ma     / client123
@@ -13,6 +14,7 @@ USE miniproject_version_alpha;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM facture;
+DELETE FROM reclamation;
 DELETE FROM anomalie;
 DELETE FROM photo_capteur;
 DELETE FROM consommation;
@@ -21,6 +23,7 @@ DELETE FROM client;
 DELETE FROM fournisseur;
 
 ALTER TABLE facture AUTO_INCREMENT = 1;
+ALTER TABLE reclamation AUTO_INCREMENT = 1;
 ALTER TABLE anomalie AUTO_INCREMENT = 1;
 ALTER TABLE photo_capteur AUTO_INCREMENT = 1;
 ALTER TABLE consommation AUTO_INCREMENT = 1;
@@ -40,6 +43,12 @@ VALUES
    'Regie Eau et Electricite',
    'fournisseur@example.ma',
    '$2y$12$ddK9Wz7XYDG06PasI8DiweTxv2arw.fItvr0dlYJAfP1CP4cJSqni',
+   100.00,
+   1000.00),
+  (2,
+   'Admin',
+   'admin@example.ma',
+   '$2y$10$SL6CInipgcgIAErDkusKjeUTJQckwP7oEorfmi0WJOWBwBR.oVwoO',
    100.00,
    1000.00);
 

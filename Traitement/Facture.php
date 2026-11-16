@@ -49,6 +49,9 @@ function facture_one($id = null): void
     }
 
     $photos = (new ConsommationBD(pdo()))->photosDe((int) $facture['id_conso']);
+    $erreur = $_GET['erreur'] ?? null;
+    $succes = $_GET['succes'] ?? null;
+    $csrf = csrf_token();
 
     require ROOT . 'IHM/facture/show.php';
 }
@@ -56,4 +59,32 @@ function facture_one($id = null): void
 function facture_show($id = null): void
 {
     facture_one($id);
+}
+
+function facture_payer($id = null): void
+{
+    if (($_SESSION['role'] ?? null) !== 'client') {
+        header('Location: ' . url('Auth/login'));
+        exit;
+    }
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        http_response_code(405);
+        return;
+    }
+
+    $idFacture = (int) ($id ?? 0);
+    $csrf = $_SESSION['csrf_token'] ?? '';
+    if (!is_string($csrf) || $csrf === '' || !is_string($_POST['csrf'] ?? null)
+        || !hash_equals($csrf, (string) $_POST['csrf'])) {
+        $query = '?erreur=' . urlencode('Session expirée. Rechargez la page.');
+    } else {
+        $paye = (new FactureBD(pdo()))->payerPourClient($idFacture, (int) $_SESSION['id_client']);
+        $query = $paye
+            ? '?succes=' . urlencode('La facture a été payée intégralement.')
+            : '?erreur=' . urlencode('Facture introuvable ou déjà payée.');
+    }
+
+    header('Location: ' . url('Facture/one/' . $idFacture) . $query);
+    exit;
 }

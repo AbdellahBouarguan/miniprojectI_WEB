@@ -5,6 +5,17 @@ final class FactureBD
 {
     public function __construct(private PDO $pdo) {}
 
+    public function payerPourClient(int $idFacture, int $idClient): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE facture SET etat = 'PAYEE', date_paiement = NOW()
+             WHERE id_facture = :facture AND id_client = :client AND etat = 'IMPAYEE'"
+        );
+        $stmt->execute(['facture' => $idFacture, 'client' => $idClient]);
+
+        return $stmt->rowCount() === 1;
+    }
+
     public function findByConso(int $idConso): ?array
     {
         $stmt = $this->pdo->prepare('SELECT * FROM facture WHERE id_conso = :id LIMIT 1');

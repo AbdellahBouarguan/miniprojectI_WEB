@@ -4,6 +4,10 @@ define('APP_NAME', 'AquaVolt');
 define('APP_TAGLINE', 'Eau & Électricité · Factures');
 define('APP_SUBTITLE', 'Mini Projet 1 - Version Alpha');
 
+// Reglage local facultatif : config/local.php est ignore par Git.
+$localConfig = is_file(ROOT . 'config/local.php') ? require ROOT . 'config/local.php' : [];
+define('CONSUMPTION_OPEN_DAY', max(1, min(28, (int) ($localConfig['consumption_open_day'] ?? 18))));
+
 // Base URL detectee automatiquement : fonctionne dans /miniprojectI_WEB-1/
 // comme a la racine du serveur PHP integre.
 $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
@@ -156,6 +160,9 @@ function statut_label(string $statut): string
         'FACTUREE' => 'Facturée',
         'IMPAYEE' => 'Impayée',
         'PAYEE' => 'Payée',
+        'EN_COURS' => 'En cours',
+        'RESOLUE' => 'Résolue',
+        'REJETEE' => 'Rejetée',
         'SEUIL_DEPASSE' => 'Seuil dépassé',
         'INDEX_INFERIEUR' => 'Index inférieur',
         'CONFIRMEE' => 'Confirmée',
@@ -167,7 +174,7 @@ function statut_label(string $statut): string
 function statut_badge(string $statut): string
 {
     return match ($statut) {
-        'PAYEE', 'VALIDEE', 'CONFIRMEE', 'CORRIGEE' => 'badge-open',
+        'PAYEE', 'VALIDEE', 'CONFIRMEE', 'CORRIGEE', 'RESOLUE' => 'badge-open',
         'IMPAYEE', 'ANOMALIE', 'SEUIL_DEPASSE', 'EN_ATTENTE' => 'badge-warning',
         'INDEX_INFERIEUR' => 'badge-danger',
         default => '',

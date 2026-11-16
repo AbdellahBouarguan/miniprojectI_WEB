@@ -1,4 +1,5 @@
 config/database.php
+config/local.php
 
 uploads/compteurs/*
 !uploads/compteurs/.htaccess

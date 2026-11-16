@@ -13,6 +13,7 @@ USE miniproject_version_alpha;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS facture;
+DROP TABLE IF EXISTS reclamation;
 DROP TABLE IF EXISTS anomalie;
 DROP TABLE IF EXISTS photo_capteur;
 DROP TABLE IF EXISTS consommation;
@@ -178,6 +179,7 @@ CREATE TABLE facture (
   montant_tva DECIMAL(12,2) NOT NULL,
   montant_ttc DECIMAL(12,2) NOT NULL,
   etat ENUM('IMPAYEE','PAYEE') NOT NULL DEFAULT 'IMPAYEE',
+  date_paiement DATETIME NULL,
   PRIMARY KEY (id_facture),
   UNIQUE KEY uk_facture_numero (numero),
   UNIQUE KEY uk_facture_conso (id_conso),
@@ -192,4 +194,26 @@ CREATE TABLE facture (
   CONSTRAINT chk_facture_montants
     CHECK (conso_eau >= 0 AND conso_elec >= 0
            AND montant_ht >= 0 AND montant_tva >= 0 AND montant_ttc >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- RECLAMATION CLIENT
+-- ------------------------------------------------------------
+CREATE TABLE reclamation (
+  id_reclamation INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_client INT UNSIGNED NOT NULL,
+  id_facture INT UNSIGNED NOT NULL,
+  sujet VARCHAR(150) NOT NULL,
+  message TEXT NOT NULL,
+  statut ENUM('EN_ATTENTE','EN_COURS','RESOLUE','REJETEE') NOT NULL DEFAULT 'EN_ATTENTE',
+  reponse TEXT NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_traitement DATETIME NULL,
+  PRIMARY KEY (id_reclamation),
+  KEY idx_reclamation_client (id_client),
+  KEY idx_reclamation_facture (id_facture),
+  CONSTRAINT fk_reclamation_client FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_reclamation_facture FOREIGN KEY (id_facture) REFERENCES facture (id_facture)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

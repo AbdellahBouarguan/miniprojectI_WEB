@@ -11,7 +11,9 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path .= '/' . (string) ($_GET['url'] ?? '');
 $active = 'dashboard';
 
-if (str_contains($path, '/Consommation')) {
+if (str_contains($path, '/Reclamation')) {
+    $active = 'reclamations';
+} elseif (str_contains($path, '/Consommation')) {
     $active = 'consommation';
 } elseif (str_contains($path, '/Client')) {
     $active = 'clients';
@@ -29,7 +31,7 @@ if (str_contains($path, '/Consommation')) {
     <meta name="theme-color" content="#0b2a4a">
     <title><?= e(APP_NAME) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= url('assets/img/favicon.svg') ?>">
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261020">
+    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261116">
 </head>
 <body class="<?= $estConnecte ? 'app-body' : 'public-body' ?>">
 <?php if ($estConnecte): ?>
@@ -54,7 +56,7 @@ if (str_contains($path, '/Consommation')) {
                     <a class="<?= $active === 'consommation' ? 'active' : '' ?>" href="<?= url('Consommation/add') ?>">
                         <?= icon('droplet') ?> Saisie consommation
                     </a>
-                    <a class="disabled" href="#" title="Bientôt disponible">
+                    <a class="<?= $active === 'reclamations' ? 'active' : '' ?>" href="<?= url('Reclamation/index') ?>">
                         <?= icon('message') ?> Réclamations
                     </a>
                 <?php else: ?>
@@ -70,10 +72,10 @@ if (str_contains($path, '/Consommation')) {
                     <a class="<?= $active === 'factures' ? 'active' : '' ?>" href="<?= url('Facture/all') ?>">
                         <?= icon('file') ?> Factures
                     </a>
-                    <a class="disabled" href="#" title="Bientôt disponible">
+                    <a class="<?= $active === 'reclamations' ? 'active' : '' ?>" href="<?= url('Reclamation/index') ?>">
                         <?= icon('message') ?> Réclamations
                     </a>
-                    <a class="disabled" href="#" title="Bientôt disponible">
+                    <a class="<?= $active === 'factures' ? 'active' : '' ?>" href="<?= url('Facture/all') ?>">
                         <?= icon('card') ?> Paiements
                     </a>
                     <a class="disabled" href="#" title="Bientôt disponible">
