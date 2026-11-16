@@ -10,6 +10,7 @@ docs/
 │   └── msd/             Modele de donnees : msd.puml, msd.png, msd.svg
 ├── latex/               Rapport LaTeX du projet
 ├── presentation/        Presentation du sprint final (Markdown, HTML, PDF)
+├── notifications.md     Documentation du module notifications internes
 └── reunions/            Comptes rendus des reunions
 ```
 
