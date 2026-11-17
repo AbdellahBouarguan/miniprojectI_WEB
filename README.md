@@ -189,19 +189,19 @@ Client 3    : client3@example.ma     / client123
 
 ## Equipe
 
-- Abdellah Bouarguan : coordination, setup, SQL, Git/GitHub
-- Nafisa El Younoussi : saisie des consommations et generation de facture
-- Reda Zakaria : gestion des clients
-- Nizar Ben Yacoub : saisie des consommations et generation de facture
-- Aymen Ouggourni : factures
+- Abdellah Bouarguan : coordination, notifications, integration, QA
+- Nafisa El Younoussi : **rapport final**, verification annuelle
+- Reda Zakaria : reclamations, paiements
+- Nizar Ben Yacoub : dashboard, Agent et import annuel
+- Aymen Ouggourni : anomalies, quartiers et base de donnees/UI
 
 ## Rapport final
 
 ```text
-docs/latex/rapport_mini_projet_1_alpha.pdf
+docs/latex_final/rapport_mini_projet_1_final.pdf
 ```
 
-Sources LaTeX : `docs/latex/main.tex` et `docs/latex/sections/`.
+Sources LaTeX : `docs/latex_final/main.tex` et `docs/latex_final/sections/`.
 
 ## Depot GitHub
 
