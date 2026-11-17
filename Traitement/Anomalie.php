@@ -123,6 +123,10 @@ function anomalie_corriger($id = null): void
                     $erreurs['valeur_corrigee'] =
                         'L’index corrigé doit être supérieur ou égal à l’index précédent.';
 
+                } elseif ($valeur > (float) $anomalie['seuil']) {
+                    $erreurs['valeur_corrigee'] =
+                        'L’index corrigé doit rester inférieur ou égal au seuil du fournisseur.';
+
                 } elseif (
                     anomalie_bd()->corriger(
                         $idAnomalie,
