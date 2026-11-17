@@ -1,0 +1,51 @@
+\chapter{Routes de l'application}
+
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.38\textwidth}p{0.12\textwidth}>{\raggedright\arraybackslash}p{0.40\textwidth}}
+\caption{Routes principales et contrôleurs associés}\label{tab:routes}\\
+\toprule
+\textbf{URL} & \textbf{Méthode} & \textbf{Rôle / fonction} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{URL} & \textbf{Méthode} & \textbf{Rôle / fonction} \\
+\midrule
+\endhead
+\texttt{/Auth/login} & GET/POST & Connexion client, fournisseur ou Agent \\
+\texttt{/Auth/logout} & GET & Déconnexion \\
+\texttt{/Client/all} & GET & Liste et recherche des clients \\
+\texttt{/Client/one/\{id\}} & GET & Fiche client et contrats \\
+\texttt{/Client/add} & GET/POST & Ajout d'un client \\
+\texttt{/Client/update/\{id\}} & GET/POST & Modification d'un client \\
+\texttt{/Client/delete/\{id\}} & POST & Suppression conditionnelle \\
+\texttt{/Quartier/all} & GET & Liste des quartiers \\
+\texttt{/Quartier/add} & POST & Ajout d'un quartier \\
+\texttt{/Contrat/all} & GET & Liste des contrats \\
+\texttt{/Contrat/add/\{idClient\}} & POST & Ajout d'un contrat \\
+\texttt{/Contrat/resilier/\{id\}} & POST & Résiliation d'un contrat \\
+\texttt{/Consommation/add} & GET/POST & Saisie d'une consommation \\
+\texttt{/Consommation/add/\{id\}} & GET/POST & Correction d'une consommation \\
+\texttt{/Consommation/all} & GET & Historique \\
+\texttt{/Consommation/one/\{id\}} & GET & Détail \\
+\texttt{/Consommation/confirmation/\{id\}} & GET & Confirmation / correction d'anomalie \\
+\texttt{/Consommation/confirmer} & POST & Confirmer ou corriger \\
+\texttt{/Consommation/facturer} & POST & Génération manuelle d'une facture \\
+\texttt{/Facture/all} & GET & Liste des factures \\
+\texttt{/Facture/one/\{id\}} & GET & Détail d'une facture \\
+\texttt{/Facture/payer/\{id\}} & POST & Paiement fournisseur \\
+\texttt{/Anomalie/index} & GET & Liste des anomalies \\
+\texttt{/Anomalie/corriger/\{id\}} & GET/POST & Correction fournisseur \\
+\texttt{/Reclamation/index} & GET & Liste des réclamations \\
+\texttt{/Reclamation/add} & GET/POST & Dépôt d'une réclamation \\
+\texttt{/Reclamation/one/\{id\}} & GET & Détail \\
+\texttt{/Reclamation/traiter/\{id\}} & POST & Traitement fournisseur \\
+\texttt{/Notification/all} & GET & Notifications \\
+\texttt{/Notification/lire/\{id\}} & POST & Marquer comme lue \\
+\texttt{/Notification/lire\_tout} & POST & Tout marquer comme lu \\
+\texttt{/Import/index} & GET/POST & Espace Agent \\
+\texttt{/Import/upload} & POST & Import annuel \\
+\texttt{/Verification/index} & GET & Vérification annuelle \\
+\texttt{/Verification/decider/\{id\}} & POST & Validation / rejet \\
+\bottomrule
+\end{longtable}
+}

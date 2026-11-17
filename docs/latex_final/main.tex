@@ -1,0 +1,134 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+\else
+  \usepackage{fontspec}
+\fi
+
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!60!black,
+  citecolor=blue!50!black,
+  pdftitle={Gestion des factures d'eau et d'electricite - Version finale},
+  pdfauthor={Abdellah Bouarguan, Nafisa El Younoussi, Reda Zakaria, Nizar Ben Yacoub, Aymen Ouggourni}
+}
+
+\onehalfspacing
+\setlength{\parskip}{0.2em}
+\setlength{\headheight}{14pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small AquaVolt}
+\fancyhead[R]{\small Version finale}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\chapter}[hang]
+  {\bfseries\Large\color{blue!45!black}}
+  {\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{-10pt}{20pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{red!60!black},
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b
+}
+
+\newcommand{\projectname}{AquaVolt}
+\newcommand{\projectversion}{Version finale}
+\newcommand{\projecttitle}{Gestion des factures d'eau et d'électricité}
+
+% Marqueur visible pour les parties à compléter par les membres de l'équipe.
+\newcommand{\todo}[1]{%
+  \par\medskip\noindent
+  \textit{\textcolor{gray!70}{À compléter : #1}}%
+  \par\medskip
+}
+
+\begin{document}
+\sloppy
+
+\input{sections/00_page_garde}
+
+\pagenumbering{roman}
+
+\input{sections/01_remerciements}
+\input{sections/02_resume}
+\input{sections/03_abstract}
+\input{sections/04_abreviations}
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/05_introduction}
+\input{sections/06_presentation}
+\input{sections/07_besoins}
+\input{sections/08_architecture}
+\input{sections/09_basededonnees}
+\input{sections/10_auth_securite}
+\input{sections/11_clients}
+\input{sections/12_quartiers_contrats}
+\input{sections/13_consommation}
+\input{sections/14_anomalies}
+\input{sections/15_facturation}
+\input{sections/16_reclamations}
+\input{sections/17_paiements}
+\input{sections/18_agent_import}
+\input{sections/19_verification}
+\input{sections/20_notifications}
+\input{sections/21_dashboard}
+\input{sections/22_tests}
+\input{sections/23_bilan}
+\input{sections/24_conclusion}
+
+\input{sections/80_bibliographie}
+\input{sections/81_glossaire}
+
+\appendix
+\input{sections/90_annexe_routes}
+\input{sections/91_annexe_sql}
+\input{sections/92_annexe_exemples}
+\input{sections/93_annexe_tests}
+\input{sections/94_annexe_captures}
+\input{sections/95_annexe_git}
+
+\end{document}

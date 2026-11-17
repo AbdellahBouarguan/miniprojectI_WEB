@@ -22,3 +22,5 @@ docs/latex/*.bbl
 docs/latex/*.blg
 
 docs/latex/main.pdf
+
+docs/latex_final/main.pdf
