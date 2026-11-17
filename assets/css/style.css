@@ -1372,6 +1372,10 @@ a {
     -webkit-overflow-scrolling: touch;
 }
 
+.nowrap {
+    white-space: nowrap;
+}
+
 .actions {
     display: flex;
     flex-wrap: wrap;
@@ -1401,6 +1405,10 @@ a {
     .form-grid,
     .photo-grid {
         grid-template-columns: 1fr;
+    }
+
+    .table-wrap > .table {
+        min-width: 760px;
     }
 
     .stats {

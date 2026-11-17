@@ -46,7 +46,7 @@
                 <tbody>
                 <?php foreach ($contrats as $contrat): ?>
                     <tr>
-                        <td><?= e($contrat['numero_contrat']) ?></td>
+                        <td class="nowrap"><?= e($contrat['numero_contrat']) ?></td>
                         <td>
                             <a href="<?= e(url('Client/one/' . (int) $contrat['id_client'])) ?>">
                                 <?= e($contrat['prenom'] . ' ' . $contrat['nom']) ?>

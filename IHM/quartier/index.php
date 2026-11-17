@@ -4,6 +4,8 @@
  * @var string|null $erreur
  * @var string|null $succes
  * @var string $csrf
+ * @var string $nomQuartier
+ * @var string $typeQuartier
  */
 $types = [
     'RESIDENTIEL' => 'Résidentiel',
@@ -38,13 +40,15 @@ $types = [
         <div class="form-grid">
             <div class="form-group">
                 <label for="nom">Nom du quartier</label>
-                <input type="text" id="nom" name="nom" maxlength="100" required>
+                <input type="text" id="nom" name="nom" maxlength="100" value="<?= e($nomQuartier) ?>" required>
             </div>
             <div class="form-group">
                 <label for="type_activite">Type d’activité</label>
                 <select id="type_activite" name="type_activite" required>
                     <?php foreach ($types as $code => $libelle): ?>
-                        <option value="<?= e($code) ?>"><?= e($libelle) ?></option>
+                        <option value="<?= e($code) ?>" <?= $code === $typeQuartier ? 'selected' : '' ?>>
+                            <?= e($libelle) ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>
