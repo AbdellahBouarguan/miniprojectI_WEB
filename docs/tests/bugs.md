@@ -29,6 +29,15 @@
 - **Correction** : sélection du premier contrat actif par défaut ; le client peut changer.
 - **Statut** : corrigé et revérifié sur desktop et mobile.
 
+### BUG-05 — Le formulaire affichait « Ouverte » avant le 18
+
+- **Sévérité** : P2
+- **Module** : Consommation
+- **Cause** : la vue affichait toujours le bandeau « Période ouverte » sans calculer la date.
+- **Symptôme** : le 17/11, le formulaire annonçait une période ouverte alors que la soumission était refusée.
+- **Correction** : calcul de `$periodeOuverte` dans `ConsommationTraitement` et affichage conditionnel « Ouverte / Fermée ».
+- **Statut** : corrigé et revérifié.
+
 ### BUG-04 — Tableaux illisibles sur mobile
 
 - **Sévérité** : P2

@@ -23,8 +23,9 @@ Campagne du **17/11/2026**.
 Phase A — public + fournisseur : 19
 Phase B — client + factures     : 19
 Responsive                     : 27
-Corrections ciblées            : 5
-Total                          : 70
+Corrections ciblées            : 6
+Total des captures d'action    : 71
+Planches contact               : 4
 ```
 
 Les captures sont dans `docs/tests/screenshots/`.
