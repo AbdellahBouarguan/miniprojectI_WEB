@@ -413,9 +413,20 @@ function import_normaliser_contenu(string $contenu): string
     // BOM UTF-8 emis par Excel
     $contenu = preg_replace('/^\xEF\xBB\xBF/', '', $contenu) ?? $contenu;
 
-    // Encodage Windows-1252 (exports Excel en français)
-    if (!mb_check_encoding($contenu, 'UTF-8')) {
-        $contenu = mb_convert_encoding($contenu, 'UTF-8', 'Windows-1252');
+    // Encodage Windows-1252 (exports Excel en français).
+    // mbstring n'est pas toujours installe : on utilise une verification
+    // UTF-8 de secours et iconv si disponible.
+    $utf8Valide = function_exists('mb_check_encoding')
+        ? mb_check_encoding($contenu, 'UTF-8')
+        : preg_match('//u', $contenu) === 1;
+
+    if (!$utf8Valide) {
+        if (function_exists('mb_convert_encoding')) {
+            $contenu = mb_convert_encoding($contenu, 'UTF-8', 'Windows-1252');
+        } elseif (function_exists('iconv')) {
+            $converti = iconv('Windows-1252', 'UTF-8//IGNORE', $contenu);
+            $contenu = $converti !== false ? $converti : $contenu;
+        }
     }
 
     return str_replace(["\r\n", "\r"], "\n", $contenu);
