@@ -1,27 +1,458 @@
+
 \chapter{Base de données}
 \label{chap:basededonnees}
 
-\todo{présenter le modèle de données, les tables, les relations, les contraintes, les états et les migrations.}
-
 \section{Modèle conceptuel}
+
+La base de données d'AquaVolt est conçue pour centraliser les informations nécessaires à la gestion des clients, des contrats, des consommations d'eau et d'électricité, des factures et des opérations associées.
+
+Elle repose sur plusieurs entités liées entre elles par des relations permettant de garantir la cohérence des informations.
+
+Les principales entités du système sont :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fournisseur :} représente l'organisme responsable de la gestion des clients et des tarifs.
+    \item \textbf{Agent :} représente l'utilisateur chargé de l'importation des consommations annuelles.
+    \item \textbf{Client :} représente l'abonné utilisant les services d'eau et d'électricité.
+    \item \textbf{Quartier :} représente une zone géographique caractérisée par un type d'activité.
+    \item \textbf{Contrat :} représente l'engagement entre un client et le service associé à un quartier.
+    \item \textbf{Tarif :} définit les prix unitaires applicables selon le type de consommation et les tranches.
+    \item \textbf{Consommation :} enregistre les index mensuels d'eau et d'électricité.
+    \item \textbf{Photo\_capteur :} conserve les chemins des photographies associées aux relevés.
+    \item \textbf{Anomalie :} enregistre les incohérences détectées dans les relevés.
+    \item \textbf{Facture :} conserve les informations relatives à la facturation et au paiement.
+    \item \textbf{Réclamation :} enregistre les demandes et signalements déposés par les clients.
+    \item \textbf{Notification :} conserve les messages destinés aux différents utilisateurs.
+    \item \textbf{Conso\_annuelle :} conserve les consommations annuelles importées par l'Agent.
+\end{itemize}
+
+Les relations entre ces entités permettent de représenter les différents processus métier de l'application.
+
 \section{Modèle logique}
+
+Le modèle logique est implémenté dans une base de données relationnelle nommée \texttt{miniproject\_version\_alpha}. Il utilise le moteur de stockage InnoDB et l'encodage UTF-8 avec le jeu de caractères \texttt{utf8mb4}.
+
+Chaque table possède une clé primaire permettant d'identifier ses enregistrements. Les relations entre les tables sont établies à l'aide de clés étrangères.
+
+Les principales associations sont les suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item Un fournisseur possède plusieurs clients et plusieurs tarifs.
+    \item Un client peut posséder plusieurs contrats et plusieurs consommations.
+    \item Un quartier peut être associé à plusieurs contrats.
+    \item Un contrat possède plusieurs relevés mensuels.
+    \item Une consommation peut être associée à des photographies et à des anomalies.
+    \item Une consommation peut donner lieu à une facture unique.
+    \item Un client peut déposer plusieurs réclamations.
+    \item Un agent peut importer plusieurs relevés annuels.
+    \item Un utilisateur peut recevoir plusieurs notifications.
+\end{itemize}
+
 \section{Description des tables}
+
+La base de données comprend treize tables principales. Les sections suivantes présentent leur rôle et leurs principaux attributs.
+
 \subsection{fournisseur}
+
+La table \texttt{fournisseur} contient les informations relatives au fournisseur responsable de la gestion de la plateforme.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_fournisseur} : identifiant unique du fournisseur.
+    \item \texttt{nom} : nom du fournisseur.
+    \item \texttt{email} : adresse électronique, unique.
+    \item \texttt{mot\_de\_passe} : mot de passe enregistré.
+    \item \texttt{seuil\_eau} : seuil maximal défini pour la consommation d'eau.
+    \item \texttt{seuil\_elec} : seuil maximal défini pour la consommation d'électricité.
+    \item \texttt{date\_creation} : date de création de l'enregistrement.
+\end{itemize}
+
 \subsection{client}
+
+La table \texttt{client} regroupe les informations personnelles et les informations d'accès des clients.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_client} : identifiant unique du client.
+    \item \texttt{id\_fournisseur} : référence au fournisseur associé.
+    \item \texttt{cin} : numéro de la carte d'identité nationale.
+    \item \texttt{nom}, \texttt{prenom} : identité du client.
+    \item \texttt{adresse} : adresse du client.
+    \item \texttt{email} : adresse électronique unique.
+    \item \texttt{mot\_de\_passe} : mot de passe enregistré.
+    \item \texttt{telephone} : numéro de téléphone facultatif.
+    \item \texttt{date\_creation} : date de création du compte.
+\end{itemize}
+
 \subsection{quartier}
+
+La table \texttt{quartier} représente les quartiers pris en charge par l'application.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_quartier} : identifiant unique du quartier.
+    \item \texttt{nom} : nom du quartier.
+    \item \texttt{type\_activite} : type d'activité (\texttt{RESIDENTIEL}, \texttt{COMMERCIAL} ou \texttt{INDUSTRIEL}).
+    \item \texttt{date\_creation} : date de création.
+\end{itemize}
+
+L'association entre le nom du quartier et son type d'activité doit être unique.
+
 \subsection{contrat}
+
+La table \texttt{contrat} permet de représenter les contrats associés aux clients et aux quartiers.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_contrat} : identifiant unique du contrat.
+    \item \texttt{id\_client} : référence au client concerné.
+    \item \texttt{id\_quartier} : référence au quartier associé.
+    \item \texttt{numero\_contrat} : numéro unique du contrat.
+    \item \texttt{date\_debut} : date de début du contrat.
+    \item \texttt{date\_fin} : date de fin éventuelle.
+    \item \texttt{statut} : état du contrat (\texttt{ACTIF} ou \texttt{RESILIE}).
+    \item \texttt{date\_creation} : date de création de l'enregistrement.
+\end{itemize}
+
 \subsection{tarif}
+
+La table \texttt{tarif} contient les tarifs appliqués par le fournisseur pour les consommations d'eau et d'électricité.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_tarif} : identifiant unique du tarif.
+    \item \texttt{id\_fournisseur} : référence au fournisseur.
+    \item \texttt{type} : type de consommation (\texttt{EAU} ou \texttt{ELEC}).
+    \item \texttt{borne\_min} : limite inférieure de la tranche.
+    \item \texttt{borne\_max} : limite supérieure de la tranche, éventuellement nulle pour la dernière tranche.
+    \item \texttt{prix\_unitaire} : prix appliqué à l'unité consommée.
+\end{itemize}
+
+Les tranches sont représentées par des intervalles de la forme
+\texttt{[borne\_min, borne\_max[}. Une borne maximale nulle indique une dernière tranche sans limite supérieure.
+
 \subsection{consommation}
+
+La table \texttt{consommation} enregistre les relevés mensuels des compteurs d'eau et d'électricité.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_conso} : identifiant unique du relevé.
+    \item \texttt{id\_client} : référence au client.
+    \item \texttt{id\_contrat} : référence au contrat concerné.
+    \item \texttt{periode\_mois} : mois du relevé.
+    \item \texttt{periode\_annee} : année du relevé.
+    \item \texttt{index\_eau} : index du compteur d'eau.
+    \item \texttt{index\_elec} : index du compteur d'électricité.
+    \item \texttt{date\_saisie} : date d'enregistrement du relevé.
+    \item \texttt{statut} : état du relevé.
+\end{itemize}
+
+Un contrat ne peut posséder qu'un seul relevé pour une même période mensuelle.
+
 \subsection{photo\_capteur}
+
+La table \texttt{photo\_capteur} conserve les références des photographies associées aux relevés des compteurs.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_photo} : identifiant unique de la photographie.
+    \item \texttt{id\_conso} : référence à la consommation concernée.
+    \item \texttt{type} : type de compteur (\texttt{EAU} ou \texttt{ELEC}).
+    \item \texttt{chemin} : chemin du fichier photographique.
+    \item \texttt{date\_televersement} : date du téléversement.
+\end{itemize}
+
+La contrainte d'unicité sur \texttt{id\_conso} et \texttt{type} limite à une seule photographie par type de compteur pour chaque consommation.
+
 \subsection{anomalie}
+
+La table \texttt{anomalie} permet d'enregistrer les incohérences détectées lors de la vérification des relevés.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_anomalie} : identifiant unique de l'anomalie.
+    \item \texttt{id\_conso} : référence au relevé concerné.
+    \item \texttt{id\_fournisseur} : référence au fournisseur chargé du traitement.
+    \item \texttt{type\_anomalie} : type d'anomalie (\texttt{INDEX\_INFERIEUR} ou \texttt{SEUIL\_DEPASSE}).
+    \item \texttt{champ} : compteur concerné (\texttt{EAU} ou \texttt{ELEC}).
+    \item \texttt{valeur\_saisie} : valeur initialement saisie.
+    \item \texttt{valeur\_reference} : valeur utilisée comme référence.
+    \item \texttt{statut} : état de traitement de l'anomalie.
+    \item \texttt{valeur\_corrigee} : valeur corrigée éventuelle.
+    \item \texttt{date\_detection} : date de détection.
+    \item \texttt{date\_resolution} : date de résolution éventuelle.
+\end{itemize}
+
 \subsection{facture}
+
+La table \texttt{facture} contient les informations relatives aux factures générées à partir des consommations.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_facture} : identifiant unique de la facture.
+    \item \texttt{numero} : numéro unique de la facture.
+    \item \texttt{id\_client} : référence au client.
+    \item \texttt{id\_conso} : référence à la consommation facturée.
+    \item \texttt{date\_facture} : date d'émission.
+    \item \texttt{periode\_mois} et \texttt{periode\_annee} : période facturée.
+    \item \texttt{conso\_eau} et \texttt{conso\_elec} : consommations facturées.
+    \item \texttt{montant\_ht} : montant hors taxes.
+    \item \texttt{taux\_tva} : taux de TVA, fixé par défaut à 18\,\%.
+    \item \texttt{montant\_tva} : montant de la TVA.
+    \item \texttt{montant\_ttc} : montant toutes taxes comprises.
+    \item \texttt{etat} : état de la facture (\texttt{IMPAYEE} ou \texttt{PAYEE}).
+    \item \texttt{date\_paiement} : date du paiement éventuel.
+    \item \texttt{mode\_paiement} : mode de paiement.
+    \item \texttt{reference\_paiement} : référence du paiement.
+\end{itemize}
+
+La table permet ainsi de conserver les informations de facturation et de paiement sans utiliser une table de paiement distincte.
+
 \subsection{notification}
+
+La table \texttt{notification} conserve les notifications internes destinées aux différents utilisateurs de l'application.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_notification} : identifiant unique de la notification.
+    \item \texttt{destinataire\_role} : rôle du destinataire (\texttt{client}, \texttt{fournisseur} ou \texttt{agent}).
+    \item \texttt{id\_destinataire} : identifiant du destinataire.
+    \item \texttt{type} : catégorie de notification.
+    \item \texttt{titre} : titre du message.
+    \item \texttt{message} : contenu de la notification.
+    \item \texttt{lien} : lien facultatif vers une fonctionnalité.
+    \item \texttt{lu} : indicateur de lecture.
+    \item \texttt{date\_creation} : date de création.
+    \item \texttt{date\_lecture} : date de lecture éventuelle.
+\end{itemize}
+
+Le destinataire est identifié par la combinaison de son rôle et de son identifiant. Cette conception permet de gérer plusieurs catégories d'utilisateurs dans une même table.
+
 \subsection{agent}
+
+La table \texttt{agent} contient les informations relatives aux agents chargés notamment de l'importation annuelle.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_agent} : identifiant unique de l'agent.
+    \item \texttt{nom} et \texttt{prenom} : identité de l'agent.
+    \item \texttt{email} : adresse électronique unique.
+    \item \texttt{mot\_de\_passe} : mot de passe enregistré.
+    \item \texttt{telephone} : numéro de téléphone facultatif.
+    \item \texttt{date\_creation} : date de création du compte.
+\end{itemize}
+
 \subsection{conso\_annuelle}
+
+La table \texttt{conso\_annuelle} conserve les relevés annuels issus de la tournée de l'Agent.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_conso\_annuelle} : identifiant unique du relevé annuel.
+    \item \texttt{id\_client} : référence au client concerné.
+    \item \texttt{id\_agent} : référence à l'agent ayant effectué l'importation.
+    \item \texttt{conso\_eau} : consommation annuelle d'eau.
+    \item \texttt{conso\_elec} : consommation annuelle d'électricité.
+    \item \texttt{annee} : année concernée.
+    \item \texttt{date\_saisie} : date d'enregistrement.
+    \item \texttt{statut\_verification} : état de vérification.
+    \item \texttt{date\_verification} : date de vérification éventuelle.
+\end{itemize}
+
+La combinaison du client et de l'année est unique, ce qui empêche l'enregistrement de plusieurs relevés annuels pour un même client durant la même année.
+
 \subsection{reclamation}
+
+La table \texttt{reclamation} permet de gérer les réclamations déposées par les clients.
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{id\_reclamation} : identifiant unique de la réclamation.
+    \item \texttt{numero} : numéro unique de la réclamation.
+    \item \texttt{id\_client} : référence au client concerné.
+    \item \texttt{id\_facture} : référence facultative à une facture.
+    \item \texttt{type} : type de réclamation.
+    \item \texttt{description} : description du problème signalé.
+    \item \texttt{piece\_jointe} : chemin d'une pièce jointe éventuelle.
+    \item \texttt{statut} : état de traitement.
+    \item \texttt{reponse} : réponse éventuelle du fournisseur.
+    \item \texttt{date\_creation} : date de dépôt.
+    \item \texttt{date\_resolution} : date de résolution éventuelle.
+\end{itemize}
+
 \section{Relations et cardinalités}
+
+Les relations entre les tables sont définies à l'aide de clés étrangères. Les principales cardinalités du modèle sont présentées dans le tableau suivant.
+
+\begin{table}[H]
+    \centering
+    \caption{Principales relations entre les entités}
+    \begin{tabularx}{\textwidth}{|l|l|X|}
+        \hline
+        \textbf{Entités liées} & \textbf{Cardinalité} & \textbf{Signification} \\
+        \hline
+        Fournisseur -- Client & 1,N & Un fournisseur peut gérer plusieurs clients. \\
+        \hline
+        Fournisseur -- Tarif & 1,N & Un fournisseur peut définir plusieurs tarifs. \\
+        \hline
+        Client -- Contrat & 1,N & Un client peut posséder plusieurs contrats. \\
+        \hline
+        Quartier -- Contrat & 1,N & Un quartier peut être associé à plusieurs contrats. \\
+        \hline
+        Client -- Consommation & 1,N & Un client peut posséder plusieurs relevés. \\
+        \hline
+        Contrat -- Consommation & 1,N & Un contrat peut posséder plusieurs relevés mensuels. \\
+        \hline
+        Consommation -- Photo\_capteur & 1,N & Un relevé peut être associé à plusieurs photographies. \\
+        \hline
+        Consommation -- Anomalie & 1,N & Un relevé peut présenter plusieurs anomalies. \\
+        \hline
+        Consommation -- Facture & 1,1 & Une consommation peut être associée à une seule facture au maximum. \\
+        \hline
+        Client -- Facture & 1,N & Un client peut recevoir plusieurs factures. \\
+        \hline
+        Client -- Réclamation & 1,N & Un client peut déposer plusieurs réclamations. \\
+        \hline
+        Agent -- Conso\_annuelle & 1,N & Un agent peut être associé à plusieurs relevés annuels. \\
+        \hline
+        Client -- Conso\_annuelle & 1,N & Un client peut avoir plusieurs relevés annuels, un par année. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+La relation entre une facture et une réclamation est facultative du côté de la réclamation : une réclamation peut concerner une facture précise ou être indépendante d'une facture.
+
+La table \texttt{notification} constitue un cas particulier. Elle identifie son destinataire à l'aide de deux attributs, \texttt{destinataire\_role} et \texttt{id\_destinataire}, sans clé étrangère directe vers les tables \texttt{client}, \texttt{fournisseur} ou \texttt{agent}.
+
 \section{Contraintes d'intégrité}
+
+Plusieurs contraintes permettent de préserver la cohérence des données.
+
+\subsection*{Clés primaires}
+
+Chaque table possède une clé primaire auto-incrémentée de type \texttt{INT UNSIGNED}, permettant d'identifier chaque enregistrement de manière unique.
+
+\subsection*{Clés étrangères}
+
+Les clés étrangères assurent la cohérence des relations entre les tables. Elles utilisent principalement les règles suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{ON UPDATE CASCADE} : les modifications d'identifiants référencés sont propagées.
+    \item \texttt{ON DELETE RESTRICT} : la suppression d'un enregistrement référencé est empêchée.
+    \item \texttt{ON DELETE CASCADE} : la suppression d'un client entraîne la suppression de ses relevés annuels ; la suppression d'une consommation entraîne celle de ses photographies et de ses anomalies.
+    \item \texttt{ON DELETE SET NULL} : la référence à une facture est mise à \texttt{NULL} lorsqu'une facture associée est supprimée.
+\end{itemize}
+
+\subsection*{Contraintes CHECK}
+
+Des contraintes de vérification sont définies pour empêcher l'enregistrement de valeurs incohérentes :
+
+\begin{itemize}[leftmargin=*]
+    \item les seuils de consommation doivent être positifs ou nuls ;
+    \item les bornes tarifaires doivent être cohérentes et les prix unitaires positifs ou nuls ;
+    \item les dates de fin des contrats ne peuvent pas être antérieures aux dates de début ;
+    \item les périodes mensuelles doivent être comprises entre 1 et 12 ;
+    \item les index et les consommations doivent être positifs ou nuls ;
+    \item les années des relevés annuels doivent être comprises entre 2000 et 2100 ;
+    \item les montants enregistrés dans les factures doivent être positifs ou nuls.
+\end{itemize}
+
 \section{Index et contraintes d'unicité}
+
+Afin de garantir l'unicité de certaines informations et de faciliter les recherches, plusieurs index sont définis dans la base de données.
+
+Les principales contraintes d'unicité sont les suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item adresse électronique du fournisseur ;
+    \item adresse électronique de l'agent ;
+    \item CIN et adresse électronique du client ;
+    \item association du nom et du type d'activité du quartier ;
+    \item numéro du contrat ;
+    \item combinaison du fournisseur, du type de tarif et de la borne minimale ;
+    \item combinaison du contrat, du mois et de l'année pour une consommation ;
+    \item combinaison du client et de l'année pour une consommation annuelle ;
+    \item combinaison de la consommation et du type de photographie ;
+    \item numéro de facture ;
+    \item référence de consommation dans la table des factures ;
+    \item numéro de réclamation.
+\end{itemize}
+
+Des index supplémentaires sont également définis sur les clés étrangères et certains attributs utilisés pour les recherches, notamment les destinataires des notifications et leurs dates de création.
+
 \section{États et transitions}
+
+Plusieurs tables utilisent des attributs de type \texttt{ENUM} afin de représenter les différents états des opérations métier.
+
+\subsection*{État d'un contrat}
+
+Un contrat peut prendre deux états :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{ACTIF} : le contrat est en cours.
+    \item \texttt{RESILIE} : le contrat a été résilié.
+\end{itemize}
+
+\subsection*{État d'une consommation}
+
+Une consommation peut prendre les états suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{EN\_ATTENTE} : le relevé vient d'être enregistré.
+    \item \texttt{ANOMALIE} : une incohérence a été détectée.
+    \item \texttt{VALIDEE} : le relevé a été validé.
+    \item \texttt{FACTUREE} : une facture a été générée pour le relevé.
+\end{itemize}
+
+\subsection*{État d'une anomalie}
+
+Le traitement d'une anomalie utilise trois états :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{EN\_ATTENTE} : anomalie en attente de traitement.
+    \item \texttt{CONFIRMEE} : anomalie confirmée.
+    \item \texttt{CORRIGEE} : anomalie corrigée.
+\end{itemize}
+
+\subsection*{État d'une facture}
+
+Une facture peut être :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{IMPAYEE} : le paiement n'a pas encore été enregistré.
+    \item \texttt{PAYEE} : le paiement a été enregistré.
+\end{itemize}
+
+\subsection*{État d'une réclamation}
+
+Une réclamation peut prendre les états suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{OUVERTE} : la réclamation vient d'être déposée.
+    \item \texttt{EN\_COURS} : son traitement est en cours.
+    \item \texttt{RESOLUE} : le problème a été résolu.
+    \item \texttt{REJETEE} : la réclamation a été rejetée.
+\end{itemize}
+
+\subsection*{État de vérification annuelle}
+
+Les relevés annuels utilisent trois états :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{A\_VERIFIER} : relevé en attente de vérification.
+    \item \texttt{VALIDEE} : relevé validé.
+    \item \texttt{REJETEE} : relevé rejeté.
+\end{itemize}
+
+\subsection*{État des notifications}
+
+L'attribut \texttt{lu} indique si une notification a été consultée. La valeur 0 signifie qu'elle n'a pas encore été lue, tandis que la valeur 1 indique qu'elle a été lue.
+
 \section{Jeu de données de démonstration}
+
+Le projet prévoit un fichier \texttt{seed.sql} destiné à préparer les données initiales de la base de données pour les besoins de démonstration et de test.
+
+Ce fichier est distinct du script \texttt{schema.sql}, qui définit la structure des tables, leurs attributs, leurs clés et leurs contraintes.
+
 \section{Migrations}
+
+Le projet comporte un répertoire \texttt{sql/migrations/} destiné à regrouper les scripts de migration de la base de données.
+
+Le script \texttt{schema.sql} constitue le script de création initiale de la structure. Il crée la base \texttt{miniproject\_version\_alpha}, définit l'encodage utilisé et crée les treize tables dans un ordre compatible avec leurs dépendances.
+
+Les scripts de migration permettent de conserver séparément les éventuelles évolutions de la structure de la base de données au cours du développement.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth,height=0.88\textheight,keepaspectratio]{../conception/msd/msd.png}
+  \caption{Modèle de données de la version finale}
+  \label{fig:msd}
+\end{figure}

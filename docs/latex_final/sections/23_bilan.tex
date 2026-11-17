@@ -1,10 +1,135 @@
+
 \chapter{Bilan, limites et perspectives}
 \label{chap:bilan}
 
-\todo{présenter le bilan, les difficultés, les compétences, les limites et les perspectives.}
-
 \section{Bilan fonctionnel}
+
+Le mini-projet AquaVolt a abouti à la réalisation d'une application web dédiée à la gestion des consommations et des factures d'eau et d'électricité. L'application permet aux différents acteurs du système, à savoir le Client, le Fournisseur et l'Agent, d'accéder aux fonctionnalités correspondant à leurs responsabilités.
+
+La version finale intègre plusieurs fonctionnalités couvrant les principales étapes du processus de gestion des consommations et de facturation :
+
+\begin{itemize}
+    \item \textbf{Authentification et gestion des accès :} mise en place d'un système d'authentification permettant de distinguer les Clients, les Fournisseurs et les Agents selon leurs rôles et leurs autorisations.
+
+    \item \textbf{Gestion des clients, des quartiers et des contrats :} gestion des informations des clients, création des quartiers et association des clients à leurs contrats selon les types d'activité.
+
+    \item \textbf{Saisie des consommations :} enregistrement mensuel des consommations d'eau et d'électricité, avec possibilité de téléverser des photographies des compteurs et de consulter les relevés précédents.
+
+    \item \textbf{Détection et traitement des anomalies :} identification des relevés présentant un index inférieur à celui du relevé précédent ou dépassant le seuil défini par le Fournisseur. Les anomalies doivent être traitées avant la validation de la consommation et la génération de la facture.
+
+    \item \textbf{Facturation automatique :} calcul des montants des factures selon les tranches tarifaires applicables à l'eau et à l'électricité, avec prise en compte de la TVA de 18\,\% et détermination des montants hors taxes (HT), de la TVA et toutes taxes comprises (TTC).
+
+    \item \textbf{Gestion des réclamations :} possibilité pour les Clients de déposer des réclamations selon différentes catégories, ainsi que leur consultation et leur traitement par le Fournisseur avec envoi de notifications.
+
+    \item \textbf{Importation et vérification annuelles :} importation des consommations annuelles à partir du fichier \texttt{Consommation\_Annuelle.txt} par l'Agent, suivie de la comparaison avec les consommations mensuelles par le Fournisseur.
+
+    \item \textbf{Gestion des paiements :} enregistrement du paiement total des factures par le Fournisseur, mise à jour de leur état et notification du Client après l'opération.
+
+    \item \textbf{Tableau de bord et notifications :} mise à disposition d'un tableau de bord fournisseur présentant des indicateurs de suivi, notamment les montants impayés, les montants encaissés, l'évolution mensuelle des consommations et le nombre d'anomalies en attente. Le système comprend également des notifications internes destinées aux différents utilisateurs.
+\end{itemize}
+
+La campagne finale de tests, réalisée le 17 novembre 2026, a permis de vérifier les principaux parcours fonctionnels et les interactions entre les modules. Les résultats ont notamment confirmé le bon déroulement de l'import annuel, de la vérification multi-contrats, du traitement des réclamations, du paiement des factures et de la gestion des notifications.
+
+Ainsi, AquaVolt regroupe les principales opérations liées à la gestion des consommations, au suivi des anomalies, à la facturation, aux réclamations et aux paiements au sein d'une même application web.
+
 \section{Difficultés rencontrées}
+
+La réalisation du projet AquaVolt a nécessité la prise en compte de plusieurs aspects techniques et organisationnels. Le développement d'une application regroupant plusieurs modules interdépendants a constitué un défi pour l'équipe.
+
+Parmi les principales difficultés rencontrées au cours du développement et de l'intégration, nous pouvons citer :
+
+\begin{itemize}
+    \item \textbf{Conception de la base de données :} la modélisation des différentes entités et de leurs relations a nécessité une attention particulière afin de garantir la cohérence des données et de faciliter les échanges entre les modules.
+
+    \item \textbf{Gestion des fonctionnalités interdépendantes :} l'intégration des modules de consommation, d'anomalies, de facturation et de paiement a demandé une coordination entre les différentes parties afin d'assurer le bon déroulement du processus de gestion des factures.
+
+    \item \textbf{Calcul des consommations annuelles :} la vérification des relevés annuels pour les clients possédant plusieurs contrats a nécessité une logique d'agrégation spécifique. Un premier calcul ne prenait pas correctement en compte l'ensemble des contrats ; il a été corrigé en calculant la consommation de chaque contrat séparément avant de sommer les résultats.
+
+    \item \textbf{Traitement des fichiers :} l'importation des données annuelles a posé des difficultés liées à l'encodage des fichiers et à la validation des lignes. Une correction a notamment été nécessaire pour permettre le traitement des fichiers même lorsque l'extension PHP \texttt{mbstring} n'est pas disponible.
+
+    \item \textbf{Intégration des modules :} la fusion des différentes parties développées par les membres de l'équipe a nécessité des vérifications supplémentaires, notamment pour résoudre les problèmes d'accès aux fonctionnalités et les liens de navigation initialement non activés.
+
+    \item \textbf{Travail collaboratif :} la répartition du développement entre cinq membres a nécessité une coordination régulière, une organisation des tâches et une intégration cohérente des différentes parties de l'application.
+\end{itemize}
+
+La campagne finale a permis d'identifier et de corriger plusieurs problèmes importants, notamment ceux liés à l'import annuel, à la vérification multi-contrats, au paiement fournisseur et à l'intégration du module de réclamation.
+
+Ces difficultés ont contribué à améliorer la compréhension des exigences liées au développement, à l'intégration et à la validation d'une application web complète.
+
 \section{Compétences acquises}
+
+La réalisation du projet AquaVolt a constitué une occasion d'approfondir nos connaissances théoriques et de développer de nouvelles compétences pratiques dans le domaine du développement web.
+
+Ce projet nous a permis de renforcer les compétences suivantes :
+
+\begin{itemize}
+    \item \textbf{Développement web :} approfondissement des connaissances en PHP et compréhension de la structure et du fonctionnement d'une application web dynamique organisée selon une architecture MVC.
+
+    \item \textbf{Gestion des bases de données :} amélioration des compétences en modélisation des données, en organisation des tables, en définition des relations et en manipulation des informations à l'aide de requêtes SQL.
+
+    \item \textbf{Logique métier :} compréhension de la mise en œuvre des règles de gestion liées aux consommations, à la détection des anomalies, à la facturation et aux paiements.
+
+    \item \textbf{Gestion des fichiers :} acquisition d'une expérience dans le traitement, la validation et l'exploitation de fichiers contenant des données à importer dans une application.
+
+    \item \textbf{Sécurité des applications :} mise en pratique de mécanismes de protection tels que le hachage des mots de passe, les jetons CSRF, les requêtes préparées et le contrôle des autorisations.
+
+    \item \textbf{Conception et intégration :} meilleure compréhension de l'organisation d'une application en plusieurs modules fonctionnels et de leurs interactions.
+
+    \item \textbf{Tests et validation :} apprentissage de la préparation de scénarios de test, de la vérification des parcours utilisateurs, de l'identification des anomalies et de la validation des corrections.
+
+    \item \textbf{Travail en équipe :} développement des capacités de communication, de coordination, de répartition des responsabilités et de collaboration dans le cadre d'un projet collectif.
+
+    \item \textbf{Gestion de versions :} familiarisation avec Git et GitHub pour le suivi des modifications, le partage du code source et l'intégration du travail des différents membres de l'équipe.
+
+    \item \textbf{Rédaction technique :} amélioration des compétences en documentation et en rédaction d'un rapport technique à l'aide de LaTeX.
+\end{itemize}
+
+Ainsi, ce mini-projet nous a permis de mettre en pratique plusieurs connaissances acquises durant notre formation en Génie Informatique et de mieux comprendre les différentes étapes de réalisation d'une application web.
+
 \section{Limites de la version finale}
+
+Malgré les fonctionnalités développées et les résultats positifs de la campagne finale, la version actuelle d'AquaVolt présente certaines limites :
+
+\begin{itemize}
+    \item \textbf{Gestion des pièces jointes :} le formulaire de réclamation ne permet pas encore au Client d'ajouter des documents ou des photographies, bien qu'un champ correspondant soit prévu dans la base de données.
+
+    \item \textbf{Affichage sur mobile :} les tableaux contenant un grand nombre de colonnes nécessitent un défilement horizontal pour consulter toutes les informations sur les petits écrans.
+
+    \item \textbf{Pagination :} les listes longues, notamment celles des factures, ne disposent pas encore d'un mécanisme de pagination.
+
+    \item \textbf{Données de démonstration :} les données initiales ne contiennent pas de photographies de compteurs ni de relevés pour octobre 2026, ce qui limite certains scénarios de démonstration.
+
+    \item \textbf{Gestion des paiements :} le système enregistre le paiement total d'une facture, mais ne propose pas encore de mécanisme de saisie et de comparaison d'un montant effectivement versé avec le montant attendu.
+
+    \item \textbf{Périmètre des tests :} les tests réalisés couvrent les principaux parcours fonctionnels et des contrôles de sécurité de base, mais ne constituent pas une campagne exhaustive de tests de charge ou un audit de sécurité complet.
+\end{itemize}
+
+Ces limites représentent des axes d'amélioration pour les versions futures et ne remettent pas en cause les fonctionnalités validées dans le cadre de ce mini-projet.
+
 \section{Perspectives d'amélioration}
+
+Afin de faire évoluer AquaVolt et d'améliorer davantage la qualité du service proposé, plusieurs perspectives peuvent être envisagées pour les versions futures de l'application.
+
+Les principales améliorations possibles sont les suivantes :
+
+\begin{itemize}
+    \item \textbf{Ajout des pièces jointes aux réclamations :} permettre aux Clients de joindre des photographies ou des documents afin de faciliter la compréhension et le traitement de leurs demandes.
+
+    \item \textbf{Amélioration de l'interface utilisateur :} optimiser davantage l'affichage des tableaux et des formulaires sur les ordinateurs, les tablettes et les smartphones, notamment en réduisant les contraintes de défilement horizontal.
+
+    \item \textbf{Mise en place de la pagination :} ajouter un système de pagination et de filtrage aux listes contenant un grand nombre d'enregistrements afin de faciliter leur consultation.
+
+    \item \textbf{Évolution du système de paiement :} intégrer la saisie du montant effectivement reçu, la comparaison avec le montant de la facture et la gestion des éventuelles divergences.
+
+    \item \textbf{Renforcement de la sécurité :} poursuivre l'amélioration de la protection des comptes utilisateurs, des données personnelles et des informations relatives aux factures, notamment par des vérifications de sécurité plus approfondies.
+
+    \item \textbf{Automatisation des traitements :} enrichir les mécanismes automatiques de détection des anomalies, de vérification des consommations et de génération des factures.
+
+    \item \textbf{Amélioration des notifications :} développer davantage le système de notification, notamment en envisageant l'envoi de notifications par courrier électronique pour faciliter le suivi des opérations importantes.
+
+    \item \textbf{Enrichissement du tableau de bord :} intégrer de nouveaux indicateurs et des outils de visualisation permettant au Fournisseur de mieux suivre les consommations, les paiements et les impayés.
+
+    \item \textbf{Optimisation des performances :} améliorer les traitements et les accès à la base de données afin de garantir une meilleure réactivité de l'application lorsque le nombre d'utilisateurs et le volume des données augmentent.
+\end{itemize}
+
+Ces perspectives permettraient de faire évoluer AquaVolt vers une solution plus complète, plus performante et mieux adaptée aux besoins des Clients, des Fournisseurs et des Agents.

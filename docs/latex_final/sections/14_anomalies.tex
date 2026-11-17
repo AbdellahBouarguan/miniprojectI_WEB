@@ -1,16 +1,197 @@
+
 \chapter{Gestion des anomalies}
 \label{chap:anomalies}
 
-\todo{décrire les types d'anomalies, la détection, le parcours client, la correction fournisseur et la facturation.}
+Le module de gestion des anomalies permet de détecter et de traiter les incohérences constatées lors de la saisie des consommations d'eau et d'électricité. Il intervient lorsqu'un index saisi ne respecte pas les règles de contrôle définies par l'application ou lorsqu'il dépasse le seuil de vigilance configuré par le fournisseur.
+
+Le traitement repose sur deux acteurs principaux : le client, qui peut consulter et confirmer ou corriger son relevé, et le fournisseur, qui dispose d'une interface de consultation et de correction des anomalies.
 
 \section{Objectifs}
+
+Le module de gestion des anomalies vise à :
+\begin{itemize}
+    \item détecter automatiquement les index incohérents ;
+    \item comparer les valeurs saisies avec les relevés précédents ;
+    \item contrôler les valeurs par rapport aux seuils définis par le fournisseur ;
+    \item informer le client lorsqu'une vérification est nécessaire ;
+    \item permettre au fournisseur de consulter et de corriger les anomalies ;
+    \item empêcher la facturation d'une consommation qui présente encore des anomalies en attente ;
+    \item permettre la validation de la consommation après résolution des anomalies.
+\end{itemize}
+
 \section{Types d'anomalies}
+
+L'application distingue deux types d'anomalies, enregistrés dans le champ \texttt{type\_anomalie} de la table \texttt{anomalie}.
+
 \subsection{Index inférieur}
+
+Une anomalie de type \texttt{INDEX\_INFERIEUR} est détectée lorsque l'index actuel est inférieur à celui du dernier relevé validé ou facturé du même contrat.
+
+La comparaison est effectuée séparément pour l'eau et l'électricité.
+
+Cette situation nécessite une vérification, car un index inférieur au relevé précédent ne peut pas être directement accepté par le système.
+
 \subsection{Seuil dépassé}
+
+Une anomalie de type \texttt{SEUIL\_DEPASSE} est détectée lorsque l'index saisi dépasse le seuil de vigilance défini par le fournisseur.
+
+Deux paramètres sont utilisés :
+\begin{itemize}
+    \item \texttt{seuil\_eau} pour les relevés du compteur d'eau ;
+    \item \texttt{seuil\_elec} pour les relevés du compteur d'électricité.
+\end{itemize}
+
+Le dépassement du seuil entraîne une demande de vérification. Le client peut confirmer les valeurs depuis son espace lorsque l'anomalie ne concerne pas un index inférieur.
+
 \section{Détection}
+
+La détection est implémentée dans la classe \texttt{Anomalie}, à travers la méthode statique \texttt{detecter()}.
+
+Cette méthode reçoit les paramètres suivants :
+\begin{itemize}
+    \item le dernier relevé validé, lorsqu'il existe ;
+    \item l'index d'eau saisi ;
+    \item l'index d'électricité saisi ;
+    \item le seuil d'eau du fournisseur ;
+    \item le seuil d'électricité du fournisseur.
+\end{itemize}
+
+Pour chaque compteur, le système applique les règles suivantes :
+\begin{enumerate}
+    \item comparer l'index saisi avec l'index précédent, lorsqu'un relevé précédent existe ;
+    \item si l'index actuel est inférieur à l'index précédent, enregistrer une anomalie \texttt{INDEX\_INFERIEUR} ;
+    \item dans le cas contraire, vérifier si l'index dépasse le seuil du fournisseur ;
+    \item si le seuil est dépassé, enregistrer une anomalie \texttt{SEUIL\_DEPASSE}.
+\end{enumerate}
+
+Pour une même valeur, la détection d'un index inférieur interrompt les vérifications supplémentaires concernant ce compteur.
+
+Chaque anomalie contient notamment le type détecté, le champ concerné (\texttt{EAU} ou \texttt{ELEC}), la valeur saisie et la valeur de référence.
+
+Les anomalies sont enregistrées dans la table \texttt{anomalie}, avec le statut initial \texttt{EN\_ATTENTE}.
+
 \section{Parcours client}
+
+Lorsqu'une anomalie est détectée pendant la saisie, le relevé nécessite une vérification avant de poursuivre normalement le processus de facturation.
+
+Le client peut accéder à une page de confirmation qui présente :
+\begin{itemize}
+    \item la période du relevé ;
+    \item le compteur concerné ;
+    \item le type d'anomalie ;
+    \item la valeur saisie ;
+    \item la valeur de référence.
+\end{itemize}
+
+Deux actions sont proposées :
+\begin{itemize}
+    \item \textbf{Confirmer ces valeurs :} permet au client de confirmer les valeurs lorsque l'anomalie ne concerne pas un index inférieur ;
+    \item \textbf{Corriger :} permet de reprendre la saisie afin de rectifier les valeurs.
+\end{itemize}
+
+Lorsque le relevé présente un index inférieur au précédent, le bouton de confirmation est désactivé. Le client doit alors corriger le relevé.
+
+Les actions de confirmation sont transmises par des requêtes POST protégées par un jeton CSRF.
+
 \section{Correction fournisseur}
+
+Le fournisseur dispose d'une interface dédiée à la consultation des anomalies en attente.
+
+La liste affiche les informations suivantes :
+\begin{itemize}
+    \item le numéro de l'anomalie ;
+    \item le nom et le CIN du client ;
+    \item le compteur concerné ;
+    \item le type d'anomalie ;
+    \item l'index saisi ;
+    \item l'index précédent, lorsqu'il existe ;
+    \item le seuil défini par le fournisseur ;
+    \item la date de détection.
+\end{itemize}
+
+Le fournisseur peut accéder à une page de correction contenant les informations du client, le type d'anomalie, l'index précédent et le seuil applicable.
+
+Il peut alors saisir le nouvel index constaté. Avant l'enregistrement, le système vérifie :
+\begin{itemize}
+    \item la validité du jeton CSRF ;
+    \item le format numérique de la valeur ;
+    \item le respect de l'index précédent, lorsque celui-ci existe ;
+    \item le respect du seuil défini par le fournisseur.
+\end{itemize}
+
+La valeur corrigée doit être supérieure ou égale à l'index précédent et inférieure ou égale au seuil du fournisseur.
+
+Une fois les contrôles effectués, la méthode \texttt{corriger()} de la classe \texttt{AnomalieBD} met à jour l'index correspondant dans la table \texttt{consommation} et clôture l'anomalie.
+
 \section{Revalidation}
+
+Après la correction d'une anomalie, le système vérifie si d'autres anomalies restent en attente pour la même consommation.
+
+La logique de revalidation est la suivante :
+\begin{enumerate}
+    \item l'anomalie traitée passe au statut \texttt{CORRIGEE} ;
+    \item la valeur corrigée est enregistrée dans le champ \texttt{valeur\_corrigee} ;
+    \item la date de résolution est renseignée ;
+    \item le nombre d'anomalies encore en attente est vérifié ;
+    \item lorsque toutes les anomalies sont clôturées, le statut de la consommation passe à \texttt{VALIDEE}.
+\end{enumerate}
+
+La correction et la mise à jour des statuts sont réalisées dans une transaction SQL. En cas d'échec, un retour arrière (\texttt{ROLLBACK}) est effectué afin d'annuler les modifications de cette transaction.
+
 \section{Génération de facture après correction}
+
+La génération de la facture est déclenchée après la correction d'une anomalie.
+
+Le contrôleur relit le statut de la consommation après la correction. Si celle-ci possède le statut \texttt{VALIDEE}, il appelle la méthode \texttt{generer()} de la classe \texttt{FactureService}.
+
+La facture est donc générée uniquement lorsque toutes les anomalies de la consommation ont été résolues et que celle-ci est validée.
+
+Si la génération de la facture échoue, l'erreur est enregistrée dans le journal applicatif et un message indique au fournisseur que la correction a réussi, mais qu'une vérification de la facturation reste nécessaire.
+
 \section{Notifications}
+
+Le traitement de correction présenté dans le contrôleur \texttt{Anomalie} ne contient pas d'envoi explicite d'une notification spécifique après la résolution d'une anomalie.
+
+Le module de notifications de l'application est traité séparément dans le chapitre consacré aux notifications. Il convient donc de distinguer les éventuelles notifications générales du système d'un envoi automatique directement lié à la correction d'une anomalie.
+
 \section{Tests}
+
+Les scénarios suivants constituent des cas de vérification fonctionnelle du module. Ils décrivent les comportements attendus à contrôler et ne constituent pas, à eux seuls, une preuve de tests exécutés.
+
+\begin{longtable}{|p{0.8cm}|p{5.1cm}|p{5.2cm}|}
+\hline
+\textbf{N°} & \textbf{Scénario} & \textbf{Résultat attendu} \\
+\hline
+1 & Saisir un index inférieur au relevé précédent. & Une anomalie de type \texttt{INDEX\_INFERIEUR} est détectée. \\
+\hline
+2 & Saisir un index supérieur au seuil du fournisseur. & Une anomalie de type \texttt{SEUIL\_DEPASSE} est détectée. \\
+\hline
+3 & Confirmer un relevé présentant un index inférieur. & La confirmation est désactivée. \\
+\hline
+4 & Consulter les anomalies en attente en tant que fournisseur. & Seules les anomalies associées au fournisseur connecté sont affichées. \\
+\hline
+5 & Enregistrer une valeur corrigée inférieure à l'index précédent. & La correction est refusée. \\
+\hline
+6 & Enregistrer une valeur corrigée supérieure au seuil. & La correction est refusée. \\
+\hline
+7 & Corriger une anomalie alors que d'autres restent en attente. & L'anomalie corrigée est clôturée, mais la consommation reste en attente de résolution des autres anomalies. \\
+\hline
+8 & Corriger la dernière anomalie d'une consommation. & La consommation passe au statut \texttt{VALIDEE}. \\
+\hline
+9 & Corriger la dernière anomalie d'une consommation et déclencher la facturation. & Le service de facturation est appelé si la consommation est validée. \\
+\hline
+\end{longtable}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{../conception/diagrams/png/02_traitement_anomalie.png}
+  \caption{Diagramme de séquence du traitement d'une anomalie}
+  \label{fig:sequence-anomalie}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{../tests/screenshots/desktop/02_client_flow/11_consumption_anomaly_threshold_after_submit.png}
+  \caption{Confirmation d'une anomalie de seuil}
+  \label{fig:anomalie-seuil}
+\end{figure}

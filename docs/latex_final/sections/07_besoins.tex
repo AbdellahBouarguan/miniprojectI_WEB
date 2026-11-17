@@ -1,14 +1,166 @@
+
 \chapter{Analyse des besoins}
 \label{chap:besoins}
 
-\todo{présenter les besoins fonctionnels, non fonctionnels, les règles métier et les cas d'utilisation.}
-
 \section{Besoins fonctionnels}
+
+Les besoins fonctionnels décrivent les services que l'application AquaVolt doit fournir à ses utilisateurs. Ils sont organisés selon les trois acteurs principaux : le Client, le Fournisseur et l'Agent.
+
 \subsection{Client}
+
+Le Client doit pouvoir effectuer les opérations suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item s'authentifier à l'aide de ses identifiants ;
+    \item consulter ses informations personnelles et ses contrats ;
+    \item consulter les quartiers associés à ses contrats ;
+    \item saisir les index mensuels de ses compteurs d'eau et d'électricité ;
+    \item joindre une photographie du compteur lors de la saisie ;
+    \item consulter les relevés du mois précédent ;
+    \item consulter ses factures et les montants à payer ;
+    \item déposer une réclamation en précisant son type et sa description ;
+    \item suivre l'état de traitement de ses réclamations ;
+    \item consulter les notifications reçues.
+\end{itemize}
+
 \subsection{Fournisseur}
+
+Le Fournisseur dispose des fonctionnalités de gestion et de suivi suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item gérer les clients et leurs informations ;
+    \item gérer les quartiers et les contrats associés ;
+    \item consulter les consommations saisies par les clients ;
+    \item examiner et traiter les anomalies détectées ;
+    \item corriger les relevés présentant des incohérences avant la facturation ;
+    \item générer automatiquement les factures selon les tarifs applicables ;
+    \item consulter les détails des factures et leurs montants ;
+    \item consulter et traiter les réclamations des clients ;
+    \item enregistrer les paiements et vérifier les montants versés ;
+    \item effectuer la vérification annuelle des consommations importées ;
+    \item consulter les notifications internes ;
+    \item suivre l'activité à travers un tableau de bord présentant des statistiques.
+\end{itemize}
+
 \subsection{Agent}
+
+L'Agent intervient dans le traitement des données annuelles. Il doit pouvoir :
+
+\begin{itemize}[leftmargin=*]
+    \item accéder à l'application avec son compte ;
+    \item importer les consommations annuelles à partir du fichier \texttt{Consommation\_Annuelle.txt} ;
+    \item permettre l'intégration des données importées dans le processus de vérification annuelle.
+\end{itemize}
+
 \section{Besoins non fonctionnels}
+
+Les besoins non fonctionnels définissent les critères de qualité que l'application doit respecter.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Sécurité :} l'accès aux fonctionnalités doit être contrôlé selon le rôle de chaque utilisateur. Les opérations sensibles doivent être protégées.
+    \item \textbf{Fiabilité :} les données relatives aux clients, aux consommations et aux factures doivent être enregistrées de manière cohérente.
+    \item \textbf{Ergonomie :} les interfaces doivent être simples à comprendre et faciliter l'utilisation de l'application.
+    \item \textbf{Maintenabilité :} l'organisation du code selon l'architecture MVC doit faciliter la modification et l'évolution des différents modules.
+    \item \textbf{Performance :} les opérations courantes, telles que la consultation des factures et des consommations, doivent être exécutées dans des délais raisonnables.
+    \item \textbf{Compatibilité :} l'application web doit pouvoir être utilisée à partir d'un navigateur web compatible.
+    \item \textbf{Intégrité des données :} les relations entre les clients, les contrats, les consommations et les factures doivent être préservées.
+\end{itemize}
+
 \section{Règles métier}
+
+Les règles métier définissent les conditions qui encadrent le fonctionnement de l'application AquaVolt.
+
+\begin{enumerate}[leftmargin=*]
+    \item Un utilisateur accède aux fonctionnalités correspondant à son rôle : Client, Fournisseur ou Agent.
+    \item Un client peut posséder plusieurs contrats, éventuellement associés à différents quartiers et types d'activité.
+    \item Chaque relevé mensuel doit être associé au contrat concerné et au compteur correspondant.
+    \item Le relevé du mois précédent sert de référence pour vérifier la cohérence du nouvel index.
+    \item Un index inférieur à celui du mois précédent constitue une anomalie.
+    \item Un index dépassant le seuil défini par le Fournisseur constitue également une anomalie.
+    \item Une anomalie doit être examinée et corrigée avant la génération de la facture correspondante.
+    \item Le montant de la facture est calculé à partir des tranches tarifaires applicables à la consommation.
+    \item La taxe sur la valeur ajoutée (TVA) est appliquée au taux de 18\,\%.
+    \item Le montant toutes taxes comprises (TTC) correspond au montant hors taxes (HT) augmenté de la TVA.
+    \item Les réclamations doivent être associées à un client et à un type de réclamation : fuite externe, fuite interne, facture ou autre.
+    \item Le traitement d'une réclamation par le Fournisseur entraîne l'envoi d'une notification au client.
+    \item Les consommations annuelles sont importées à partir du fichier prévu à cet effet, puis vérifiées par le Fournisseur.
+    \item Lors de l'enregistrement d'un paiement, le montant versé doit être comparé au montant attendu afin de détecter les éventuels écarts.
+\end{enumerate}
+
 \section{Cas d'utilisation}
+
+Les cas d'utilisation représentent les interactions entre les acteurs et les fonctionnalités proposées par l'application.
+
+Les principaux cas d'utilisation sont regroupés comme suit :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Client :} s'authentifier, consulter ses contrats, saisir une consommation, joindre une photo du compteur, consulter une facture, déposer une réclamation et consulter ses notifications.
+    \item \textbf{Fournisseur :} gérer les clients et les quartiers, gérer les contrats, traiter les anomalies, générer les factures, traiter les réclamations, enregistrer les paiements, vérifier les consommations annuelles et consulter le tableau de bord.
+    \item \textbf{Agent :} s'authentifier et importer les consommations annuelles.
+\end{itemize}
+
 \section{Scénarios principaux}
+
+Cette section présente les principaux scénarios de fonctionnement de l'application.
+
+\subsection*{Scénario 1 : Saisie d'une consommation mensuelle}
+
+\begin{enumerate}[leftmargin=*]
+    \item Le Client s'authentifie sur la plateforme.
+    \item Il sélectionne le contrat concerné.
+    \item Il saisit les nouveaux index de consommation.
+    \item Il ajoute une photographie du compteur.
+    \item Le système compare les nouveaux index avec ceux du mois précédent et vérifie les seuils définis.
+    \item Si une anomalie est détectée, le relevé est signalé pour traitement par le Fournisseur.
+    \item Si aucune anomalie n'est détectée, le relevé peut poursuivre le processus de facturation.
+\end{enumerate}
+
+\subsection*{Scénario 2 : Génération d'une facture}
+
+\begin{enumerate}[leftmargin=*]
+    \item Le Fournisseur accède aux consommations validées.
+    \item Le système détermine la consommation à facturer.
+    \item Les tarifs par tranches sont appliqués.
+    \item Le système calcule les montants HT, TVA et TTC.
+    \item La facture est générée et mise à disposition pour consultation.
+\end{enumerate}
+
+\subsection*{Scénario 3 : Traitement d'une réclamation}
+
+\begin{enumerate}[leftmargin=*]
+    \item Le Client s'authentifie et accède à l'espace des réclamations.
+    \item Il sélectionne le type de réclamation et renseigne sa description.
+    \item La réclamation est enregistrée dans le système.
+    \item Le Fournisseur consulte la réclamation et procède à son traitement.
+    \item Le système envoie une notification au Client concernant le traitement effectué.
+\end{enumerate}
+
+\subsection*{Scénario 4 : Importation et vérification annuelle}
+
+\begin{enumerate}[leftmargin=*]
+    \item L'Agent accède à la fonctionnalité d'importation annuelle.
+    \item Il sélectionne le fichier \texttt{Consommation\_Annuelle.txt}.
+    \item Le système traite les données contenues dans le fichier.
+    \item Les données importées sont mises à disposition pour la vérification annuelle.
+    \item Le Fournisseur consulte les données et vérifie les éventuels écarts.
+\end{enumerate}
+
 \section{Contraintes et hypothèses}
+
+La réalisation du projet repose sur les contraintes et hypothèses suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Contraintes technologiques :} l'application est développée en PHP 8, utilise MariaDB comme système de gestion de base de données et adopte une architecture MVC.
+    \item \textbf{Contrainte d'accès :} chaque utilisateur doit disposer d'un compte correspondant à son rôle pour accéder aux fonctionnalités autorisées.
+    \item \textbf{Contrainte de données :} les informations saisies doivent respecter les règles de cohérence définies par l'application.
+    \item \textbf{Contrainte d'importation :} l'importation annuelle repose sur le fichier \texttt{Consommation\_Annuelle.txt}.
+    \item \textbf{Hypothèse tarifaire :} les factures sont calculées à partir des tranches tarifaires définies dans l'application, avec une TVA de 18\,\%.
+    \item \textbf{Hypothèse de fonctionnement :} les clients disposent d'un accès à Internet et d'un navigateur web pour utiliser la plateforme.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{../pdf/use_case_diagram.jpeg}
+  \caption{Diagramme de cas d'utilisation du projet}
+  \label{fig:usecase}
+\end{figure}

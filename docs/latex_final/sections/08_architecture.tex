@@ -1,14 +1,196 @@
+
 \chapter{Architecture et technologies}
 \label{chap:architecture}
 
-\todo{décrire l'architecture MVC, le routeur, l'organisation des fichiers et les technologies.}
-
 \section{Architecture MVC}
+
+L'application AquaVolt repose sur l'architecture MVC (Modèle--Vue--Contrôleur). Ce modèle d'organisation permet de séparer les différentes responsabilités de l'application afin de faciliter son développement, sa maintenance et son évolution.
+
+L'architecture MVC est composée de trois éléments principaux : le Modèle, la Vue et le Contrôleur.
+
 \subsection{Modèle}
+
+Le Modèle représente la partie de l'application responsable de la gestion des données et des traitements métier. Il assure les interactions avec la base de données MariaDB et permet notamment de manipuler les informations relatives aux clients, aux contrats, aux consommations, aux factures et aux réclamations.
+
+Il intervient également dans les opérations de consultation, d'ajout, de modification et de suppression des données, selon les règles définies par l'application.
+
 \subsection{Vue}
+
+La Vue correspond à la partie visible de l'application. Elle permet aux utilisateurs d'interagir avec les différentes fonctionnalités à travers des interfaces adaptées à leurs rôles.
+
+Elle assure notamment l'affichage des formulaires de saisie, des tableaux de données, des factures, des réclamations et des informations du tableau de bord.
+
 \subsection{Contrôleur}
+
+Le Contrôleur constitue l'intermédiaire entre le Modèle et la Vue. Il reçoit les requêtes des utilisateurs, vérifie les données transmises, déclenche les traitements nécessaires et sélectionne la réponse à retourner.
+
+Dans AquaVolt, les contrôleurs interviennent notamment dans les opérations d'authentification, de gestion des clients, de saisie des consommations, de facturation et de traitement des réclamations.
+
+
 \section{Routeur et cycle d'une requête}
+
+L'application AquaVolt utilise un mécanisme de routage développé en PHP pour orienter les requêtes HTTP vers les traitements correspondants. Ce mécanisme repose principalement sur deux fichiers : \texttt{router.php} et \texttt{index.php}.
+
+\subsection*{Rôle du fichier router.php}
+
+Le fichier \texttt{router.php} constitue le point de redirection des requêtes. Il récupère le chemin demandé à partir de l'URL et vérifie si celui-ci correspond à un fichier physique existant dans le projet.
+
+Si le chemin correspond à un fichier existant, le serveur le traite directement. Dans le cas contraire, le chemin est transmis au fichier \texttt{index.php} à travers le paramètre \texttt{url}.
+
+\subsection*{Rôle du fichier index.php}
+
+Le fichier \texttt{index.php} constitue le point d'entrée principal de l'application. Il assure plusieurs opérations :
+
+\begin{itemize}[leftmargin=*]
+    \item démarrage de la session utilisateur ;
+    \item définition du chemin racine du projet ;
+    \item chargement des fichiers de configuration et de connexion à la base de données ;
+    \item récupération et découpage de l'URL en segments ;
+    \item identification du contrôleur, de l'action et de l'identifiant éventuel ;
+    \item vérification de l'autorisation du contrôleur et de la validité du nom de l'action ;
+    \item chargement du fichier de traitement correspondant ;
+    \item vérification de l'existence de la fonction associée à l'action ;
+    \item exécution de cette fonction avec l'identifiant éventuel.
+\end{itemize}
+
+Si le contrôleur, son fichier ou la fonction demandée n'existe pas, l'application retourne une réponse HTTP 404 et affiche la page d'erreur correspondante.
+
+\subsection*{Cycle de traitement d'une requête}
+
+Le traitement d'une requête suit les étapes suivantes :
+
+\begin{enumerate}[leftmargin=*]
+    \item L'utilisateur accède à une URL depuis son navigateur.
+    \item Le fichier \texttt{router.php} récupère le chemin demandé.
+    \item Si le chemin ne correspond pas à un fichier physique, il transmet la requête à \texttt{index.php}.
+    \item Le fichier \texttt{index.php} découpe l'URL pour identifier le contrôleur, l'action et l'identifiant éventuel.
+    \item Le système vérifie que le contrôleur appartient à la liste des contrôleurs autorisés et que le nom de l'action respecte le format attendu.
+    \item Le fichier correspondant dans le répertoire \texttt{Traitement/} est chargé.
+    \item La fonction associée à l'action est recherchée puis exécutée.
+    \item Le traitement métier utilise les classes du répertoire \texttt{BD/} lorsque des opérations sur la base de données sont nécessaires.
+    \item Le résultat est présenté à l'utilisateur à travers l'interface correspondante du répertoire \texttt{IHM/}.
+\end{enumerate}
+
+\subsection*{Exemple de routage}
+
+Une URL telle que :
+
+\begin{center}
+    \texttt{http://localhost/miniprojectI\_WEB/client/index}
+\end{center}
+
+est interprétée de la manière suivante :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Contrôleur :} \texttt{Client} ;
+    \item \textbf{Action :} \texttt{index} ;
+    \item \textbf{Identifiant :} aucun.
+\end{itemize}
+
+Le système charge alors le fichier \texttt{Traitement/Client.php}, puis recherche et exécute la fonction \texttt{client\_index()}.
+
+Ce mécanisme permet de centraliser le traitement des requêtes et de contrôler les chemins d'accès aux différentes fonctionnalités de l'application.
+
 \section{Organisation des fichiers}
+
+Le projet AquaVolt est organisé en plusieurs répertoires, chacun ayant une responsabilité spécifique. Cette organisation permet de séparer les interfaces utilisateur, les traitements métier, l'accès aux données, les ressources statiques et les fichiers de configuration.
+
+La structure principale du projet est présentée ci-dessous :
+
+\begin{itemize}[leftmargin=*]
+
+    \item \textbf{assets/ :} contient les ressources utilisées par l'interface utilisateur.
+    \begin{itemize}
+        \item \texttt{css/} : contient les feuilles de style, notamment \texttt{style.css}.
+        \item \texttt{js/} : contient les scripts JavaScript, notamment \texttt{app.js} et \texttt{consommation.js}.
+        \item \texttt{img/} : contient les ressources graphiques.
+    \end{itemize}
+
+    \item \textbf{BD/ :} regroupe les classes DAO et les classes chargées de l'accès aux données. On y trouve notamment \texttt{ClientBD.php}, \texttt{ConsommationBD.php}, \texttt{AnomalieBD.php}, \texttt{Facture.php}, \texttt{Reclamation.php} et \texttt{Connexion.php}.
+
+    \item \textbf{config/ :} contient les fichiers de configuration de l'application et les paramètres de connexion à la base de données, notamment \texttt{app.php} et \texttt{database.php}.
+
+    \item \textbf{IHM/ :} regroupe les interfaces Homme-Machine correspondant aux différentes fonctionnalités. Les sous-répertoires sont organisés par module :
+    \begin{itemize}
+        \item \texttt{auth/} : interfaces d'authentification ;
+        \item \texttt{client/} : gestion des clients ;
+        \item \texttt{consommation/} : saisie et consultation des consommations ;
+        \item \texttt{contrat/} : consultation des contrats ;
+        \item \texttt{facture/} : consultation des factures ;
+        \item \texttt{anomalie/} : consultation et correction des anomalies ;
+        \item \texttt{reclamation/} : dépôt et suivi des réclamations ;
+        \item \texttt{notification/} : consultation des notifications ;
+        \item \texttt{quartier/} : gestion des quartiers ;
+        \item \texttt{verification/} : vérification des consommations annuelles ;
+        \item \texttt{import/} : interfaces liées à l'importation des données ;
+        \item \texttt{layout/} : éléments communs aux interfaces, tels que l'en-tête et le pied de page.
+    \end{itemize}
+
+    \item \textbf{Traitement/ :} contient les classes responsables de la logique métier et des services de l'application. Il regroupe notamment les traitements liés à l'authentification, aux clients, aux consommations, aux anomalies, à la facturation, à la tarification, aux réclamations, aux notifications, à l'importation et à la vérification annuelle.
+
+    \item \textbf{sql/ :} contient les scripts SQL nécessaires à la création et à la préparation de la base de données. Il comprend notamment \texttt{schema.sql}, \texttt{seed.sql} et le répertoire \texttt{migrations/}.
+
+    \item \textbf{uploads/ :} permet de stocker les fichiers téléversés par les utilisateurs, notamment les photographies des compteurs dans le répertoire \texttt{compteurs/}.
+
+    \item \textbf{tests/ :} est réservé aux éléments liés aux tests de l'application.
+
+    \item \textbf{docs/ :} regroupe la documentation du projet, les éléments de conception, les exemples et les fichiers du rapport final.
+
+    \item \textbf{Fichiers à la racine :} le projet contient également des fichiers importants comme \texttt{index.php}, \texttt{router.php}, \texttt{.htaccess}, \texttt{README.md} et \texttt{.gitignore}. Le fichier \texttt{router.php} participe au routage des requêtes, tandis que \texttt{index.php} constitue un point d'entrée de l'application.
+
+\end{itemize}
+
+Cette organisation reflète la séparation des responsabilités adoptée dans le projet : le répertoire \texttt{IHM/} assure la présentation, \texttt{Traitement/} regroupe la logique métier et \texttt{BD/} prend en charge l'accès aux données.
+
 \section{Technologies utilisées}
+
+Les principales technologies utilisées pour la réalisation d'AquaVolt sont présentées dans le tableau suivant.
+
+\begin{table}[H]
+    \centering
+    \caption{Technologies utilisées dans le projet AquaVolt}
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Technologie} & \textbf{Rôle dans le projet} \\
+        \hline
+        PHP 8 & Développement de la logique serveur et des traitements métier. \\
+        \hline
+        MariaDB & Stockage et gestion des données de l'application. \\
+        \hline
+        MVC & Organisation du code en Modèles, Vues et Contrôleurs. \\
+        \hline
+        SQL & Manipulation et interrogation des données de la base. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+L'association de PHP 8 et de MariaDB permet de développer une application web dynamique reposant sur une base de données relationnelle.
+
 \section{Environnement de développement}
+
+Le développement d'AquaVolt a été réalisé dans un environnement permettant de créer, modifier, tester et intégrer les différentes fonctionnalités de l'application.
+
+L'environnement comprend principalement :
+
+\begin{itemize}[leftmargin=*]
+    \item un environnement d'exécution PHP 8 pour le traitement des requêtes côté serveur ;
+    \item un serveur de base de données MariaDB pour le stockage des informations ;
+    \item un navigateur web pour accéder à l'application et vérifier son fonctionnement ;
+    \item des outils de développement permettant de modifier le code source et de tester les fonctionnalités.
+\end{itemize}
+
 \section{Choix de conception}
+
+Le choix de l'architecture MVC répond au besoin de structurer l'application et de séparer les responsabilités de ses différents composants.
+
+Cette organisation présente plusieurs avantages :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Séparation des responsabilités :} chaque composant possède un rôle précis.
+    \item \textbf{Maintenabilité :} les modifications peuvent être réalisées dans les composants concernés sans perturber toute l'application.
+    \item \textbf{Réutilisation :} certains traitements et composants peuvent être réutilisés dans plusieurs fonctionnalités.
+    \item \textbf{Évolutivité :} de nouveaux modules peuvent être ajoutés en respectant l'organisation existante.
+    \item \textbf{Lisibilité :} la séparation entre les données, les traitements et les interfaces facilite la compréhension du code.
+\end{itemize}
+
+Ainsi, l'architecture MVC constitue une base adaptée à l'organisation des différents modules d'AquaVolt et contribue à rendre l'application plus structurée et plus facile à maintenir.

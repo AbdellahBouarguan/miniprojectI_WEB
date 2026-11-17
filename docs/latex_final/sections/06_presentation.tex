@@ -1,16 +1,120 @@
+
 \chapter{Présentation du projet}
 \label{chap:presentation}
 
-\todo{présenter le contexte, la problématique, les objectifs, les acteurs et l'organisation du projet.}
-
 \section{Contexte}
+
+La gestion des consommations d'eau et d'électricité nécessite un suivi régulier des relevés des compteurs, des contrats des clients et des factures associées. Ces opérations impliquent plusieurs intervenants et nécessitent une organisation permettant de garantir la fiabilité des informations et la bonne gestion des données.
+
+Dans ce contexte, le projet \textbf{AquaVolt} consiste à développer une application web permettant de centraliser les opérations liées à la gestion des consommations d'eau et d'électricité. La plateforme facilite les échanges entre les clients, le fournisseur et l'agent, tout en assurant le suivi des relevés, des anomalies, des factures et des paiements.
+
 \section{Problématique}
+
+La gestion des consommations et de la facturation peut présenter plusieurs difficultés, notamment la collecte des relevés, la détection des erreurs de saisie, le traitement des réclamations et le suivi des paiements.
+
+L'absence d'une plateforme centralisée peut rendre ces opérations plus complexes et augmenter les risques d'erreurs. Il est donc nécessaire de disposer d'une solution permettant de regrouper les informations, d'automatiser certains traitements et de faciliter le suivi des différentes opérations.
+
+Le projet AquaVolt cherche ainsi à répondre à la problématique suivante : comment concevoir une application web qui simplifie et centralise la gestion des consommations d'eau et d'électricité, depuis la saisie des relevés jusqu'au suivi des factures et des paiements ?
+
 \section{Objectifs}
+
+L'objectif principal du projet est de réaliser une application web permettant d'améliorer la gestion des consommations et de la facturation de l'eau et de l'électricité.
+
+Les objectifs spécifiques sont les suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item assurer une authentification sécurisée selon les rôles des utilisateurs ;
+    \item gérer les clients, les quartiers et les contrats ;
+    \item permettre la saisie mensuelle des consommations et le téléversement des photos des compteurs ;
+    \item détecter automatiquement les anomalies dans les relevés ;
+    \item générer les factures selon les tarifs applicables ;
+    \item faciliter le dépôt et le traitement des réclamations ;
+    \item assurer le suivi des paiements ;
+    \item permettre l'importation et la vérification des consommations annuelles ;
+    \item centraliser les notifications et les informations dans un tableau de bord.
+\end{itemize}
+
 \section{Acteurs et rôles}
+
+L'application AquaVolt comporte trois acteurs principaux : le Client, le Fournisseur et l'Agent. Chaque acteur dispose de fonctionnalités adaptées à ses responsabilités.
+
 \subsection{Client}
+
+Le Client utilise la plateforme pour consulter et suivre ses informations. Ses principales fonctionnalités sont :
+
+\begin{itemize}[leftmargin=*]
+    \item consulter ses contrats et les informations associées ;
+    \item saisir ses relevés mensuels de consommation d'eau et d'électricité ;
+    \item joindre une photographie du compteur pour justifier le relevé ;
+    \item consulter les index du mois précédent ;
+    \item consulter ses factures et suivre leur état ;
+    \item déposer des réclamations et consulter leur état de traitement ;
+    \item recevoir des notifications concernant ses opérations.
+\end{itemize}
+
 \subsection{Fournisseur}
+
+Le Fournisseur assure la gestion et le suivi des opérations de l'application. Il peut notamment :
+
+\begin{itemize}[leftmargin=*]
+    \item gérer les clients, les quartiers et les contrats ;
+    \item consulter les relevés de consommation ;
+    \item traiter les anomalies détectées avant la génération des factures ;
+    \item gérer les réclamations des clients ;
+    \item générer et consulter les factures ;
+    \item enregistrer les paiements et vérifier les montants versés ;
+    \item effectuer la vérification annuelle des consommations ;
+    \item consulter le tableau de bord et les statistiques ;
+    \item recevoir les notifications internes.
+\end{itemize}
+
 \subsection{Agent}
+
+L'Agent intervient principalement dans le traitement des données annuelles. Son rôle consiste à importer les consommations à partir du fichier \texttt{Consommation\_Annuelle.txt}, afin de mettre à disposition les données nécessaires à leur vérification par le Fournisseur.
+
 \section{Périmètre de la version finale}
+
+La version finale d'AquaVolt couvre les principales opérations liées à la gestion des consommations et des factures d'eau et d'électricité.
+
+Elle comprend les modules suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item authentification et gestion des accès selon les rôles ;
+    \item gestion des clients, des quartiers et des contrats ;
+    \item saisie et consultation des consommations mensuelles ;
+    \item détection et traitement des anomalies ;
+    \item calcul et génération automatique des factures ;
+    \item gestion des réclamations et de leur traitement ;
+    \item enregistrement et suivi des paiements ;
+    \item importation et vérification des consommations annuelles ;
+    \item gestion des notifications internes ;
+    \item tableau de bord de suivi de l'activité du Fournisseur.
+\end{itemize}
+
+Ces fonctionnalités constituent le périmètre fonctionnel de la version finale développée dans le cadre de ce mini-projet.
+
 \section{Méthodologie de travail}
+
+Le développement du projet a été réalisé en équipe selon une démarche progressive. Le travail a été organisé autour de plusieurs étapes : compréhension du sujet, identification des besoins, conception de la solution, développement des modules, intégration des fonctionnalités et vérification du fonctionnement de l'application.
+
+Une répartition des responsabilités a été adoptée afin de permettre aux membres de l'équipe de travailler sur des parties distinctes, tout en assurant leur intégration dans une application commune.
+
 \section{Répartition des tâches}
+
+Le projet a été réalisé par une équipe de cinq membres. Les responsabilités ont été réparties comme suit :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Nafisa El Younoussi :} préparation du rapport final et réalisation du module de vérification annuelle des consommations.
+    \item \textbf{Aymen Ouggourni :} développement des fonctionnalités liées aux anomalies et aux quartiers, avec une participation à la base de données et à l'interface utilisateur.
+    \item \textbf{Nizar Ben Yacoub :} réalisation du tableau de bord et du module d'importation annuelle des consommations par l'Agent.
+    \item \textbf{Reda Zakaria :} développement du module de gestion et de traitement des réclamations, ainsi que du suivi des paiements et des factures réglées.
+    \item \textbf{Abdellah Bouarguan :} réalisation du système de notifications internes et coordination du projet.
+\end{itemize}
+
+Cette répartition a permis de développer les différents modules en parallèle, puis de les intégrer progressivement dans la plateforme AquaVolt.
+
 \section{Planning et réunions}
+
+Le travail a été organisé progressivement, en tenant compte des différentes étapes de réalisation du projet. Les membres de l'équipe ont coordonné leurs tâches afin de suivre l'avancement du développement, de discuter des difficultés rencontrées et de faciliter l'intégration des différents modules.
+
+Les échanges et les réunions de suivi ont notamment permis de faire le point sur l'état d'avancement, de répartir les tâches restantes et de vérifier la cohérence entre les fonctionnalités développées.
