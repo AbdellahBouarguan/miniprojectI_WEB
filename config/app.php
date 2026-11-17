@@ -7,7 +7,7 @@ define('APP_SUBTITLE', 'Mini Projet 1 - Version Alpha');
 // Base URL detectee automatiquement : fonctionne dans /miniprojectI_WEB-1/
 // comme a la racine du serveur PHP integre.
 $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
-$basePath = dirname($scriptName);
+$basePath = str_replace('\\', '/', dirname($scriptName));
 $basePath = ($basePath === '/' || $basePath === '.') ? '' : rtrim($basePath, '/');
 
 define('BASE_URL', $basePath . '/');
@@ -31,6 +31,7 @@ function role_label(?string $role): string
     return match ($role) {
         'client' => 'Client',
         'fournisseur' => 'Fournisseur',
+        'agent' => 'Agent',
         default => 'Visiteur',
     };
 }
@@ -100,6 +101,68 @@ function format_nombre(float $valeur, int $decimales = 2): string
     }
 
     return $texte === '' ? '0' : $texte;
+}
+
+/**
+ * Nombre au format SVG (separateur decimal ".").
+ */
+function chart_nombre(float $valeur, int $decimales = 1): string
+{
+    $texte = number_format($valeur, $decimales, '.', '');
+
+    if (str_contains($texte, '.')) {
+        $texte = rtrim(rtrim($texte, '0'), '.');
+    }
+
+    return $texte === '' ? '0' : $texte;
+}
+
+/**
+ * Graphique en barres vertical (SVG) pour le tableau de bord.
+ *
+ * @param array<int, array<string, mixed>> $serie 12 mois avec la cle demandee
+ */
+function chart_barres(array $serie, string $cle, string $unite, string $couleur, float $maximum): string
+{
+    $largeur = 384.0;
+    $hauteur = 170.0;
+    $margeHaut = 10.0;
+    $margeBas = 26.0;
+    $zone = $hauteur - $margeHaut - $margeBas;
+    $pas = $largeur / 12;
+    $largeurBarre = $pas * 0.56;
+    $max = $maximum > 0 ? $maximum : 1.0;
+    $base = $margeHaut + $zone;
+
+    $svg = '<svg class="chart-svg" viewBox="0 0 ' . chart_nombre($largeur, 0) . ' '
+        . chart_nombre($hauteur, 0) . '" role="img" aria-label="Évolution mensuelle en ' . e($unite) . '">';
+
+    $svg .= '<line class="chart-axis" x1="0" y1="' . chart_nombre($base)
+        . '" x2="' . chart_nombre($largeur, 0) . '" y2="' . chart_nombre($base) . '"/>';
+
+    foreach ($serie as $mois) {
+        $valeur = (float) ($mois[$cle] ?? 0);
+        $index = max(0, min(11, (int) ($mois['mois'] ?? 1) - 1));
+        $x = $index * $pas + ($pas - $largeurBarre) / 2;
+        $hauteurBarre = $zone * min(1.0, $valeur / $max);
+        $y = $base - $hauteurBarre;
+        $xCentre = $index * $pas + $pas / 2;
+
+        if ($valeur > 0) {
+            $svg .= '<rect x="' . chart_nombre($x) . '" y="' . chart_nombre($y)
+                . '" width="' . chart_nombre($largeurBarre) . '" height="' . chart_nombre($hauteurBarre)
+                . '" rx="3" fill="' . e($couleur) . '" opacity="0.9">'
+                . '<title>' . e(($mois['nom'] ?? '') . ' : ' . format_nombre($valeur) . ' ' . $unite) . '</title>'
+                . '</rect>';
+        }
+
+        $svg .= '<text class="chart-label" x="' . chart_nombre($xCentre) . '" y="'
+            . chart_nombre($hauteur - 8) . '" text-anchor="middle">' . e((string) ($mois['court'] ?? '')) . '</text>';
+    }
+
+    $svg .= '</svg>';
+
+    return $svg;
 }
 
 function icon(string $name, string $class = 'icon'): string

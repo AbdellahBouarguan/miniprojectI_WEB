@@ -4,7 +4,7 @@
 
 - [ ] Importer `sql/schema.sql` sans erreur.
 - [ ] Importer `sql/seed.sql` sans erreur.
-- [ ] Verifier les 7 tables.
+- [ ] Verifier les 9 tables (dont `agent` et `conso_annuelle`).
 - [ ] Verifier les cles etrangeres.
 - [ ] Verifier les contraintes UNIQUE.
 - [ ] Verifier le calcul des tranches.
@@ -74,6 +74,26 @@
 - [ ] CSRF refuse un jeton invalide.
 - [ ] Lien interne uniquement.
 - [ ] Notification creee apres generation d'une facture.
+
+## Tableau de bord fournisseur
+
+- [ ] Total impaye correct (somme des factures IMPAYEE).
+- [ ] Total encaisse correct (somme des factures PAYEE).
+- [ ] Filtre par annee fonctionnel.
+- [ ] Evolution mensuelle eau / electricite affichee sur 12 mois.
+- [ ] Message « Aucune donnee pour la periode » si l'annee est vide.
+
+## Agent et import annuel
+
+- [ ] Connexion agent.
+- [ ] Un client est refuse sur `/Import/index`.
+- [ ] Un fournisseur est refuse sur `/Import/index`.
+- [ ] Fichier valide importe.
+- [ ] Entete invalide rejetee.
+- [ ] Ligne malformee rejetee.
+- [ ] `ID_Client` inconnu rejete.
+- [ ] Doublon client / annee ignore.
+- [ ] Rapport inseres / ignores / rejetes affiche.
 
 ## Securite
 

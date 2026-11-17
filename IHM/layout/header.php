@@ -1,6 +1,6 @@
 <?php
 $role = $_SESSION['role'] ?? null;
-$estConnecte = in_array($role, ['client', 'fournisseur'], true);
+$estConnecte = in_array($role, ['client', 'fournisseur', 'agent'], true);
 
 $notificationsNonLues = 0;
 
@@ -8,9 +8,12 @@ if ($estConnecte) {
     require_once ROOT . 'BD/Notification.php';
 
     $notificationRole = (string) $role;
-    $notificationId = $role === 'client'
-        ? (int) ($_SESSION['id_client'] ?? 0)
-        : (int) ($_SESSION['id_fournisseur'] ?? 0);
+    $notificationId = match ($role) {
+        'client' => (int) ($_SESSION['id_client'] ?? 0),
+        'fournisseur' => (int) ($_SESSION['id_fournisseur'] ?? 0),
+        'agent' => (int) ($_SESSION['id_agent'] ?? 0),
+        default => 0,
+    };
 
     if ($notificationId > 0) {
         try {
@@ -42,6 +45,8 @@ if (str_contains($path, '/Consommation')) {
     $active = 'contrats';
 } elseif (str_contains($path, '/Quartier')) {
     $active = 'quartiers';
+} elseif (str_contains($path, '/Import')) {
+    $active = 'import';
 }
 ?>
 <!DOCTYPE html>
@@ -52,7 +57,7 @@ if (str_contains($path, '/Consommation')) {
     <meta name="theme-color" content="#0b2a4a">
     <title><?= e(APP_NAME) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= url('assets/img/favicon.svg') ?>">
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261020">
+    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=20261113">
 </head>
 <body class="<?= $estConnecte ? 'app-body' : 'public-body' ?>">
 <?php if ($estConnecte): ?>
@@ -79,6 +84,13 @@ if (str_contains($path, '/Consommation')) {
                     </a>
                     <a class="disabled" href="#" title="Bientôt disponible">
                         <?= icon('message') ?> Réclamations
+                    </a>
+                <?php elseif ($role === 'agent'): ?>
+                    <a class="<?= $active === 'import' ? 'active' : '' ?>" href="<?= url('Import/index') ?>">
+                        <?= icon('file') ?> Import annuel
+                    </a>
+                    <a href="<?= url('Import/index') ?>#releves">
+                        <?= icon('grid') ?> Relevés importés
                     </a>
                 <?php else: ?>
                     <a class="<?= $active === 'dashboard' ? 'active' : '' ?>" href="<?= url('') ?>">

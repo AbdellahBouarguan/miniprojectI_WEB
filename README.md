@@ -30,6 +30,10 @@ mysql -u root < sql/seed.sql
 
 Ou importer `sql/schema.sql` puis `sql/seed.sql` dans phpMyAdmin.
 
+Les tables ajoutées pendant le sprint sont livrées à la fois dans `sql/schema.sql`
+(import complet) et dans `sql/migrations/` (DDL par module), par exemple
+`sql/migrations/001_agent_conso_annuelle.sql` pour le module Agent.
+
 ## Configuration
 
 Copier `config/database.example.php` vers `config/database.php` et adapter les identifiants locaux.
@@ -102,6 +106,9 @@ GET      /Anomalie/index
 GET      /Notification/all
 POST     /Notification/lire/{id}
 POST     /Notification/lire_tout
+
+GET/POST /Import/index
+POST     /Import/upload
 ```
 
 Flux des anomalies :
@@ -111,6 +118,34 @@ Flux des anomalies :
 - Après confirmation/correction valide : facture générée automatiquement.
 
 Le routeur appelle la fonction `{controleur}_{action}`, par exemple `client_all()` ou `facture_show()`.
+
+## Module Agent — import annuel
+
+Le rôle `agent` dispose d’un espace dédié (`/Import/index`) pour déposer le fichier
+`Consommation_Annuelle.txt` relevé lors de la tournée annuelle.
+
+Format attendu (en-tête obligatoire) :
+
+```text
+ID_Client,ID_Agent,ConsommationEau,ConsommationElect,Annee,Date_Saisie
+1,1,120.50,340.00,2026,2026-12-15
+```
+
+- L’import est automatique dès le dépôt du fichier.
+- Un rapport indique les lignes **insérées**, **ignorées** (doublon client/année) et **rejetées** (ligne malformée, client ou agent inconnu, valeur invalide, date invalide).
+- La contrainte `UNIQUE(id_client, annee)` garantit un seul relevé par client et par an.
+- Fichiers d’exemple : `docs/examples/Consommation_Annuelle.txt` et `docs/examples/Consommation_Annuelle_erreurs.txt`.
+
+## Tableau de bord fournisseur
+
+La page d’accueil du fournisseur affiche :
+
+- le **montant total des factures impayées** et le **total encaissé** (factures `PAYEE`) ;
+- le nombre de factures impayées / payées, les clients et les anomalies en attente ;
+- l’**évolution mensuelle** des consommations d’eau et d’électricité (graphiques SVG) ;
+- un filtre par année.
+
+Les indicateurs sont calculés par `BD/Dashboard.php` à partir de la table `facture`.
 
 ## Structure
 
@@ -131,6 +166,7 @@ tests/             Checklist de tests
 
 ```text
 Fournisseur : fournisseur@example.ma / fournisseur123
+Agent       : agent@example.ma       / agent123
 Client 1    : client1@example.ma     / client123
 Client 2    : client2@example.ma     / client123
 Client 3    : client3@example.ma     / client123
