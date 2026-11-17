@@ -1,0 +1,4 @@
+ID_Client,ID_Agent,ConsommationEau,ConsommationElect,Annee,Date_Saisie
+1,1,120.50,340.00,2026,2026-12-15
+2,1,85.00,260.00,2026,2026-12-15
+3,1,150.25,410.00,2026,2026-12-15

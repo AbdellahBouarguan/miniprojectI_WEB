@@ -4,6 +4,9 @@ $role = $_SESSION['role'] ?? null;
 ?>
 <?php require ROOT . 'IHM/layout/header.php'; ?>
 
+<?php if (!empty($erreur)): ?><div class="message-error"><?= e($erreur) ?></div><?php endif; ?>
+<?php if (!empty($succes)): ?><div class="message-success"><?= e($succes) ?></div><?php endif; ?>
+
 <div class="page-head">
     <div>
         <h1>Facture <?= e($facture['numero']) ?></h1>
@@ -57,6 +60,20 @@ $role = $_SESSION['role'] ?? null;
         </tr>
     </table>
 </section>
+
+<?php if ($role === 'fournisseur' && $facture['etat'] === 'IMPAYEE'): ?>
+<section class="card">
+    <h2>Règlement</h2>
+    <p>Montant à régler : <strong><?= e(number_format((float) $facture['montant_ttc'], 2, ',', ' ')) ?> DH</strong></p>
+    <p>Ce paiement intégral est enregistré dans l’application.</p>
+    <form method="post" action="<?= e(url('Facture/payer/' . (int) $facture['id_facture'])) ?>">
+        <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+        <button class="btn btn-primary" type="submit">Enregistrer le paiement total</button>
+    </form>
+</section>
+<?php elseif ($facture['etat'] === 'PAYEE' && !empty($facture['date_paiement'])): ?>
+<section class="card"><p>Facture réglée le <?= e(format_date_fr($facture['date_paiement'])) ?>.</p></section>
+<?php endif; ?>
 
 <section class="card">
     <h2>Consommations et montants</h2>

@@ -14,13 +14,16 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS facture;
+DROP TABLE IF EXISTS reclamation;
 DROP TABLE IF EXISTS anomalie;
 DROP TABLE IF EXISTS photo_capteur;
+DROP TABLE IF EXISTS conso_annuelle;
 DROP TABLE IF EXISTS consommation;
 DROP TABLE IF EXISTS contrat;
 DROP TABLE IF EXISTS quartier;
 DROP TABLE IF EXISTS tarif;
 DROP TABLE IF EXISTS client;
+DROP TABLE IF EXISTS agent;
 DROP TABLE IF EXISTS fournisseur;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -42,6 +45,23 @@ CREATE TABLE fournisseur (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
+-- AGENT
+-- L'agent effectue une seule tournée par an et dépose le fichier
+-- Consommation_Annuelle.txt (import annuel).
+-- ------------------------------------------------------------
+CREATE TABLE agent (
+  id_agent INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nom VARCHAR(100) NOT NULL,
+  prenom VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  mot_de_passe VARCHAR(255) NOT NULL,
+  telephone VARCHAR(30) NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_agent),
+  UNIQUE KEY uk_agent_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
 -- QUARTIER
 -- ------------------------------------------------------------
 CREATE TABLE quartier (
@@ -53,6 +73,7 @@ CREATE TABLE quartier (
   UNIQUE KEY uk_quartier_nom_activite (nom, type_activite)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------------
 -- CLIENT
 -- ------------------------------------------------------------
 CREATE TABLE client (
@@ -155,6 +176,37 @@ CREATE TABLE consommation (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
+-- CONSO_ANNUELLE
+-- Relevé annuel issu de la tournée de l'agent.
+-- UNIQUE(id_client, annee) : un seul relevé par client et par an,
+-- ce qui permet de détecter les doublons à l'import.
+-- ------------------------------------------------------------
+CREATE TABLE conso_annuelle (
+  id_conso_annuelle INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_client INT UNSIGNED NOT NULL,
+  id_agent INT UNSIGNED NOT NULL,
+  conso_eau DECIMAL(12,2) NOT NULL,
+  conso_elec DECIMAL(12,2) NOT NULL,
+  annee SMALLINT UNSIGNED NOT NULL,
+  date_saisie DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  statut_verification ENUM('A_VERIFIER','VALIDEE','REJETEE') NOT NULL DEFAULT 'A_VERIFIER',
+  date_verification DATETIME NULL,
+  PRIMARY KEY (id_conso_annuelle),
+  UNIQUE KEY uk_conso_annuelle_client_annee (id_client, annee),
+  KEY idx_conso_annuelle_agent (id_agent),
+  CONSTRAINT fk_conso_annuelle_client
+    FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_conso_annuelle_agent
+    FOREIGN KEY (id_agent) REFERENCES agent (id_agent)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT chk_conso_annuelle_valeurs
+    CHECK (conso_eau >= 0 AND conso_elec >= 0),
+  CONSTRAINT chk_conso_annuelle_annee
+    CHECK (annee BETWEEN 2000 AND 2100)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
 -- PHOTO_CAPTEUR
 -- Exactement 2 photos par consommation : EAU + ELEC.
 -- Le UNIQUE garantit au plus une photo par type.
@@ -225,6 +277,9 @@ CREATE TABLE facture (
   montant_tva DECIMAL(12,2) NOT NULL,
   montant_ttc DECIMAL(12,2) NOT NULL,
   etat ENUM('IMPAYEE','PAYEE') NOT NULL DEFAULT 'IMPAYEE',
+  date_paiement DATETIME NULL,
+  mode_paiement VARCHAR(30) NULL,
+  reference_paiement VARCHAR(100) NULL,
   PRIMARY KEY (id_facture),
   UNIQUE KEY uk_facture_numero (numero),
   UNIQUE KEY uk_facture_conso (id_conso),
@@ -239,6 +294,31 @@ CREATE TABLE facture (
   CONSTRAINT chk_facture_montants
     CHECK (conso_eau >= 0 AND conso_elec >= 0
            AND montant_ht >= 0 AND montant_tva >= 0 AND montant_ttc >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- RECLAMATION CLIENT
+-- ------------------------------------------------------------
+CREATE TABLE reclamation (
+  id_reclamation INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(30) NOT NULL,
+  id_client INT UNSIGNED NOT NULL,
+  id_facture INT UNSIGNED NULL,
+  type ENUM('FUITE_EXTERNE','FUITE_INTERNE','FACTURE','AUTRE') NOT NULL,
+  description TEXT NOT NULL,
+  piece_jointe VARCHAR(255) NULL,
+  statut ENUM('OUVERTE','EN_COURS','RESOLUE','REJETEE') NOT NULL DEFAULT 'OUVERTE',
+  reponse TEXT NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_resolution DATETIME NULL,
+  PRIMARY KEY (id_reclamation),
+  UNIQUE KEY uk_reclamation_numero (numero),
+  KEY idx_reclamation_client (id_client),
+  KEY idx_reclamation_facture (id_facture),
+  CONSTRAINT fk_reclamation_client FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_reclamation_facture FOREIGN KEY (id_facture) REFERENCES facture (id_facture)
+    ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------

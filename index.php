@@ -16,7 +16,7 @@ $controller = ucfirst(strtolower($segments[0] ?? 'Home'));
 $action = strtolower($segments[1] ?? 'index');
 $id = $segments[2] ?? null;
 
-$allowedControllers = ['Home', 'Auth', 'Client', 'Consommation', 'Facture', 'Anomalie', 'Notification', 'Quartier', 'Contrat'];
+$allowedControllers = ['Home', 'Auth', 'Client', 'Consommation', 'Facture', 'Anomalie', 'Notification', 'Quartier', 'Contrat', 'Import', 'Reclamation', 'Verification'];
 
 if (!in_array($controller, $allowedControllers, true) || !preg_match('/^[a-zA-Z0-9_]+$/', $action)) {
     http_response_code(404);

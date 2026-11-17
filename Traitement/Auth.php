@@ -24,31 +24,46 @@ function auth_login($id = null): void
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erreur = 'Adresse e-mail invalide.';
         } else {
-            $client = auth_trouver_client($email);
-
-            if ($client !== null) {
-                if (password_verify($motDePasse, $client['mot_de_passe'])) {
-                    auth_connecter_client($client);
-                }
-
-                $erreur = 'Email ou mot de passe incorrect.';
-            } else {
-                $fournisseur = auth_trouver_fournisseur($email);
-
-                if ($fournisseur !== null) {
-                    if (password_verify($motDePasse, $fournisseur['mot_de_passe'])) {
-                        auth_connecter_fournisseur($fournisseur);
-                    }
-
-                    $erreur = 'Email ou mot de passe incorrect.';
-                } else {
-                    $erreur = 'Email ou mot de passe incorrect.';
-                }
-            }
+            auth_tenter_connexion($email, $motDePasse);
+            $erreur = 'Email ou mot de passe incorrect.';
         }
     }
 
     require ROOT . 'IHM/auth/login.php';
+}
+
+/**
+ * Cherche l'utilisateur dans les trois espaces (client, fournisseur,
+ * agent). En cas de succes, la session est ouverte et la fonction
+ * redirige puis quitte : le retour n'a lieu qu'en cas d'echec.
+ */
+function auth_tenter_connexion(string $email, string $motDePasse): void
+{
+    $client = auth_trouver_client($email);
+
+    if ($client !== null) {
+        if (password_verify($motDePasse, (string) $client['mot_de_passe'])) {
+            auth_connecter_client($client);
+        }
+
+        return;
+    }
+
+    $fournisseur = auth_trouver_fournisseur($email);
+
+    if ($fournisseur !== null) {
+        if (password_verify($motDePasse, (string) $fournisseur['mot_de_passe'])) {
+            auth_connecter_fournisseur($fournisseur);
+        }
+
+        return;
+    }
+
+    $agent = auth_trouver_agent($email);
+
+    if ($agent !== null && password_verify($motDePasse, (string) $agent['mot_de_passe'])) {
+        auth_connecter_agent($agent);
+    }
 }
 
 /**
@@ -138,6 +153,20 @@ function auth_connecter_fournisseur(array $fournisseur): void
     $_SESSION['email'] = $fournisseur['email'];
 
     header('Location: ' . url('Client/all'));
+    exit;
+}
+
+function auth_connecter_agent(array $agent): void
+{
+    session_regenerate_id(true);
+
+    $_SESSION['role'] = 'agent';
+    $_SESSION['id_agent'] = (int) $agent['id_agent'];
+    $_SESSION['nom'] = $agent['nom'];
+    $_SESSION['prenom'] = $agent['prenom'] ?? '';
+    $_SESSION['email'] = $agent['email'];
+
+    header('Location: ' . url('Import/index'));
     exit;
 }
 
@@ -274,8 +303,12 @@ function auth_logout($id = null): void
 
 function auth_rediriger_selon_role(): void
 {
-    if (($_SESSION['role'] ?? null) === 'fournisseur') {
+    $role = $_SESSION['role'] ?? null;
+
+    if ($role === 'fournisseur') {
         header('Location: ' . url('Client/all'));
+    } elseif ($role === 'agent') {
+        header('Location: ' . url('Import/index'));
     } else {
         header('Location: ' . url('Consommation/add'));
     }
@@ -328,4 +361,22 @@ function auth_trouver_fournisseur(string $email): ?array
     $fournisseur = mysqli_fetch_assoc($resultat);
 
     return $fournisseur ?: null;
+}
+
+function auth_trouver_agent(string $email): ?array
+{
+    $stmt = mysqli_prepare(
+        db(),
+        'SELECT id_agent, nom, prenom, email, mot_de_passe
+         FROM agent
+         WHERE email = ?
+         LIMIT 1'
+    );
+    mysqli_stmt_bind_param($stmt, 's', $email);
+    mysqli_stmt_execute($stmt);
+
+    $resultat = mysqli_stmt_get_result($stmt);
+    $agent = mysqli_fetch_assoc($resultat);
+
+    return $agent ?: null;
 }
