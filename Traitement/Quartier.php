@@ -38,6 +38,8 @@ function quartier_all($id = null): void
     $quartiers = quartier_lister();
     $erreur = $_GET['erreur'] ?? null;
     $succes = $_GET['succes'] ?? null;
+    $nomQuartier = trim((string) ($_GET['nom'] ?? ''));
+    $typeQuartier = strtoupper(trim((string) ($_GET['type'] ?? 'RESIDENTIEL')));
     $csrf = csrf_token();
 
     require ROOT . 'IHM/quartier/index.php';
@@ -76,6 +78,8 @@ function quartier_add($id = null): void
         header(
             'Location: ' . url('Quartier/all')
             . '?erreur=' . urlencode(implode(' ', $erreurs))
+            . '&nom=' . urlencode($nom)
+            . '&type=' . urlencode($type)
         );
         exit;
     }

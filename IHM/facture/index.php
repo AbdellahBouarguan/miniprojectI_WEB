@@ -44,7 +44,7 @@ $role = $_SESSION['role'] ?? null;
             <tbody>
             <?php foreach ($factures as $f): ?>
                 <tr>
-                    <td><?= e($f['numero']) ?></td>
+                    <td class="nowrap"><?= e($f['numero']) ?></td>
                     <td><?= e(format_date_fr($f['date_facture'])) ?></td>
                     <td><?= (int) $f['periode_mois'] ?>/<?= (int) $f['periode_annee'] ?></td>
                     <td>

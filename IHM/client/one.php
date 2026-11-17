@@ -93,7 +93,7 @@
                 <tbody>
                 <?php foreach ($contrats as $contrat): ?>
                     <tr>
-                        <td><?= e($contrat['numero_contrat']) ?></td>
+                        <td class="nowrap"><?= e($contrat['numero_contrat']) ?></td>
                         <td><?= e($contrat['quartier_nom']) ?></td>
                         <td><?= e($contrat['type_activite']) ?></td>
                         <td><?= e(format_date_fr($contrat['date_debut'])) ?></td>

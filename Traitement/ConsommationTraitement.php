@@ -374,10 +374,14 @@ final class ConsommationTraitement
         $annee = is_scalar($anneeBrut) ? (int) $anneeBrut : (int) date('Y');
 
         $contrats = $this->bd->contratsClient($idClient, $conso === null);
+        $contratParDefaut = isset($erreurs['id_contrat'])
+            ? 0
+            : (count($contrats) > 0 ? (int) $contrats[0]['id_contrat'] : 0);
+
         $contratSelectionne = (int) (
             $anciennes['id_contrat']
             ?? $conso['id_contrat']
-            ?? (count($contrats) === 1 ? $contrats[0]['id_contrat'] : 0)
+            ?? $contratParDefaut
         );
 
         $precedent = $contratSelectionne > 0
@@ -386,6 +390,15 @@ final class ConsommationTraitement
         $photosPrecedentes = $precedent !== null
             ? $this->bd->photosDe((int) $precedent['id_conso'])
             : [];
+
+        $aujourdhui = new DateTimeImmutable('today');
+        $periodeOuverte = $conso !== null
+            || (
+                (int) $aujourdhui->format('n') === $mois
+                && (int) $aujourdhui->format('Y') === $annee
+                && (int) $aujourdhui->format('j') >= self::JOUR_DEBUT
+            );
+
         $csrf = csrf_token();
 
         require __DIR__ . '/../IHM/consommation/saisie.php';

@@ -1,7 +1,7 @@
 <?php
 /** @var array $erreurs @var array $anciennes @var array|null $conso @var array|null $precedent
  *  @var array $photosPrecedentes @var string $csrf
- *  @var array $contrats @var int $contratSelectionne
+ *  @var array $contrats @var int $contratSelectionne @var bool $periodeOuverte
  */
 $mois = (int) ($mois ?? ($anciennes['periode_mois'] ?? $conso['periode_mois'] ?? date('n')));
 $annee = (int) ($annee ?? ($anciennes['periode_annee'] ?? $conso['periode_annee'] ?? date('Y')));
@@ -64,10 +64,19 @@ $compteurs = [
 <?php if ($conso === null): ?>
     <div class="period-banner">
         <div>
-            <strong>Période de saisie ouverte — <?= e(mois_francais($mois)) ?> <?= $annee ?></strong>
-            <span>Ouverte du 18 du mois jusqu’à la fin du mois.</span>
+            <strong>
+                Période de saisie <?= $periodeOuverte ? 'ouverte' : 'fermée' ?>
+                — <?= e(mois_francais($mois)) ?> <?= $annee ?>
+            </strong>
+            <span>
+                <?= $periodeOuverte
+                    ? 'Ouverte du 18 du mois jusqu’à la fin du mois.'
+                    : 'La saisie ouvre le 18 du mois.' ?>
+            </span>
         </div>
-        <span class="badge badge-open">Ouverte</span>
+        <span class="badge <?= $periodeOuverte ? 'badge-open' : 'badge-warning' ?>">
+            <?= $periodeOuverte ? 'Ouverte' : 'Fermée' ?>
+        </span>
     </div>
 <?php else: ?>
     <div class="period-banner">

@@ -12,6 +12,7 @@ docs/
 ├── presentation/        Presentation du sprint final (Markdown, HTML, PDF)
 ├── notifications.md     Documentation du module notifications internes
 ├── quartiers_contrats.md Documentation des quartiers et contrats
+├── tests/               Plan, résultats, bugs et captures des tests manuels
 └── reunions/            Comptes rendus des reunions
 ```
 
