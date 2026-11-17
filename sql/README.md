@@ -42,7 +42,7 @@ SELECT * FROM client;
 SELECT * FROM tarif ORDER BY type, borne_min;
 ```
 
-Pour une base existante, appliquer une seule fois `sql/migration_paiement_reclamation.sql` afin d'ajouter la date de paiement et la table des réclamations. Ce script conserve les données existantes.
+Pour une base existante, appliquer une seule fois `sql/migrations/002_reclamation_paiement.sql` afin d'ajouter la date de paiement et la table des réclamations. Ce script conserve les données existantes.
 
 ## Tables
 
@@ -56,6 +56,8 @@ Pour une base existante, appliquer une seule fois `sql/migration_paiement_reclam
 - `anomalie`
 - `facture`
 - `notification`
+- `agent`
+- `conso_annuelle`
 - `reclamation`
 
 ## Remarque

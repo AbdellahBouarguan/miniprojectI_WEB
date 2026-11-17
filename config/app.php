@@ -2,7 +2,7 @@
 
 define('APP_NAME', 'AquaVolt');
 define('APP_TAGLINE', 'Eau & Électricité · Factures');
-define('APP_SUBTITLE', 'Mini Projet 1 - Version Alpha');
+define('APP_SUBTITLE', 'Mini Projet 1 - Version finale');
 
 // Reglage local facultatif : config/local.php est ignore par Git.
 $localConfig = is_file(ROOT . 'config/local.php') ? require ROOT . 'config/local.php' : [];

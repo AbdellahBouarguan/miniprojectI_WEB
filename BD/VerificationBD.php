@@ -133,40 +133,93 @@ final class VerificationBD
                         FROM consommation x
                         WHERE x.id_client = c.id_client
                           AND x.periode_annee = ?
-                          AND x.statut IN ('VALIDEE', 'FACTUREE')) AS nb_mois,
-                       fin.index_eau AS fin_eau, fin.index_elec AS fin_elec,
-                       base.index_eau AS base_eau, base.index_elec AS base_elec
+                          AND x.statut IN ('VALIDEE', 'FACTUREE')) AS nb_mois
                 FROM client c
                 LEFT JOIN conso_annuelle a
                        ON a.id_client = c.id_client AND a.annee = ?
-                LEFT JOIN consommation fin
-                       ON fin.id_conso = (
-                            SELECT x.id_conso
-                            FROM consommation x
-                            WHERE x.id_client = c.id_client
-                              AND x.periode_annee = ?
-                              AND x.statut IN ('VALIDEE', 'FACTUREE')
-                            ORDER BY x.periode_mois DESC
-                            LIMIT 1)
-                LEFT JOIN consommation base
-                       ON base.id_conso = (
-                            SELECT x.id_conso
-                            FROM consommation x
-                            WHERE x.id_client = c.id_client
-                              AND x.periode_annee < ?
-                              AND x.statut IN ('VALIDEE', 'FACTUREE')
-                            ORDER BY x.periode_annee DESC, x.periode_mois DESC
-                            LIMIT 1)
                 WHERE c.id_fournisseur = ?
                 ORDER BY c.nom, c.prenom";
 
         $stmt = mysqli_prepare($this->db, $sql);
-        mysqli_stmt_bind_param($stmt, 'iiiii', $annee, $annee, $annee, $annee, $idFournisseur);
+        mysqli_stmt_bind_param($stmt, 'iii', $annee, $annee, $idFournisseur);
         mysqli_stmt_execute($stmt);
 
         $resultat = mysqli_stmt_get_result($stmt);
+        $lignes = mysqli_fetch_all($resultat, MYSQLI_ASSOC);
 
-        return mysqli_fetch_all($resultat, MYSQLI_ASSOC);
+        foreach ($lignes as &$ligne) {
+            $saisie = $this->saisieAnnuelleClient((int) $ligne['id_client'], $annee);
+            $ligne['saisi_eau'] = $saisie['eau'];
+            $ligne['saisi_elec'] = $saisie['elec'];
+        }
+        unset($ligne);
+
+        return $lignes;
+    }
+
+    /**
+     * Somme les consommations de l'annee pour tous les contrats du client.
+     * Pour chaque contrat : dernier index de l'annee - dernier index avant
+     * l'annee. Cela fonctionne aussi avec plusieurs contrats.
+     *
+     * @return array{eau: ?float, elec: ?float}
+     */
+    private function saisieAnnuelleClient(int $idClient, int $annee): array
+    {
+        $stmt = mysqli_prepare(
+            $this->db,
+            "SELECT id_contrat, periode_annee, periode_mois, index_eau, index_elec
+             FROM consommation
+             WHERE id_client = ?
+               AND statut IN ('VALIDEE', 'FACTUREE')
+             ORDER BY id_contrat, periode_annee, periode_mois"
+        );
+        mysqli_stmt_bind_param($stmt, 'i', $idClient);
+        mysqli_stmt_execute($stmt);
+        $resultat = mysqli_stmt_get_result($stmt);
+
+        $etats = [];
+        $present = false;
+
+        foreach (mysqli_fetch_all($resultat, MYSQLI_ASSOC) as $ligne) {
+            $idContrat = (int) $ligne['id_contrat'];
+            $anneeLigne = (int) $ligne['periode_annee'];
+
+            if (!isset($etats[$idContrat])) {
+                $etats[$idContrat] = [
+                    'base_eau' => null,
+                    'base_elec' => null,
+                    'fin_eau' => null,
+                    'fin_elec' => null,
+                ];
+            }
+
+            if ($anneeLigne < $annee) {
+                $etats[$idContrat]['base_eau'] = (float) $ligne['index_eau'];
+                $etats[$idContrat]['base_elec'] = (float) $ligne['index_elec'];
+            } elseif ($anneeLigne === $annee) {
+                $etats[$idContrat]['fin_eau'] = (float) $ligne['index_eau'];
+                $etats[$idContrat]['fin_elec'] = (float) $ligne['index_elec'];
+            }
+        }
+
+        $eau = 0.0;
+        $elec = 0.0;
+
+        foreach ($etats as $etat) {
+            if ($etat['fin_eau'] === null || $etat['fin_elec'] === null) {
+                continue;
+            }
+
+            $present = true;
+            $eau += max(0.0, $etat['fin_eau'] - (float) ($etat['base_eau'] ?? 0.0));
+            $elec += max(0.0, $etat['fin_elec'] - (float) ($etat['base_elec'] ?? 0.0));
+        }
+
+        return [
+            'eau' => $present ? $eau : null,
+            'elec' => $present ? $elec : null,
+        ];
     }
 
     public function decider(int $idClient, int $annee, int $idFournisseur, string $decision): bool

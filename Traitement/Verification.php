@@ -27,8 +27,12 @@ final class Verification
         $agentPresent = $l['id_conso_annuelle'] !== null;
         $nbMois = (int) $l['nb_mois'];
 
-        $saisiEau = self::consommationSaisie($l['fin_eau'], $l['base_eau']);
-        $saisiElec = self::consommationSaisie($l['fin_elec'], $l['base_elec']);
+        $saisiEau = isset($l['saisi_eau'])
+            ? ($l['saisi_eau'] !== null ? (float) $l['saisi_eau'] : null)
+            : self::consommationSaisie($l['fin_eau'] ?? null, $l['base_eau'] ?? null);
+        $saisiElec = isset($l['saisi_elec'])
+            ? ($l['saisi_elec'] !== null ? (float) $l['saisi_elec'] : null)
+            : self::consommationSaisie($l['fin_elec'] ?? null, $l['base_elec'] ?? null);
         $agentEau = $agentPresent ? (float) $l['agent_eau'] : null;
         $agentElec = $agentPresent ? (float) $l['agent_elec'] : null;
 

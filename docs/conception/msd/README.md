@@ -1,4 +1,4 @@
-# Modele de donnees - Version Alpha + quartiers/contrats
+# Modele de donnees - Version finale
 
 ## Tables retenues
 
@@ -12,8 +12,11 @@
 - `anomalie`
 - `facture`
 - `notification`
+- `agent`
+- `conso_annuelle`
+- `reclamation`
 
-Les tables `agent`, `conso_annuelle` et `reclamation` sont ajoutees par leurs branches dediees.
+Toutes les tables sont presentes dans la version finale.
 
 ## Cles et relations
 
@@ -29,6 +32,10 @@ Les tables `agent`, `conso_annuelle` et `reclamation` sont ajoutees par leurs br
 | Consommation - Anomalie | 1..1 - 0..n | `anomalie.id_conso` |
 | Consommation - Facture | 1..1 - 0..1 | `facture.id_conso` UNIQUE |
 | Consommation - Photo_Capteur | 1..1 - 2..2 | `photo_capteur.id_conso` + UNIQUE(`id_conso`, `type`) |
+| Agent - Conso_Annuelle | 1..1 - 0..n | `conso_annuelle.id_agent` |
+| Client - Conso_Annuelle | 1..1 - 0..n | `conso_annuelle.id_client` |
+| Client - Reclamation | 1..1 - 0..n | `reclamation.id_client` |
+| Facture - Reclamation | 0..1 - 0..n | `reclamation.id_facture` |
 
 ## Choix de modelisation
 

@@ -1,10 +1,10 @@
-# Mini Projet 1 - Version Alpha
+# Mini Projet 1 - Version finale
 
 Application web PHP de gestion des factures d'eau et d'electricite.
 
-Branche Alpha : `aymane`
+Branche stable : `main`
 
-## Perimetre Alpha
+## Perimetre
 
 - Gestion des clients
 - Saisie des consommations et televersement des photos
@@ -12,6 +12,10 @@ Branche Alpha : `aymane`
 - Generation automatique et consultation des factures
 - Notifications internes client / fournisseur
 - Quartiers, contrats clients et rattachement des consommations
+- Agent et import annuel
+- Verification annuelle
+- Reclamations client / fournisseur
+- Paiement total des factures
 
 ## Pre-requis
 
@@ -103,8 +107,11 @@ GET      /Facture/one/{id}
 POST     /Facture/payer/{id}
 
 GET      /Reclamation/index
-POST     /Reclamation/soumettre
+GET/POST /Reclamation/add
+GET      /Reclamation/one/{id}
 POST     /Reclamation/traiter/{id}
+
+GET      /Verification/index
 
 GET      /Anomalie/index
 
@@ -117,7 +124,7 @@ POST     /Import/upload
 ```
 
 Le paiement intégral marque la facture comme payée et enregistre la date dans l'application. Il ne s'agit pas d'un paiement bancaire en ligne.
-Pour une base déjà installée, appliquer une seule fois `sql/migration_paiement_reclamation.sql`.
+Pour une base déjà installée, appliquer une seule fois `sql/migrations/002_reclamation_paiement.sql`.
 
 Flux des anomalies :
 

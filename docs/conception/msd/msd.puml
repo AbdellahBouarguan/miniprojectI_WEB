@@ -1,5 +1,5 @@
 @startuml msd
-title Mini Projet 1 - Version Alpha - Modele de donnees
+title Mini Projet 1 - Version finale - Modele de donnees
 hide circle
 skinparam linetype ortho
 skinparam entity {
@@ -15,6 +15,17 @@ entity "FOURNISSEUR" as fournisseur {
   mot_de_passe : VARCHAR(255)
   seuil_eau : DECIMAL(10,2)
   seuil_elec : DECIMAL(10,2)
+  date_creation : DATETIME
+}
+
+entity "AGENT" as agent {
+  * id_agent : INT <<PK>>
+  --
+  nom : VARCHAR(100)
+  prenom : VARCHAR(100)
+  email : VARCHAR(150) <<UNIQUE>>
+  mot_de_passe : VARCHAR(255)
+  telephone : VARCHAR(30)
   date_creation : DATETIME
 }
 
@@ -75,6 +86,19 @@ entity "CONSOMMATION" as consommation {
   statut : ENUM
 }
 
+entity "CONSO_ANNUELLE" as conso_annuelle {
+  * id_conso_annuelle : INT <<PK>>
+  --
+  id_client : INT <<FK>>
+  id_agent : INT <<FK>>
+  conso_eau : DECIMAL(12,2)
+  conso_elec : DECIMAL(12,2)
+  annee : SMALLINT
+  date_saisie : DATETIME
+  statut_verification : ENUM
+  date_verification : DATETIME NULL
+}
+
 entity "PHOTO_CAPTEUR" as photo_capteur {
   * id_photo : INT <<PK>>
   --
@@ -115,11 +139,31 @@ entity "FACTURE" as facture {
   montant_tva : DECIMAL(12,2)
   montant_ttc : DECIMAL(12,2)
   etat : ENUM IMPAYEE/PAYEE
+  date_paiement : DATETIME NULL
+  mode_paiement : VARCHAR(30) NULL
+  reference_paiement : VARCHAR(100) NULL
+}
+
+entity "RECLAMATION" as reclamation {
+  * id_reclamation : INT <<PK>>
+  --
+  numero : VARCHAR(30) <<UNIQUE>>
+  id_client : INT <<FK>>
+  id_facture : INT <<FK>> NULL
+  type : ENUM
+  description : TEXT
+  piece_jointe : VARCHAR(255) NULL
+  statut : ENUM
+  reponse : TEXT NULL
+  date_creation : DATETIME
+  date_resolution : DATETIME NULL
 }
 
 fournisseur ||--o{ client : "gere"
 fournisseur ||--o{ tarif : "definit"
 fournisseur ||--o{ anomalie : "suit"
+agent ||--o{ conso_annuelle : "importe"
+client ||--o{ conso_annuelle : "concerne"
 client ||--o{ contrat : "possede"
 quartier ||--o{ contrat : "regroupe"
 contrat ||--o{ consommation : "concerne"
@@ -127,6 +171,8 @@ client ||--o{ facture : "recoit"
 consommation ||--o{ anomalie : "presente"
 consommation ||--o| facture : "genere"
 consommation ||--|{ photo_capteur : "contient"
+client ||--o{ reclamation : "depose"
+facture ||--o{ reclamation : "concerne"
 
 note right of photo_capteur
   Exactement 2 photos par consommation :
@@ -135,9 +181,8 @@ note right of photo_capteur
 end note
 
 note bottom of anomalie
-  Alpha : le client confirme ou corrige.
-  Si confirme, la facture est generee automatiquement.
-  Le fournisseur consulte (correction fournisseur = V2).
+  Le fournisseur corrige l'anomalie.
+  La correction est revalidee avant la generation de la facture.
 end note
 
 @enduml

@@ -38,6 +38,7 @@ Fournisseur : fournisseur@example.ma / fournisseur123
 Client 1    : client1@example.ma / client123
 Client 2    : client2@example.ma / client123
 Client 3    : client3@example.ma / client123
+Agent       : agent@example.ma  / agent123
 ```
 
 ## État de la base après les tests
@@ -48,14 +49,17 @@ La base est remise au seed à la fin de la campagne :
 3 clients
 3 quartiers
 4 contrats
-4 consommations
-0 facture
+22 consommations
+18 factures historiques
 4 notifications
+1 agent
+0 conso_annuelle
+0 réclamation
 ```
 
-## Modules non testables sur `main`
+## Modules intégrés et testés
 
-Les modules suivants ne sont pas encore mergés dans `main` :
+Les modules suivants ont été mergés et testés :
 
 - réclamations ;
 - paiements ;
@@ -64,4 +68,11 @@ Les modules suivants ne sont pas encore mergés dans `main` :
 - dashboard final avec impayés ;
 - génération de facture après correction fournisseur.
 
-Ils feront l’objet d’une seconde campagne après intégration de leurs branches.
+## Campagne finale
+
+Après intégration des modules Agent, vérification, réclamations et paiements :
+
+- `docs/tests/final/README.md` ;
+- `docs/tests/final/results.md` ;
+- `docs/tests/final/bugs.md` ;
+- `docs/tests/final/screenshots/`.
