@@ -12,6 +12,7 @@ USE miniproject_version_alpha;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DELETE FROM notification;
 DELETE FROM facture;
 DELETE FROM anomalie;
 DELETE FROM photo_capteur;
@@ -20,6 +21,7 @@ DELETE FROM tarif;
 DELETE FROM client;
 DELETE FROM fournisseur;
 
+ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE facture AUTO_INCREMENT = 1;
 ALTER TABLE anomalie AUTO_INCREMENT = 1;
 ALTER TABLE photo_capteur AUTO_INCREMENT = 1;
@@ -91,3 +93,26 @@ VALUES
   (1, 'ELEC',   0.00, 100.00,  0.8200),
   (1, 'ELEC', 100.00, 150.00,  0.9200),
   (1, 'ELEC', 150.00,   NULL,  1.1000);
+
+-- ------------------------------------------------------------
+-- NOTIFICATIONS DE DEMONSTRATION
+-- ------------------------------------------------------------
+INSERT INTO notification
+  (destinataire_role, id_destinataire, type, titre, message, lien, lu)
+VALUES
+  ('client', 1, 'FACTURE',
+   'Bienvenue sur AquaVolt',
+   'Votre espace client est prêt. Consultez vos factures et saisissez vos index.',
+   'Facture/all', 0),
+  ('client', 1, 'SYSTEME',
+   'Pensez à saisir votre consommation',
+   'La saisie est ouverte du 18 du mois jusqu’à la fin du mois.',
+   'Consommation/add', 0),
+  ('fournisseur', 1, 'ANOMALIE',
+   'Anomalies à vérifier',
+   'Consultez les relevés signalés avant la génération des factures.',
+   'Anomalie/index', 0),
+  ('fournisseur', 1, 'SYSTEME',
+   'Bienvenue dans votre espace fournisseur',
+   'Gérez vos clients, vos anomalies et vos factures depuis le tableau de bord.',
+   'Client/all', 1);

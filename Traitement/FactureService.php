@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/Tarification.php';
 require_once __DIR__ . '/../BD/Facture.php';
 require_once __DIR__ . '/../BD/ConsommationBD.php';
+require_once __DIR__ . '/../BD/Notification.php';
 
 final class FactureService
 {
@@ -90,6 +91,23 @@ final class FactureService
             throw $e;
         }
 
-        return $this->factures->findByConso($idConso) ?? [];
+        $facture = $this->factures->findByConso($idConso) ?? [];
+
+        if ($facture !== []) {
+            try {
+                (new NotificationBD($this->pdo))->creer(
+                    'client',
+                    (int) $facture['id_client'],
+                    'FACTURE',
+                    'Nouvelle facture disponible',
+                    'Votre facture ' . $facture['numero'] . ' est disponible.',
+                    'Facture/one/' . (int) $facture['id_facture']
+                );
+            } catch (Throwable $e) {
+                error_log('[NOTIFICATION] ' . $e->getMessage());
+            }
+        }
+
+        return $facture;
     }
 }
