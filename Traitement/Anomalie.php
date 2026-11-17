@@ -1,8 +1,10 @@
+
 <?php
 declare(strict_types=1);
 
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/../BD/AnomalieBD.php';
+require_once __DIR__ . '/FactureService.php';
 
 final class Anomalie
 {
@@ -25,7 +27,9 @@ final class Anomalie
         ];
 
         foreach ($champs as $code => $c) {
-            $indexPrecedent = $precedent !== null ? (float) $precedent[$c['index']] : 0.0;
+            $indexPrecedent = $precedent !== null
+                ? (float) $precedent[$c['index']]
+                : 0.0;
 
             // 1. Index inférieur au relevé précédent
             if ($precedent !== null && $c['valeur'] < $indexPrecedent) {
@@ -35,12 +39,10 @@ final class Anomalie
                     'valeur_saisie' => $c['valeur'],
                     'valeur_reference' => $indexPrecedent,
                 ];
-                continue; // inutile de tester le seuil sur une valeur incohérente
+                continue;
             }
 
             // 2. Index supérieur au seuil de vigilance
-            // Le seuil est exprimé en index (index précédent + 40 %,
-            // avec le seuil du fournisseur comme plancher).
             if ($c['valeur'] > $c['seuil']) {
                 $anomalies[] = [
                     'type' => 'SEUIL_DEPASSE',
@@ -118,15 +120,58 @@ function anomalie_corriger($id = null): void
                     $anomalie['index_precedent'] !== null
                     && $valeur < (float) $anomalie['index_precedent']
                 ) {
-                    $erreurs['valeur_corrigee'] = 'L’index corrigé doit être supérieur ou égal à l’index précédent.';
-                } elseif (anomalie_bd()->corriger($idAnomalie, $idFournisseur, $valeur)) {
+                    $erreurs['valeur_corrigee'] =
+                        'L’index corrigé doit être supérieur ou égal à l’index précédent.';
+
+                } elseif (
+                    anomalie_bd()->corriger(
+                        $idAnomalie,
+                        $idFournisseur,
+                        $valeur
+                    )
+                ) {
+                    $messageSucces = 'Anomalie corrigée avec succès.';
+
+                    try {
+                        $idConso = (int) $anomalie['id_conso'];
+
+                        // Relire le statut de la consommation après correction.
+                        $consommations = new ConsommationBD(pdo());
+                        $consommation = $consommations->trouverParId($idConso);
+
+                        // Générer la facture uniquement si toutes les anomalies
+                        // de cette consommation sont corrigées.
+                        if (
+                            $consommation !== null
+                            && $consommation['statut'] === 'VALIDEE'
+                        ) {
+                            $facture = (new FactureService(pdo()))
+                                ->generer($idConso);
+
+                            $messageSucces =
+                                'Anomalie corrigée. Facture générée : '
+                                . $facture['numero'];
+                        }
+                    } catch (Throwable $e) {
+                        error_log(
+                            '[FACTURATION APRES CORRECTION] '
+                            . $e->getMessage()
+                        );
+
+                        $messageSucces =
+                            'Anomalie corrigée, mais la génération de la facture '
+                            . 'a échoué. Une vérification est nécessaire.';
+                    }
+
                     header(
                         'Location: ' . url('Anomalie/index')
-                        . '?succes=' . urlencode('Anomalie corrigée avec succès.')
+                        . '?succes=' . urlencode($messageSucces)
                     );
                     exit;
+
                 } else {
-                    $erreurs['general'] = 'Impossible de corriger l’anomalie.';
+                    $erreurs['general'] =
+                        'Impossible de corriger l’anomalie.';
                 }
             }
         }
