@@ -27,6 +27,17 @@
     <div class="table-wrap">
         <table class="table">
             <tr>
+                <th>Contrat</th>
+                <td><?= e($conso['numero_contrat'] ?? '—') ?></td>
+            </tr>
+            <tr>
+                <th>Quartier</th>
+                <td>
+                    <?= e($conso['quartier_nom'] ?? '—') ?>
+                    (<?= e($conso['type_activite'] ?? '—') ?>)
+                </td>
+            </tr>
+            <tr>
                 <th>Index eau saisi</th>
                 <td><?= e(number_format((float) $conso['index_eau'], 2, ',', ' ')) ?> m³</td>
             </tr>

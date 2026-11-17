@@ -1,6 +1,7 @@
 <?php
 /** @var array $erreurs @var array $anciennes @var array|null $conso @var array|null $precedent
  *  @var array $photosPrecedentes @var string $csrf
+ *  @var array $contrats @var int $contratSelectionne
  */
 $mois = (int) ($mois ?? ($anciennes['periode_mois'] ?? $conso['periode_mois'] ?? date('n')));
 $annee = (int) ($annee ?? ($anciennes['periode_annee'] ?? $conso['periode_annee'] ?? date('Y')));
@@ -72,7 +73,12 @@ $compteurs = [
     <div class="period-banner">
         <div>
             <strong>Correction de la période : <?= $mois ?>/<?= $annee ?></strong>
-            <span>La période ne peut pas être modifiée.</span>
+            <span>
+                Contrat <?= e($conso['numero_contrat']) ?>
+                — <?= e($conso['quartier_nom']) ?>
+                (<?= e($conso['type_activite']) ?>).
+                La période et le contrat ne peuvent pas être modifiés.
+            </span>
         </div>
         <span class="badge badge-warning">Correction</span>
     </div>
@@ -89,11 +95,42 @@ $compteurs = [
 
     <?php if ($conso !== null): ?>
         <input type="hidden" name="id_conso" value="<?= (int) $conso['id_conso'] ?>">
+        <input type="hidden" name="id_contrat" value="<?= (int) $conso['id_contrat'] ?>">
         <input type="hidden" name="periode_mois" value="<?= $mois ?>">
         <input type="hidden" name="periode_annee" value="<?= $annee ?>">
     <?php else: ?>
         <section class="card">
             <div class="form-grid">
+                <?php if (count($contrats) === 1): ?>
+                    <input type="hidden" name="id_contrat" value="<?= (int) $contrats[0]['id_contrat'] ?>">
+                    <div class="form-group">
+                        <label>Contrat</label>
+                        <p class="meter-help">
+                            <strong><?= e($contrats[0]['numero_contrat']) ?></strong>
+                            — <?= e($contrats[0]['quartier_nom']) ?>
+                            (<?= e($contrats[0]['type_activite']) ?>)
+                        </p>
+                    </div>
+                <?php else: ?>
+                    <div class="form-group">
+                        <label for="id_contrat">Contrat</label>
+                        <select id="id_contrat" name="id_contrat" required>
+                            <option value="">— Choisir un contrat —</option>
+                            <?php foreach ($contrats as $contrat): ?>
+                                <option
+                                    value="<?= (int) $contrat['id_contrat'] ?>"
+                                    <?= (int) $contrat['id_contrat'] === $contratSelectionne ? 'selected' : '' ?>
+                                >
+                                    <?= e($contrat['numero_contrat']) ?>
+                                    — <?= e($contrat['quartier_nom']) ?>
+                                    (<?= e($contrat['type_activite']) ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?= $erreurChamp('id_contrat') ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="form-group">
                     <label for="periode_mois">Mois</label>
                     <select id="periode_mois" name="periode_mois">

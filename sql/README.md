@@ -16,6 +16,14 @@ mysql -u root -p < sql/schema.sql
 mysql -u root -p < sql/seed.sql
 ```
 
+## Mise a jour d'une base existante
+
+Pour ajouter les quartiers et les contrats sans recreer la base :
+
+```bash
+mysql -u root < sql/migrations/003_quartier_contrat.sql
+```
+
 ## Import via phpMyAdmin
 
 1. Ouvrir phpMyAdmin.
@@ -38,6 +46,8 @@ SELECT * FROM tarif ORDER BY type, borne_min;
 
 - `fournisseur`
 - `client`
+- `quartier`
+- `contrat`
 - `tarif`
 - `consommation`
 - `photo_capteur`

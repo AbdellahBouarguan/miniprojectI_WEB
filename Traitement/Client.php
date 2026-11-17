@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/../BD/ClientBD.php';
+require_once __DIR__ . '/../BD/Contrat.php';
+require_once __DIR__ . '/../BD/Quartier.php';
 
 function client_bd(): ClientBD
 {
@@ -61,6 +63,11 @@ function client_one($id = null): void
 
     unset($client['mot_de_passe']);
     $nbConsommations = client_bd()->nbConsommations($idClient);
+    $contrats = (new ContratBD(pdo()))->listerParClient($idClient);
+    $quartiers = (new QuartierBD(pdo()))->lister();
+    $erreur = $_GET['erreur'] ?? null;
+    $succes = $_GET['succes'] ?? null;
+    $csrf = csrf_token();
 
     require ROOT . 'IHM/client/one.php';
 }

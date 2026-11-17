@@ -38,6 +38,10 @@ if (str_contains($path, '/Consommation')) {
     $active = 'anomalies';
 } elseif (str_contains($path, '/Facture')) {
     $active = 'factures';
+} elseif (str_contains($path, '/Contrat')) {
+    $active = 'contrats';
+} elseif (str_contains($path, '/Quartier')) {
+    $active = 'quartiers';
 }
 ?>
 <!DOCTYPE html>
@@ -82,6 +86,12 @@ if (str_contains($path, '/Consommation')) {
                     </a>
                     <a class="<?= $active === 'clients' ? 'active' : '' ?>" href="<?= url('Client/all') ?>">
                         <?= icon('users') ?> Clients
+                    </a>
+                    <a class="<?= $active === 'contrats' ? 'active' : '' ?>" href="<?= url('Contrat/all') ?>">
+                        <?= icon('file') ?> Contrats
+                    </a>
+                    <a class="<?= $active === 'quartiers' ? 'active' : '' ?>" href="<?= url('Quartier/all') ?>">
+                        <?= icon('grid') ?> Quartiers
                     </a>
                     <a class="<?= $active === 'anomalies' ? 'active' : '' ?>" href="<?= url('Anomalie/index') ?>">
                         <?= icon('alert') ?> Anomalies

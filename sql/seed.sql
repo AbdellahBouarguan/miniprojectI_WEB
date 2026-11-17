@@ -17,6 +17,8 @@ DELETE FROM facture;
 DELETE FROM anomalie;
 DELETE FROM photo_capteur;
 DELETE FROM consommation;
+DELETE FROM contrat;
+DELETE FROM quartier;
 DELETE FROM tarif;
 DELETE FROM client;
 DELETE FROM fournisseur;
@@ -26,6 +28,8 @@ ALTER TABLE facture AUTO_INCREMENT = 1;
 ALTER TABLE anomalie AUTO_INCREMENT = 1;
 ALTER TABLE photo_capteur AUTO_INCREMENT = 1;
 ALTER TABLE consommation AUTO_INCREMENT = 1;
+ALTER TABLE contrat AUTO_INCREMENT = 1;
+ALTER TABLE quartier AUTO_INCREMENT = 1;
 ALTER TABLE tarif AUTO_INCREMENT = 1;
 ALTER TABLE client AUTO_INCREMENT = 1;
 ALTER TABLE fournisseur AUTO_INCREMENT = 1;
@@ -44,6 +48,16 @@ VALUES
    '$2y$12$ddK9Wz7XYDG06PasI8DiweTxv2arw.fItvr0dlYJAfP1CP4cJSqni',
    100.00,
    1000.00);
+
+-- ------------------------------------------------------------
+-- QUARTIERS
+-- ------------------------------------------------------------
+INSERT INTO quartier
+  (id_quartier, nom, type_activite)
+VALUES
+  (1, 'Centre-ville', 'COMMERCIAL'),
+  (2, 'Résidentiel Nord', 'RESIDENTIEL'),
+  (3, 'Zone Industrielle', 'INDUSTRIEL');
 
 -- ------------------------------------------------------------
 -- CLIENTS
@@ -66,14 +80,27 @@ VALUES
    '0600000003');
 
 -- ------------------------------------------------------------
+-- CONTRATS
+-- Client 1 possede deux contrats dans deux quartiers differents.
+-- ------------------------------------------------------------
+INSERT INTO contrat
+  (id_contrat, id_client, id_quartier, numero_contrat, date_debut, date_fin, statut)
+VALUES
+  (1, 1, 1, 'CTR-1-CENTRE', '2026-01-01', NULL, 'ACTIF'),
+  (2, 1, 2, 'CTR-1-NORD',   '2026-01-01', NULL, 'ACTIF'),
+  (3, 2, 2, 'CTR-2-NORD',   '2026-01-01', NULL, 'ACTIF'),
+  (4, 3, 3, 'CTR-3-ZONE',   '2026-01-01', NULL, 'ACTIF');
+
+-- ------------------------------------------------------------
 -- CONSOMMATIONS DE DEMONSTRATION (mois precedent)
 -- ------------------------------------------------------------
 INSERT INTO consommation
-  (id_client, periode_mois, periode_annee, index_eau, index_elec, statut)
+  (id_client, id_contrat, periode_mois, periode_annee, index_eau, index_elec, statut)
 VALUES
-  (1, 9, 2026, 100.00, 300.00, 'VALIDEE'),
-  (2, 9, 2026,  80.00, 250.00, 'VALIDEE'),
-  (3, 9, 2026, 120.00, 400.00, 'VALIDEE');
+  (1, 1, 9, 2026, 100.00, 300.00, 'VALIDEE'),
+  (1, 2, 9, 2026,  30.00, 100.00, 'VALIDEE'),
+  (2, 3, 9, 2026,  80.00, 250.00, 'VALIDEE'),
+  (3, 4, 9, 2026, 120.00, 400.00, 'VALIDEE');
 
 -- ------------------------------------------------------------
 -- TARIFS
