@@ -1,20 +1,27 @@
+
 \chapter*{Introduction générale}
 \addcontentsline{toc}{chapter}{Introduction générale}
 
-La gestion des consommations d'eau et d'électricité repose sur la collecte régulière des index des compteurs, la vérification des valeurs saisies et le calcul des montants à facturer. Une application web permet de centraliser ces opérations, de conserver les justificatifs photographiques et de réduire les erreurs de saisie.
+La gestion des consommations d'eau et d'électricité constitue une activité qui nécessite un suivi régulier des relevés des compteurs, une vérification des données collectées et un calcul précis des montants à facturer. La réalisation de ces opérations nécessite une organisation rigoureuse afin de garantir la fiabilité des informations et de limiter les erreurs de traitement.
 
-Le projet \textbf{AquaVolt} fournit une application permettant aux clients de transmettre leurs relevés et de consulter leurs factures, au fournisseur de gérer les abonnés, les quartiers, les contrats, les anomalies, les réclamations et les paiements, et à un Agent d'importer les consommations annuelles.
+Dans ce contexte, les applications web représentent une solution permettant de centraliser les différentes opérations au sein d'une plateforme unique. Elles facilitent la collecte des consommations, le suivi des factures, la gestion des réclamations et la consultation des informations par les différents acteurs concernés.
 
-La version finale couvre l'ensemble des fonctionnalités demandées. Le présent rapport décrit le contexte et les besoins, l'architecture MVC, le modèle de données, les modules développés, les mécanismes de sécurité, les tests réalisés et les perspectives d'amélioration.
+C'est dans cette perspective que s'inscrit le projet \textbf{AquaVolt}, une application web dédiée à la gestion des factures d'eau et d'électricité. Elle s'adresse à trois acteurs principaux : le client, qui peut transmettre ses relevés et consulter ses factures ; le fournisseur, qui assure la gestion des clients, des quartiers, des contrats, des anomalies, des réclamations et des paiements ; et l'agent, qui intervient notamment dans l'importation des consommations annuelles.
+
+Développée en PHP 8 avec une base de données MariaDB et organisée selon l'architecture MVC, l'application regroupe les principales opérations liées au suivi des consommations et à la facturation. Elle intègre également des mécanismes de détection des anomalies, de vérification annuelle, de notification et de suivi de l'activité à travers un tableau de bord.
+
+Le présent rapport décrit les différentes étapes de réalisation du projet. Il présente le contexte général, l'analyse des besoins, l'architecture technique, la conception de la base de données, les différents modules développés, les mécanismes de sécurité et les tests effectués. Enfin, il expose le bilan du travail réalisé ainsi que les limites et les perspectives d'évolution de l'application.
 
 \section*{Organisation du rapport}
 
+Le rapport est organisé en plusieurs chapitres complémentaires :
+
 \begin{itemize}[leftmargin=*]
-  \item le chapitre~\ref{chap:presentation} présente le projet et son organisation ;
-  \item le chapitre~\ref{chap:besoins} analyse les besoins ;
-  \item le chapitre~\ref{chap:architecture} décrit l'architecture et les technologies ;
-  \item le chapitre~\ref{chap:basededonnees} présente la base de données ;
-  \item les chapitres suivants détaillent les modules fonctionnels ;
-  \item le chapitre~\ref{chap:tests} présente les tests et les résultats ;
-  \item le chapitre~\ref{chap:bilan} dresse le bilan et les perspectives.
+    \item le chapitre~\ref{chap:presentation} présente le projet, son contexte et son organisation ;
+    \item le chapitre~\ref{chap:besoins} analyse les besoins fonctionnels et non fonctionnels ;
+    \item le chapitre~\ref{chap:architecture} décrit l'architecture de l'application et les technologies utilisées ;
+    \item le chapitre~\ref{chap:basededonnees} présente la conception et la structure de la base de données ;
+    \item les chapitres suivants détaillent les différents modules fonctionnels de l'application ;
+    \item le chapitre~\ref{chap:tests} présente les tests réalisés et leurs résultats ;
+    \item le chapitre~\ref{chap:bilan} dresse le bilan du projet, ses limites et ses perspectives d'amélioration.
 \end{itemize}

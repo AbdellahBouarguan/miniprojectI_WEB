@@ -1,15 +1,181 @@
+
 \chapter{Saisie des consommations}
 \label{chap:consommation}
 
-\todo{décrire la période de saisie, la sélection du contrat, les photos, la validation et le calcul.}
+Ce chapitre présente le fonctionnement du module de saisie des consommations d'eau et d'électricité dans AquaVolt. Il décrit la période de saisie, le choix du contrat, les informations demandées au client, le téléversement des photos des compteurs, les contrôles effectués par le serveur ainsi que la consultation de l'historique des relevés.
 
 \section{Objectifs}
+
+Le module de saisie permet au client de transmettre périodiquement les index de ses compteurs d'eau et d'électricité. Ces informations permettent de déterminer les consommations de la période et constituent la base du processus de facturation.
+
+Les principaux objectifs de ce module sont :
+\begin{itemize}
+    \item permettre au client de saisir les index de ses deux compteurs ;
+    \item rattacher chaque relevé au contrat concerné ;
+    \item conserver une trace des relevés précédents ;
+    \item demander des photos justificatives des compteurs ;
+    \item détecter les valeurs incohérentes ou dépassant les seuils définis par le fournisseur ;
+    \item permettre la consultation de l'historique et du détail des consommations.
+\end{itemize}
+
 \section{Période de saisie}
+
+La période de saisie est paramétrable dans le fichier \texttt{config/app.php}, à travers la constante \texttt{CONSUMPTION\_OPEN\_DAY}.
+
+Par défaut, le jour d'ouverture est fixé au 18 du mois. Cette valeur peut être personnalisée à l'aide du fichier facultatif \texttt{config/local.php}. Le système limite automatiquement la valeur configurée à un nombre compris entre 1 et 28.
+
+La vue de saisie affiche les informations relatives à l'ouverture ou à la fermeture de la période. Le contrôle de la période est également effectué côté serveur afin de ne pas dépendre uniquement de l'affichage du formulaire.
+
 \section{Sélection du contrat}
+
+Un client peut posséder plusieurs contrats associés à différents quartiers. Chaque consommation doit donc être rattachée au contrat correspondant au compteur relevé.
+
+Lors de l'enregistrement :
+\begin{itemize}
+    \item seuls les contrats actifs du client sont proposés ;
+    \item lorsqu'un seul contrat actif existe, il est sélectionné automatiquement ;
+    \item lorsque plusieurs contrats actifs existent, le client doit choisir celui auquel le relevé correspond ;
+    \item le serveur vérifie que le contrat sélectionné appartient bien au client connecté.
+\end{itemize}
+
+En cas de correction d'un relevé existant, le contrat et la période sont conservés afin d'éviter de rattacher la correction à un autre contrat.
+
 \section{Formulaire de saisie}
+
+Le formulaire permet au client de renseigner les informations suivantes :
+\begin{itemize}
+    \item le contrat concerné, lorsque plusieurs contrats actifs sont disponibles ;
+    \item le mois et l'année de la consommation ;
+    \item l'index du compteur d'eau ;
+    \item l'index du compteur d'électricité ;
+    \item la photo du compteur d'eau ;
+    \item la photo du compteur d'électricité.
+\end{itemize}
+
+En mode correction, le contrat et la période du relevé sont affichés comme des informations fixes. Le formulaire présente également les anciens index et, lorsqu'elles sont disponibles, les anciennes photos afin de faciliter la vérification des nouvelles valeurs.
+
+Un relevé existant ne peut être modifié que lorsqu'il possède le statut \texttt{EN\_ATTENTE} ou \texttt{ANOMALIE}.
+
 \section{Téléversement des photos}
+
+Les photos servent de justificatifs visuels des index transmis par le client. Le formulaire prévoit une photo pour chaque compteur : eau et électricité.
+
+Le traitement serveur applique les contrôles suivants :
+\begin{itemize}
+    \item taille maximale de 5 Mo par fichier, définie par la constante \texttt{MAX\_UPLOAD\_SIZE} ;
+    \item vérification du type MIME réel à l'aide de \texttt{finfo} ;
+    \item formats acceptés : JPEG, PNG et WEBP ;
+    \item génération d'un suffixe aléatoire pour le nom du fichier ;
+    \item stockage dans le répertoire \texttt{uploads/compteurs/}, avec un sous-répertoire associé au client.
+\end{itemize}
+
+Les chemins des photos sont enregistrés dans la table \texttt{photo\_capteur}, en association avec la consommation et le type de compteur concerné.
+
 \section{Validation serveur}
+
+Avant l'enregistrement d'un relevé, le serveur effectue plusieurs vérifications :
+\begin{itemize}
+    \item l'utilisateur doit être authentifié avec le rôle client ;
+    \item la requête doit respecter le mécanisme de protection CSRF ;
+    \item le contrat doit appartenir au client connecté et être actif pour une nouvelle saisie ;
+    \item le mois et l'année doivent être valides ;
+    \item la période doit être ouverte ;
+    \item les index doivent être des valeurs non négatives ;
+    \item un relevé ne doit pas déjà exister pour le même contrat et la même période ;
+    \item une nouvelle saisie est bloquée lorsqu'une anomalie reste en attente pour le même contrat.
+\end{itemize}
+
+Le système vérifie également les valeurs par rapport au relevé précédent et aux seuils définis par le fournisseur. Ces contrôles permettent de distinguer les relevés cohérents de ceux qui nécessitent une vérification.
+
 \section{Calcul de la consommation}
+
+La consommation d'une période est calculée à partir de la différence entre l'index actuel et le dernier index validé ou facturé de la même série de relevés.
+
+Les calculs sont effectués séparément pour l'eau et l'électricité :
+
+\[
+C_{\text{eau}} =
+I_{\text{eau actuel}} - I_{\text{eau précédent}}
+\]
+
+\[
+C_{\text{électricité}} =
+I_{\text{électricité actuel}} - I_{\text{électricité précédent}}
+\]
+
+Dans l'implémentation, les résultats négatifs sont ramenés à zéro. Un index inférieur au précédent est néanmoins détecté comme une anomalie et ne peut pas être confirmé directement par le client.
+
 \section{Relevé précédent}
+
+Pour effectuer les comparaisons, le système recherche la dernière consommation antérieure du même contrat dont le statut est \texttt{VALIDEE} ou \texttt{FACTUREE}.
+
+Les index précédents sont utilisés :
+\begin{itemize}
+    \item pour afficher les valeurs de référence dans le formulaire ;
+    \item pour calculer les consommations de la nouvelle période ;
+    \item pour détecter un index inférieur au relevé précédent.
+\end{itemize}
+
+Cette organisation permet de conserver une continuité des relevés pour chaque contrat, même lorsqu'un client possède plusieurs contrats.
+
 \section{Historique et détail}
-\section{Tests}
+
+Le client peut consulter l'ensemble de ses consommations enregistrées à partir de la page d'historique.
+
+Cette page présente, pour chaque relevé :
+\begin{itemize}
+    \item la période concernée ;
+    \item le numéro du contrat, le quartier et le type d'activité ;
+    \item les index d'eau et d'électricité ;
+    \item le statut de la consommation ;
+    \item le numéro de facture lorsqu'une facture est disponible.
+\end{itemize}
+
+Les actions proposées dépendent du statut du relevé :
+\begin{itemize}
+    \item \texttt{ANOMALIE} : consulter la page de confirmation ou de correction ;
+    \item \texttt{EN\_ATTENTE} : reprendre la saisie ;
+    \item \texttt{VALIDEE} : demander la génération de la facture.
+\end{itemize}
+
+La page de détail présente les index saisis, les consommations calculées, le contrat associé, les photos disponibles, les anomalies détectées et les informations de facturation lorsqu'une facture existe.
+
+\section{Gestion des anomalies}
+
+Lorsqu'un relevé présente une anomalie, le client est dirigé vers une page de vérification. Celle-ci affiche le champ concerné, le type d'anomalie, la valeur saisie et la valeur de référence.
+
+Deux types d'anomalies sont distingués :
+\begin{itemize}
+    \item \texttt{INDEX\_INFERIEUR} : l'index saisi est inférieur à celui du relevé précédent ;
+    \item \texttt{SEUIL\_DEPASSE} : la valeur dépasse le seuil défini par le fournisseur.
+\end{itemize}
+
+Le client peut confirmer les valeurs ou demander leur correction. Toutefois, lorsque l'anomalie concerne un index inférieur au relevé précédent, la confirmation est désactivée et une correction est obligatoire.
+
+Les décisions sont transmises au serveur par une requête POST protégée par un jeton CSRF. Le traitement de ces décisions est assuré par le module de consommation.
+
+\section{Tests du module}
+
+Les scénarios suivants constituent des cas de vérification fonctionnelle du module. Ils décrivent les comportements attendus à contrôler, sans prétendre que tous ont fait l'objet d'une exécution formelle.
+
+\begin{longtable}{|p{0.8cm}|p{5.1cm}|p{5.2cm}|}
+\hline
+\textbf{N°} & \textbf{Scénario} & \textbf{Résultat attendu} \\
+\hline
+1 & Saisir une consommation avec un contrat actif. & Le relevé est associé au contrat sélectionné. \\
+\hline
+2 & Saisir une consommation avec plusieurs contrats actifs. & Le client doit choisir le contrat concerné. \\
+\hline
+3 & Saisir un index inférieur au relevé précédent. & Une anomalie est détectée et la confirmation est bloquée. \\
+\hline
+4 & Dépasser le seuil défini par le fournisseur. & Une anomalie de type seuil dépassé est signalée. \\
+\hline
+5 & Téléverser une image dans un format non autorisé. & Le fichier est refusé par le serveur. \\
+\hline
+6 & Téléverser une image dépassant 5 Mo. & Le fichier est refusé par le contrôle de taille. \\
+\hline
+7 & Consulter l'historique des consommations. & Les relevés et leurs statuts sont affichés. \\
+\hline
+8 & Consulter le détail d'une consommation. & Les index, les consommations calculées et les informations associées sont affichés. \\
+\hline
+\end{longtable}

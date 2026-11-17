@@ -1,14 +1,143 @@
+
 \chapter{Paiements}
 \label{chap:paiements}
 
-\todo{décrire les règles, le formulaire fournisseur, le passage à PAYEE, le double paiement et le dashboard.}
-
 \section{Objectifs}
+
+Le module de paiement permet au fournisseur de suivre les règlements des factures émises pour ses clients.
+
+Il lui offre la possibilité d'enregistrer le paiement d'une facture, de mettre à jour son état et d'informer automatiquement le client concerné.
+
+Ce module contribue également au suivi financier du fournisseur grâce aux indicateurs du tableau de bord, qui distinguent les montants impayés des montants encaissés.
+
 \section{Règles de paiement}
+
+Dans la version actuelle de l'application, le paiement est enregistré directement dans la table \texttt{facture}. Aucune table séparée n'est utilisée pour gérer les paiements.
+
+Les principales règles sont les suivantes :
+\begin{itemize}
+    \item seul un fournisseur authentifié peut enregistrer le paiement d'une facture ;
+    \item la facture doit appartenir à un client rattaché au fournisseur connecté ;
+    \item seule une facture dont l'état est \texttt{IMPAYEE} peut être payée ;
+    \item le paiement concerne la totalité du montant TTC de la facture ;
+    \item après confirmation, l'état de la facture passe à \texttt{PAYEE}.
+\end{itemize}
+
+Le système ne prévoit pas, dans cette version, de gestion des paiements partiels.
+
 \section{Formulaire fournisseur}
+
+Le formulaire de paiement est intégré à la page de détail d'une facture, dans la vue \texttt{IHM/facture/show.php}.
+
+Lorsque la facture est encore impayée, le fournisseur dispose d'une action permettant d'enregistrer son paiement.
+
+Cette action transmet une requête POST au contrôleur \texttt{Traitement/Facture.php}, à travers la fonction \texttt{facture\_payer()}.
+
+Avant de modifier la facture, le contrôleur vérifie :
+\begin{itemize}
+    \item que l'utilisateur possède le rôle \texttt{fournisseur} ;
+    \item que la requête utilise la méthode POST ;
+    \item que le jeton CSRF est valide ;
+    \item que la facture existe et appartient au fournisseur connecté ;
+    \item que son état actuel est \texttt{IMPAYEE}.
+\end{itemize}
+
+Ces vérifications empêchent un client ou un fournisseur non autorisé d'enregistrer le paiement d'une facture qui ne lui appartient pas.
+
 \section{Passage à l'état PAYEE}
+
+La mise à jour du paiement est réalisée par la méthode \texttt{payerParFournisseur()} de la classe \texttt{FactureBD}.
+
+Cette méthode modifie les informations suivantes :
+\begin{itemize}
+    \item le champ \texttt{etat} prend la valeur \texttt{PAYEE} ;
+    \item le champ \texttt{date\_paiement} reçoit la date et l'heure actuelles.
+\end{itemize}
+
+La mise à jour est conditionnée par l'appartenance de la facture à un client du fournisseur et par son état initial \texttt{IMPAYEE}.
+
+La méthode vérifie ensuite le nombre de lignes modifiées. Si une ligne a été modifiée, l'opération est considérée comme réussie.
+
 \section{Date et référence de paiement}
+
+La date de paiement est enregistrée automatiquement avec la fonction SQL \texttt{NOW()} lors du passage de la facture à l'état \texttt{PAYEE}.
+
+Elle est ensuite affichée dans la page de détail de la facture.
+
+Le schéma de la base de données prévoit également les champs \texttt{mode\_paiement} et \texttt{reference\_paiement}.
+
+Cependant, la méthode \texttt{payerParFournisseur()} étudiée ne renseigne que l'état de la facture et sa date de paiement. La saisie du mode et de la référence du paiement n'est donc pas prise en charge par ce traitement.
+
 \section{Double paiement}
+
+Le système prévoit une protection contre l'enregistrement répété du paiement d'une même facture.
+
+La méthode \texttt{payerParFournisseur()} ajoute une condition dans sa requête SQL : la facture doit posséder l'état \texttt{IMPAYEE} au moment de la mise à jour.
+
+Après un premier paiement réussi, son état devient \texttt{PAYEE}. Une nouvelle tentative ne satisfait donc plus cette condition.
+
+Le contrôleur vérifie également l'état de la facture avant d'appeler la méthode de mise à jour.
+
+Ainsi, une facture déjà payée ne peut pas être enregistrée une seconde fois comme impayée.
+
 \section{Impact sur le tableau de bord}
+
+Le paiement d'une facture a un effet direct sur les indicateurs financiers affichés dans le tableau de bord du fournisseur.
+
+Les données sont récupérées par la classe \texttt{DashboardBD}, à partir de la table \texttt{facture}, en tenant compte du fournisseur auquel appartient le client.
+
+La méthode \texttt{totaux()} calcule notamment :
+\begin{itemize}
+    \item le montant total impayé, correspondant à la somme des montants TTC des factures dont l'état est \texttt{IMPAYEE} ;
+    \item le montant total encaissé, correspondant à la somme des montants TTC des factures dont l'état est \texttt{PAYEE} ;
+    \item le nombre de factures impayées ;
+    \item le nombre de factures payées ;
+    \item le nombre total de factures.
+\end{itemize}
+
+Ces indicateurs peuvent être filtrés selon l'année de la période facturée. Le tableau de bord affiche également le montant total des impayés toutes années confondues.
+
+La vue \texttt{IHM/home.php} présente ces résultats sous forme de cartes statistiques :
+\begin{itemize}
+    \item Total impayé ;
+    \item Total encaissé ;
+    \item Nombre de clients ;
+    \item Nombre d'anomalies en attente.
+\end{itemize}
+
+La mise à jour de l'état d'une facture entraîne donc son changement de catégorie dans les calculs financiers : son montant n'est plus comptabilisé parmi les impayés, mais parmi les montants encaissés.
+
 \section{Notification client}
+
+Après l'enregistrement réussi du paiement, le contrôleur déclenche une notification destinée au client concerné.
+
+Cette notification utilise le système interne de l'application et contient notamment :
+\begin{itemize}
+    \item le type \texttt{PAIEMENT} ;
+    \item un titre informant le client du paiement de sa facture ;
+    \item un message associé à l'événement ;
+    \item un lien vers la facture concernée.
+\end{itemize}
+
+La notification est créée après la mise à jour de la facture.
+
+En cas d'échec de création de la notification, l'erreur est enregistrée dans les journaux de l'application. Le paiement déjà enregistré n'est pas annulé.
+
 \section{Tests}
+
+Les scénarios suivants permettent de vérifier le fonctionnement du module :
+\begin{itemize}
+    \item enregistrer le paiement d'une facture impayée appartenant au fournisseur connecté ;
+    \item vérifier le passage de l'état \texttt{IMPAYEE} à \texttt{PAYEE} ;
+    \item vérifier l'enregistrement automatique de la date de paiement ;
+    \item empêcher le paiement d'une facture déjà payée ;
+    \item empêcher un fournisseur de payer une facture appartenant à un autre fournisseur ;
+    \item empêcher un client d'accéder à l'action de paiement ;
+    \item vérifier le rejet d'une requête utilisant un jeton CSRF invalide ;
+    \item vérifier l'affichage de la date de paiement dans le détail de la facture ;
+    \item vérifier la création d'une notification destinée au client ;
+    \item vérifier la diminution du total impayé et l'augmentation du total encaissé dans le tableau de bord ;
+    \item vérifier les calculs des indicateurs pour une année sélectionnée et toutes les années confondues.
+\end{itemize}
+
+Ces scénarios constituent les vérifications fonctionnelles à effectuer pour valider le module.

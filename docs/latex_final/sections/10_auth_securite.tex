@@ -1,18 +1,99 @@
+
 \chapter{Authentification et sécurité}
 \label{chap:securite}
 
-\todo{décrire l'authentification des trois rôles, les sessions, le contrôle d'accès et les protections.}
+La sécurité constitue un aspect essentiel de l'application AquaVolt, car celle-ci manipule des informations personnelles, des données de consommation et des informations relatives aux factures. L'application distingue trois catégories d'utilisateurs : les clients, les fournisseurs et les agents. Chaque catégorie dispose de fonctionnalités adaptées à son rôle.
+
+Ce chapitre présente les mécanismes d'authentification, de gestion des sessions et de contrôle d'accès, ainsi que les principales protections mises en place contre les vulnérabilités courantes des applications web.
 
 \section{Authentification}
+
+L'authentification permet de vérifier l'identité d'un utilisateur avant de lui donner accès aux fonctionnalités de l'application. AquaVolt distingue trois types de comptes.
+
 \subsection{Client}
+
+Le client accède à son espace personnel à l'aide de ses identifiants. Après authentification, il peut consulter ses informations, suivre ses contrats, saisir ses consommations, consulter ses factures et déposer des réclamations.
+
 \subsection{Fournisseur}
+
+Le fournisseur utilise ses propres identifiants pour accéder à son espace de gestion. Il dispose des fonctionnalités nécessaires au suivi des clients, des quartiers, des contrats, des consommations, des anomalies, des factures, des réclamations et des paiements.
+
 \subsection{Agent}
+
+L'agent possède un compte spécifique lui permettant d'accéder aux fonctionnalités qui lui sont attribuées, notamment l'importation des consommations annuelles.
+
 \section{Gestion des sessions}
+
+L'application utilise les sessions PHP pour conserver l'état d'authentification de l'utilisateur pendant sa navigation. Le démarrage de la session est effectué au niveau du point d'entrée principal à l'aide de la fonction \texttt{session\_start()}.
+
+Les informations stockées dans la session permettent de retrouver l'utilisateur connecté et de contrôler l'accès aux différentes fonctionnalités. La session est également utilisée pour conserver le jeton CSRF nécessaire à la protection des formulaires.
+
 \section{Contrôle d'accès par rôle}
+
+Le contrôle d'accès permet de limiter les opérations disponibles selon le type de compte connecté. Les droits sont répartis entre les trois rôles de l'application :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Client :} accès à ses informations, ses contrats, ses consommations, ses factures et ses réclamations ;
+    \item \textbf{Fournisseur :} accès aux fonctionnalités de gestion et de suivi de son activité ;
+    \item \textbf{Agent :} accès aux opérations d'importation des consommations annuelles qui lui sont destinées.
+\end{itemize}
+
+Cette séparation vise à empêcher un utilisateur d'accéder aux fonctionnalités qui ne correspondent pas à son rôle. Les autorisations doivent être vérifiées côté serveur afin de ne pas dépendre uniquement de l'affichage des menus.
+
 \section{Hachage des mots de passe}
+
+Les mots de passe sont protégés par un mécanisme de hachage avant leur enregistrement dans la base de données. Le code utilise la fonction PHP \texttt{password\_hash()} avec l'option \texttt{PASSWORD\_DEFAULT}.
+
+Cette méthode est notamment présente dans les fichiers \texttt{Traitement/Auth.php} et \texttt{Traitement/Client.php}. Elle permet de ne pas conserver les mots de passe sous leur forme originale et de renforcer la protection des comptes utilisateurs.
+
 \section{Protection CSRF}
+
+Les attaques CSRF (Cross-Site Request Forgery) consistent à provoquer l'exécution d'une action non souhaitée sur une application dans laquelle l'utilisateur est déjà authentifié.
+
+AquaVolt utilise un jeton CSRF associé à la session de l'utilisateur. Sa génération repose sur la fonction \texttt{random\_bytes(32)}, dont le résultat est converti en chaîne hexadécimale à l'aide de \texttt{bin2hex()}.
+
+Lors de la soumission d'un formulaire, le jeton transmis est comparé à celui conservé dans la session à l'aide de la fonction \texttt{hash\_equals()}. Cette vérification permet de rejeter les requêtes dont le jeton est absent ou invalide.
+
+Ce mécanisme est utilisé dans plusieurs fichiers de traitement, notamment \texttt{Auth.php}, \texttt{Client.php}, \texttt{Facture.php}, \texttt{Quartier.php} et \texttt{Reclamation.php}.
+
 \section{Protection XSS}
+
+Les attaques XSS (Cross-Site Scripting) consistent à injecter du contenu malveillant, notamment du code JavaScript, dans une page consultée par d'autres utilisateurs.
+
+Pour limiter ce risque, AquaVolt utilise la fonction PHP \texttt{htmlspecialchars()} afin d'échapper les caractères spéciaux avant leur affichage dans les pages HTML.
+
+Cette fonction est notamment utilisée dans \texttt{config/app.php} et \texttt{Traitement/helpers.php}, avec les options \texttt{ENT\_QUOTES} et l'encodage \texttt{UTF-8}. Elle contribue ainsi à empêcher l'interprétation de données utilisateur comme du code HTML ou JavaScript.
+
 \section{Requêtes préparées et injection SQL}
+
+Les injections SQL représentent un risque lorsqu'une application intègre directement des données utilisateur dans ses requêtes SQL.
+
+L'utilisation de requêtes préparées avec PDO permet de séparer les instructions SQL des valeurs transmises par les utilisateurs. Les paramètres sont ainsi fournis séparément à la requête, ce qui limite les risques d'injection SQL.
+
 \section{Sécurité des uploads}
+
+AquaVolt permet aux clients de téléverser des photographies de leurs compteurs afin de justifier les relevés de consommation.
+
+La sécurité de ces opérations nécessite plusieurs contrôles, notamment la vérification du type et du format des fichiers, la limitation de leur taille, la génération de noms de fichiers sécurisés et la restriction de l'exécution de scripts dans le répertoire de stockage.
+
+Ces précautions contribuent à réduire les risques liés au dépôt de fichiers malveillants.
+
 \section{Transactions et intégrité}
+
+Les opérations impliquant plusieurs modifications de données doivent préserver la cohérence de la base de données. Les transactions permettent de regrouper plusieurs requêtes dans une même opération : soit toutes les modifications sont validées, soit elles sont annulées en cas d'erreur.
+
+Les clés étrangères, les contraintes d'unicité et les contraintes de vérification définies dans le schéma SQL contribuent également à préserver l'intégrité des données.
+
 \section{Limites de sécurité}
+
+Malgré les mécanismes de protection présents dans l'application, la sécurité reste un aspect qui peut être renforcé. Plusieurs améliorations peuvent être envisagées :
+
+\begin{itemize}[leftmargin=*]
+    \item renforcer la vérification des autorisations pour chaque opération sensible ;
+    \item améliorer la gestion de l'expiration et du renouvellement des sessions ;
+    \item approfondir les contrôles appliqués aux fichiers téléversés ;
+    \item réaliser des tests de sécurité complémentaires ;
+    \item mettre en place une surveillance des tentatives de connexion suspectes.
+\end{itemize}
+
+Ces améliorations permettraient de renforcer davantage la confidentialité des informations et la sécurité globale de l'application.

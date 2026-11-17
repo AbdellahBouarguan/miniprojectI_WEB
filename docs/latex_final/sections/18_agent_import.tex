@@ -1,14 +1,214 @@
+
 \chapter{Agent et import annuel}
 \label{chap:agent}
 
-\todo{décrire le rôle Agent, le fichier annuel, la validation, l'import, les doublons et le rapport.}
-
 \section{Objectifs}
+
+Le module Agent permet d'intégrer dans l'application les relevés annuels de consommation d'eau et d'électricité. Ces relevés sont fournis sous forme d'un fichier texte nommé \texttt{Consommation\_Annuelle.txt}.
+
+L'objectif est d'automatiser l'enregistrement des consommations annuelles dans la base de données, tout en vérifiant la cohérence des informations reçues. Le traitement distingue les lignes valides, les doublons et les lignes contenant des données incorrectes.
+
+À la fin de l'opération, un rapport récapitule les résultats de l'import et permet à l'agent de consulter les relevés qu'il a enregistrés.
+
 \section{Rôle Agent}
+
+L'agent est un utilisateur disposant d'un espace dédié à l'importation des relevés annuels. L'accès à cet espace est réservé aux utilisateurs dont le rôle enregistré dans la session est \texttt{agent} et qui possèdent un identifiant d'agent.
+
+Le module propose les fonctionnalités suivantes :
+\begin{itemize}
+    \item déposer un fichier contenant les consommations annuelles ;
+    \item lancer automatiquement son analyse et son traitement ;
+    \item consulter le rapport de l'import ;
+    \item visualiser l'historique des relevés associés à son identifiant ;
+    \item consulter le nombre total de relevés enregistrés et les années présentes dans la base de données.
+\end{itemize}
+
+Le contrôleur \texttt{Traitement/Import.php} vérifie le rôle de l'utilisateur avant de permettre l'accès à l'espace Agent. Les opérations d'importation sont également protégées par un jeton CSRF vérifié à l'aide de \texttt{hash\_equals()}.
+
 \section{Fichier Consommation\_Annuelle.txt}
+
+Le fichier \texttt{Consommation\_Annuelle.txt} contient les relevés annuels des clients. Il est transmis à l'application depuis le formulaire de dépôt de l'espace Agent.
+
+Le fichier doit respecter une structure tabulaire composée de six colonnes séparées par des virgules :
+
+\begin{itemize}
+    \item \texttt{ID\_Client} : identifiant du client concerné ;
+    \item \texttt{ID\_Agent} : identifiant de l'agent associé au relevé ;
+    \item \texttt{ConsommationEau} : consommation annuelle d'eau ;
+    \item \texttt{ConsommationElect} : consommation annuelle d'électricité ;
+    \item \texttt{Annee} : année concernée par le relevé ;
+    \item \texttt{Date\_Saisie} : date d'enregistrement du relevé.
+\end{itemize}
+
+Un exemple de contenu est présenté ci-dessous :
+
+\begin{lstlisting}
+ID_Client,ID_Agent,ConsommationEau,ConsommationElect,Annee,Date_Saisie
+1,1,120.50,340.00,2026,2026-12-15
+2,1,85.00,260.00,2026,2026-12-15
+\end{lstlisting}
+
+Le fichier doit comporter une ligne d'en-tête. Les données commencent à la ligne suivante. Les lignes vides sont ignorées pendant l'analyse.
+
 \section{Format et validation}
+
+Avant de traiter les données, l'application effectue plusieurs contrôles sur le fichier déposé.
+
+\subsection{Contrôle du fichier}
+
+Le traitement vérifie les éléments suivants :
+\begin{itemize}
+    \item un fichier doit avoir été sélectionné ;
+    \item le téléversement doit s'être terminé correctement ;
+    \item le fichier doit avoir été reçu par le serveur ;
+    \item sa taille doit être supérieure à zéro et ne pas dépasser 2 Mo ;
+    \item son extension doit être \texttt{.txt} ;
+    \item son contenu doit pouvoir être lu par l'application.
+\end{itemize}
+
+Le contenu est ensuite normalisé afin de prendre en charge certains formats d'encodage. Le traitement supprime notamment le BOM UTF-8, tente de convertir les contenus Windows-1252 en UTF-8 lorsque cela est nécessaire et uniformise les fins de ligne.
+
+\subsection{Vérification de l'en-tête}
+
+La première ligne non vide est considérée comme l'en-tête. L'application vérifie la présence des six colonnes attendues et leur ordre.
+
+La comparaison normalise les noms des colonnes en ignorant les différences de casse et les caractères non alphanumériques. En revanche, le nombre et l'ordre des colonnes doivent correspondre au format attendu.
+
+Si l'en-tête est absent ou incorrect, l'import est interrompu et un message indique le format attendu.
+
+\subsection{Validation des lignes}
+
+Chaque ligne non vide est analysée comme une ligne CSV. Le traitement attend exactement six champs.
+
+Les contrôles appliqués sont les suivants :
+
+\begin{itemize}
+    \item \textbf{Identifiant du client :} il doit être numérique et correspondre à un client existant dans la base de données.
+    \item \textbf{Identifiant de l'agent :} lorsqu'il est renseigné et différent de zéro, il doit correspondre à un agent existant. S'il est vide ou égal à zéro, l'identifiant de l'agent connecté est utilisé.
+    \item \textbf{Consommation d'eau :} elle doit être numérique, renseignée et supérieure ou égale à zéro.
+    \item \textbf{Consommation d'électricité :} elle doit également être numérique, renseignée et supérieure ou égale à zéro.
+    \item \textbf{Année :} elle doit comporter quatre chiffres et être comprise entre 2000 et 2100.
+    \item \textbf{Date de saisie :} elle doit respecter l'un des formats acceptés par le traitement. Si elle est vide, la date et l'heure courantes sont utilisées.
+\end{itemize}
+
+Pour les consommations, les séparateurs décimaux point et virgule sont acceptés. Les espaces présents dans les valeurs sont également supprimés avant leur conversion numérique.
+
+Les dates acceptées comprennent notamment les formats \texttt{AAAA-MM-JJ}, \texttt{AAAA-MM-JJ HH:MM:SS} et \texttt{JJ/MM/AAAA}, avec ou sans indication de l'heure selon les formats prévus dans le code.
+
+Une ligne qui ne respecte pas les contrôles est rejetée et son motif est ajouté au rapport.
+
 \section{Import automatique}
+
+L'import est déclenché par le formulaire de dépôt de l'espace Agent. Celui-ci utilise une requête HTTP POST et un formulaire multipart permettant de transmettre le fichier au serveur.
+
+Le traitement est organisé dans la fonction \texttt{import\_traiter\_upload()} du fichier \texttt{Traitement/Import.php}.
+
+Le déroulement général est le suivant :
+
+\begin{enumerate}
+    \item Vérification du jeton CSRF.
+    \item Vérification de la présence du fichier et du résultat du téléversement.
+    \item Contrôle de l'extension et de la taille du fichier.
+    \item Lecture et normalisation du contenu.
+    \item Vérification de l'en-tête.
+    \item Analyse et validation de chaque ligne.
+    \item Insertion des lignes valides dans la table \texttt{conso\_annuelle}.
+    \item Enregistrement du rapport dans la session.
+    \item Redirection vers l'espace Agent pour afficher le résultat.
+\end{enumerate}
+
+Les insertions sont effectuées dans une transaction. Si une erreur technique survient pendant l'opération, la transaction est annulée afin de ne pas conserver un import partiellement enregistré. Les lignes invalides ou considérées comme des doublons sont, quant à elles, traitées comme des résultats individuels et n'empêchent pas le traitement des autres lignes.
+
+L'insertion en base est réalisée par la méthode \texttt{inserer()} de la classe \texttt{ConsoAnnuelleBD}. Cette méthode utilise une requête préparée avec des paramètres pour enregistrer les données.
+
 \section{Gestion des doublons}
+
+L'application applique une règle d'unicité : un seul relevé annuel peut être enregistré pour un même client et une même année.
+
+Avant l'insertion d'une ligne, la méthode \texttt{existe()} de la classe \texttt{ConsoAnnuelleBD} recherche un relevé correspondant à l'identifiant du client et à l'année indiquée.
+
+Si un relevé existe déjà, la ligne est ignorée et un message explicatif est ajouté au rapport. Aucune nouvelle insertion n'est effectuée pour ce couple client-année.
+
+Cette règle est également garantie au niveau de la base de données par la contrainte :
+
+\begin{lstlisting}[language=SQL]
+UNIQUE (id_client, annee)
+\end{lstlisting}
+
+Ainsi, le système évite l'enregistrement de plusieurs relevés annuels pour un même client et une même année, y compris lorsque plusieurs lignes du fichier concernent ce même couple.
+
 \section{Rapport d'import}
+
+Après l'analyse du fichier, l'application construit un rapport contenant le nom du fichier, le nombre de lignes analysées et trois catégories de résultats :
+
+\begin{itemize}
+    \item \textbf{Lignes insérées :} relevés validés et enregistrés dans la base de données ;
+    \item \textbf{Lignes ignorées :} relevés déjà présents pour le même client et la même année ;
+    \item \textbf{Lignes rejetées :} lignes qui ne respectent pas les règles de validation, accompagnées du motif du rejet.
+\end{itemize}
+
+Le rapport est conservé temporairement dans la session, puis affiché après la redirection vers la page d'import. Cette organisation correspond au principe POST / Redirect / GET et évite de relancer le traitement lors de l'actualisation de la page.
+
+L'interface présente trois indicateurs récapitulatifs et permet de développer les listes détaillées de chaque catégorie. Pour limiter la taille du rapport, un maximum de 200 messages détaillés est conservé par catégorie. Les compteurs affichés correspondent néanmoins au nombre total de résultats obtenus.
+
+En cas d'erreur technique pendant la transaction, les insertions sont annulées et le rapport signale l'erreur rencontrée.
+
 \section{Table conso\_annuelle}
+
+Les relevés annuels validés sont enregistrés dans la table \texttt{conso\_annuelle}. Cette table assure la conservation des informations relatives au client, à l'agent et à l'année du relevé.
+
+Elle contient les principaux attributs suivants :
+
+\begin{itemize}
+    \item \texttt{id} : identifiant du relevé annuel ;
+    \item \texttt{id\_client} : référence au client concerné ;
+    \item \texttt{id\_agent} : référence à l'agent associé au relevé ;
+    \item \texttt{conso\_eau} : consommation annuelle d'eau ;
+    \item \texttt{conso\_elec} : consommation annuelle d'électricité ;
+    \item \texttt{annee} : année du relevé ;
+    \item \texttt{date\_saisie} : date d'enregistrement ;
+    \item \texttt{statut\_verification} : état de vérification du relevé ;
+    \item \texttt{date\_verification} : date de vérification, lorsqu'elle est renseignée.
+\end{itemize}
+
+Le statut de vérification peut prendre les valeurs \texttt{A\_VERIFIER}, \texttt{VALIDEE} ou \texttt{REJETEE}. Le relevé est initialement enregistré avec le statut \texttt{A\_VERIFIER}, conformément à la valeur par défaut définie dans la structure de la table.
+
+La contrainte d'unicité sur \texttt{(id\_client, annee)} garantit qu'un client ne possède pas plusieurs relevés pour la même année. Les références vers les tables \texttt{client} et \texttt{agent} assurent également la cohérence des associations enregistrées.
+
+La classe \texttt{ConsoAnnuelleBD} fournit les opérations nécessaires à ce module : vérifier l'existence d'un relevé, récupérer les identifiants des clients existants, insérer un relevé, lister les relevés d'un agent, compter les relevés enregistrés et récupérer les années présentes dans la table.
+
 \section{Tests}
+
+Les scénarios suivants permettent de vérifier le fonctionnement du module d'import annuel. Ils constituent des cas de vérification à effectuer et ne représentent pas, à eux seuls, des résultats de tests déjà exécutés.
+
+\begin{longtable}{|p{0.8cm}|p{5.2cm}|p{7cm}|}
+\hline
+\textbf{N°} & \textbf{Scénario} & \textbf{Résultat attendu} \\
+\hline
+1 & Accès à l'espace avec un compte Agent & L'espace d'import annuel est accessible. \\
+\hline
+2 & Accès avec un rôle différent de Agent & L'utilisateur est redirigé vers la page de connexion. \\
+\hline
+3 & Dépôt d'un fichier TXT valide & Le fichier est analysé et les lignes valides sont enregistrées. \\
+\hline
+4 & Dépôt d'un fichier sans en-tête valide & L'import est interrompu et un message indique l'en-tête attendu. \\
+\hline
+5 & Dépôt d'un fichier dépassant 2 Mo & Le fichier est refusé. \\
+\hline
+6 & Ligne contenant un identifiant client inconnu & La ligne est rejetée avec un motif explicatif. \\
+\hline
+7 & Ligne contenant une consommation négative ou non numérique & La ligne est rejetée. \\
+\hline
+8 & Ligne contenant une année hors de l'intervalle autorisé & La ligne est rejetée. \\
+\hline
+9 & Import d'un relevé déjà enregistré pour le même client et la même année & La ligne est ignorée comme doublon. \\
+\hline
+10 & Fichier contenant des lignes valides et invalides & Les lignes sont classées séparément dans le rapport. \\
+\hline
+11 & Consultation de l'historique de l'agent & Les relevés associés à son identifiant sont affichés. \\
+\hline
+12 & Erreur technique pendant l'insertion & La transaction est annulée et le rapport signale l'erreur. \\
+\hline
+\end{longtable}
+
+Ce module permet ainsi d'intégrer les relevés annuels de manière structurée, de limiter les doublons et de fournir à l'agent un compte rendu détaillé de chaque opération d'import.

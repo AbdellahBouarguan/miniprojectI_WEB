@@ -1,13 +1,157 @@
+
 \chapter{Notifications internes}
 \label{chap:notifications}
 
-\todo{décrire la table notification, les événements, la cloche, la page et le marquage comme lu.}
-
 \section{Objectifs}
+
+Le module de notifications internes permet d'informer les utilisateurs des événements importants liés à leurs activités dans l'application AquaVolt.
+
+Il facilite le suivi des opérations en affichant des messages destinés aux clients, aux fournisseurs et aux agents. Chaque notification contient un titre, un message, un type, une date de création et éventuellement un lien permettant d'accéder directement à la page concernée.
+
+Les principaux objectifs de ce module sont :
+\begin{itemize}
+    \item informer les utilisateurs des événements importants ;
+    \item centraliser les messages dans une interface dédiée ;
+    \item distinguer les notifications lues des notifications non lues ;
+    \item faciliter l'accès aux pages concernées par les événements ;
+    \item garantir que chaque utilisateur consulte uniquement ses propres notifications.
+\end{itemize}
+
 \section{Table notification}
+
+Les notifications sont stockées dans la table \texttt{notification} de la base de données.
+
+Chaque enregistrement contient les informations suivantes :
+\begin{itemize}
+    \item \texttt{id\_notification} : identifiant unique de la notification ;
+    \item \texttt{destinataire\_role} : rôle du destinataire (\texttt{client}, \texttt{fournisseur} ou \texttt{agent}) ;
+    \item \texttt{id\_destinataire} : identifiant de l'utilisateur concerné ;
+    \item \texttt{type} : catégorie de la notification ;
+    \item \texttt{titre} : titre du message ;
+    \item \texttt{message} : contenu de la notification ;
+    \item \texttt{lien} : chemin interne facultatif vers une page de l'application ;
+    \item \texttt{lu} : indicateur précisant si la notification a été consultée ;
+    \item \texttt{date\_creation} : date de création ;
+    \item \texttt{date\_lecture} : date à laquelle la notification a été marquée comme lue.
+\end{itemize}
+
+Le destinataire est identifié par le couple \texttt{(destinataire\_role, id\_destinataire)}. Cette organisation permet de distinguer les utilisateurs même lorsque leurs identifiants numériques sont identiques dans des tables différentes.
+
+La table prévoit les types suivants :
+\begin{itemize}
+    \item \texttt{FACTURE} : événement relatif à une facture ;
+    \item \texttt{ANOMALIE} : événement relatif à une anomalie ;
+    \item \texttt{RECLAMATION} : événement relatif à une réclamation ;
+    \item \texttt{PAIEMENT} : événement relatif à un paiement ;
+    \item \texttt{VERIFICATION} : événement relatif à la vérification annuelle ;
+    \item \texttt{SYSTEME} : notification générale du système.
+\end{itemize}
+
+La classe \texttt{NotificationBD} centralise les opérations d'accès aux données : création, consultation, comptage des notifications non lues et mise à jour de leur état.
+
+Lors de la création, le rôle et le destinataire sont vérifiés. Le titre et le message ne doivent pas être vides. Leur longueur est limitée respectivement à 150 et 500 caractères. Le type est également contrôlé ; un type non reconnu est remplacé par \texttt{SYSTEME}.
+
+Le lien associé est normalisé afin de limiter son utilisation aux chemins internes acceptés par l'application.
+
 \section{Événements notifiés}
+
+Le module prend en charge plusieurs catégories d'événements. Les traitements déjà étudiés utilisent notamment les notifications pour informer les utilisateurs des opérations suivantes :
+
+\begin{itemize}
+    \item \textbf{Facturation :} après la génération d'une facture, une notification est envoyée au client concerné ;
+    \item \textbf{Réclamations :} lorsqu'un client dépose une réclamation, le fournisseur est informé. Lorsque le fournisseur traite la réclamation, le client reçoit également une notification ;
+    \item \textbf{Paiement :} après l'enregistrement du paiement d'une facture par le fournisseur, le client est informé ;
+    \item \textbf{Vérification annuelle :} après la validation ou le rejet d'un relevé annuel, le client reçoit une notification indiquant la décision.
+\end{itemize}
+
+Les catégories \texttt{ANOMALIE} et \texttt{SYSTEME} sont également prévues dans la structure des notifications. Leur présence dans les types autorisés ne signifie toutefois pas que chaque événement de ces catégories déclenche nécessairement une notification dans les traitements actuellement examinés.
+
+La création d'une notification est réalisée à travers la fonction \texttt{notification\_creer()}, qui transmet les informations à la classe \texttt{NotificationBD}.
+
 \section{Cloche et compteur}
+
+Pour faciliter l'accès aux notifications, l'application intègre une icône en forme de cloche dans la barre supérieure de l'interface.
+
+Pour chaque utilisateur connecté, le fichier \texttt{header.php} récupère son rôle et son identifiant à partir de la session. Il utilise ensuite la fonction \texttt{notification\_compter\_non\_lues()} afin d'obtenir le nombre de notifications dont le champ \texttt{lu} vaut zéro.
+
+Lorsque ce nombre est supérieur à zéro, un compteur apparaît à côté de la cloche. Pour éviter un affichage trop long, les valeurs supérieures à 99 sont représentées par \texttt{99+}.
+
+La cloche est un lien vers la page des notifications. Le compteur est recalculé lors du chargement de l'en-tête. En cas d'erreur pendant la récupération du nombre de notifications, l'affichage revient à zéro.
+
 \section{Page des notifications}
+
+La page accessible par la route \texttt{Notification/all} présente les notifications de l'utilisateur connecté.
+
+Les enregistrements sont récupérés en fonction du rôle et de l'identifiant du destinataire. Ils sont classés par date de création décroissante, afin d'afficher les notifications les plus récentes en premier.
+
+La méthode de consultation limite le nombre de résultats à 50 par défaut, avec une limite configurable comprise entre 1 et 100.
+
+Pour chaque notification, l'interface affiche :
+\begin{itemize}
+    \item une icône correspondant à sa catégorie ;
+    \item un badge indiquant son type ;
+    \item le titre et le contenu du message ;
+    \item la date et l'heure de création ;
+    \item un indicateur lorsque la notification n'a pas encore été lue ;
+    \item un bouton permettant d'ouvrir la page associée, lorsqu'un lien valide existe.
+\end{itemize}
+
+Les catégories sont différenciées visuellement à l'aide de badges et d'icônes. Lorsqu'aucune notification n'est disponible, un message indique que la liste est vide.
+
+La page affiche également le nombre de notifications non lues et propose une action globale permettant de les marquer toutes comme lues.
+
 \section{Marquage comme lu}
+
+L'application propose deux possibilités pour modifier l'état des notifications.
+
+\subsection{Marquage individuel}
+
+Chaque notification non lue dispose d'un bouton \textit{Marquer comme lue}. Cette action envoie une requête POST vers la route \texttt{Notification/lire/\textit{id}}.
+
+Le traitement vérifie la méthode HTTP, le jeton CSRF et l'appartenance de la notification à l'utilisateur connecté. Si les contrôles sont satisfaits, le champ \texttt{lu} est mis à 1 et le champ \texttt{date\_lecture} reçoit la date et l'heure de lecture.
+
+\subsection{Marquage global}
+
+L'utilisateur peut également marquer toutes ses notifications non lues comme lues à l'aide du bouton \textit{Tout marquer comme lu}.
+
+Cette action envoie une requête POST vers la route \texttt{Notification/lire\_tout}. Le traitement met à jour uniquement les notifications correspondant au rôle et à l'identifiant de l'utilisateur connecté, dont le champ \texttt{lu} vaut encore zéro.
+
+Après chaque opération, l'utilisateur est redirigé vers la page des notifications avec un message indiquant le résultat de l'action.
+
 \section{Contrôle d'accès}
+
+Le module applique plusieurs contrôles afin de protéger les notifications :
+
+\begin{itemize}
+    \item seuls les utilisateurs connectés ayant un rôle reconnu (\texttt{client}, \texttt{fournisseur} ou \texttt{agent}) peuvent accéder à leurs notifications ;
+    \item l'identifiant du destinataire est récupéré depuis la session ;
+    \item les opérations de marquage utilisent des requêtes POST ;
+    \item un jeton CSRF est vérifié avec la fonction \texttt{hash\_equals()} ;
+    \item les requêtes de mise à jour vérifient simultanément l'identifiant de la notification, le rôle et l'identifiant du destinataire ;
+    \item les requêtes SQL utilisent des requêtes préparées.
+\end{itemize}
+
+Ces vérifications empêchent notamment un utilisateur de marquer comme lue une notification appartenant à un autre compte.
+
+Les liens associés aux notifications sont également contrôlés afin de limiter les redirections vers des destinations externes ou des chemins non autorisés.
+
 \section{Tests}
+
+Les scénarios suivants permettent de vérifier le fonctionnement du module :
+
+\begin{itemize}
+    \item vérifier la création d'une notification destinée à un client ;
+    \item vérifier la création d'une notification destinée à un fournisseur ;
+    \item vérifier la consultation des notifications par les différents rôles ;
+    \item vérifier que chaque utilisateur ne voit que ses propres notifications ;
+    \item vérifier le classement des notifications de la plus récente à la plus ancienne ;
+    \item vérifier l'affichage du compteur de notifications non lues dans la barre supérieure ;
+    \item vérifier l'affichage de \texttt{99+} lorsque le nombre de notifications dépasse 99 ;
+    \item vérifier le marquage individuel d'une notification comme lue ;
+    \item vérifier le marquage global de toutes les notifications non lues ;
+    \item vérifier le refus d'une requête de marquage sans jeton CSRF valide ;
+    \item vérifier qu'un utilisateur ne peut pas modifier l'état d'une notification appartenant à un autre utilisateur ;
+    \item vérifier le comportement de l'interface lorsqu'aucune notification n'est disponible.
+\end{itemize}
+
+Ces scénarios constituent les vérifications fonctionnelles à effectuer sur le module.

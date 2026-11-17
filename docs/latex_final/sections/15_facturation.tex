@@ -1,18 +1,294 @@
+
 \chapter{Facturation}
 \label{chap:facturation}
 
-\todo{décrire les tranches, la TVA, la génération, le numéro, la transaction et le contenu de la facture.}
-
 \section{Objectifs}
+
+Le module de facturation permet de transformer une consommation validée en une facture détaillée. Il calcule automatiquement les montants correspondant à l'eau et à l'électricité à partir des tarifs définis par le fournisseur.
+
+Chaque facture contient les consommations de la période concernée, le montant hors taxes (HT), la taxe sur la valeur ajoutée (TVA) et le montant toutes taxes comprises (TTC).
+
+La facturation est déclenchée après la validation d'une consommation. Elle peut également être effectuée après la correction des anomalies, lorsque la consommation devient valide.
+
 \section{Tarification progressive}
+
+L'application utilise une tarification progressive par tranches. Chaque fournisseur possède ses propres tarifs, enregistrés dans la table \texttt{tarif} de la base de données.
+
+Une tranche est définie par une borne minimale, une borne maximale et un prix unitaire. Les intervalles sont représentés sous la forme :
+\[
+[\text{borne minimale},\text{borne maximale}[
+\]
+
+La dernière tranche possède une borne maximale nulle, ce qui signifie qu'elle s'applique à toute la quantité restante.
+
 \subsection{Tranches de l'eau}
+
+Les tarifs de démonstration de l'eau sont exprimés en dirhams par mètre cube (DH/m\textsuperscript{3}).
+
+\begin{table}[H]
+\centering
+\caption{Grille tarifaire de l'eau}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Tranche} & \textbf{Consommation (m\textsuperscript{3})} & \textbf{Prix unitaire (DH)} \\
+\midrule
+1 & [0, 6[ & 2,3700 \\
+2 & [6, 20[ & 7,3900 \\
+3 & [20, 35[ & 10,9800 \\
+4 & [35, +\infty[ & 11,0300 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Tranches de l'électricité}
+
+Les tarifs de démonstration de l'électricité sont exprimés en dirhams par kilowattheure (DH/kWh).
+
+\begin{table}[H]
+\centering
+\caption{Grille tarifaire de l'électricité}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Tranche} & \textbf{Consommation (kWh)} & \textbf{Prix unitaire (DH)} \\
+\midrule
+1 & [0, 100[ & 0,8200 \\
+2 & [100, 150[ & 0,9200 \\
+3 & [150, +\infty[ & 1,1000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ces valeurs proviennent des données initiales du fichier \texttt{seed.sql}. Elles constituent les tarifs utilisés pour la démonstration de l'application.
+
 \section{TVA}
+
+Après le calcul des montants de l'eau et de l'électricité, l'application détermine le montant hors taxes, puis applique la TVA.
+
+Le taux utilisé est de 18\,\% par défaut. Le service de tarification utilise la constante \texttt{TVA\_RATE} lorsqu'elle est définie ; dans le cas contraire, il applique le taux par défaut de 18\,\%.
+
+Le montant hors taxes est calculé comme suit :
+
+\[
+HT = M_{\text{eau}} + M_{\text{électricité}}
+\]
+
+Le montant de la TVA est obtenu par :
+
+\[
+TVA = HT \times \frac{18}{100}
+\]
+
+Enfin, le montant toutes taxes comprises est :
+
+\[
+TTC = HT + TVA
+\]
+
+Les montants calculés sont arrondis à deux décimales.
+
 \section{Génération de la facture}
+
+La génération d'une facture est assurée par la classe \texttt{FactureService}, située dans le dossier \texttt{Traitement}.
+
+Le processus commence par la recherche d'une facture déjà associée à la consommation. Si une facture existe, elle est retournée afin d'éviter une nouvelle création.
+
+Dans le cas contraire, le service vérifie que :
+\begin{itemize}
+    \item la consommation existe dans la base de données ;
+    \item son statut est \texttt{VALIDEE} ;
+    \item les informations du client et du fournisseur sont disponibles ;
+    \item les tarifs de l'eau et de l'électricité sont définis.
+\end{itemize}
+
+Le service récupère ensuite les consommations calculées, les tarifs du fournisseur et le taux de TVA. La classe \texttt{Tarification} effectue les calculs nécessaires.
+
+Une fois les montants déterminés, le service prépare les informations de la facture et procède à son enregistrement.
+
+Après la création de la facture, le statut de la consommation passe à \texttt{FACTUREE}.
+
 \section{Numérotation}
+
+Chaque facture possède un numéro unique construit à partir de l'année, du mois de consommation et de l'identifiant de la consommation.
+
+Le format utilisé est :
+
+\[
+\texttt{FAC-AAAAMM-ID}
+\]
+
+Par exemple, pour une consommation identifiée par le numéro 101, correspondant au mois de mars 2026, le numéro de facture obtenu est :
+
+\[
+\texttt{FAC-202603-101}
+\]
+
+Cette convention facilite l'identification des factures et leur association avec les périodes de consommation.
+
 \section{Transaction et unicité}
+
+La création d'une facture et la modification du statut de la consommation sont réalisées dans une même transaction PDO.
+
+Le processus comprend les opérations suivantes :
+\begin{enumerate}
+    \item Démarrer une transaction.
+    \item Insérer la nouvelle facture dans la table \texttt{facture}.
+    \item Modifier le statut de la consommation en \texttt{FACTUREE}.
+    \item Valider la transaction avec \texttt{commit()}.
+\end{enumerate}
+
+En cas d'erreur, la transaction est annulée avec \texttt{rollBack()} afin d'éviter un enregistrement partiel.
+
+L'unicité est également assurée par la contrainte définie sur la colonne \texttt{id\_conso} de la table \texttt{facture}. Ainsi, une même consommation ne peut pas être associée à plusieurs factures.
+
 \section{Contenu de la facture}
+
+La facture enregistrée contient les informations suivantes :
+\begin{itemize}
+    \item le numéro de la facture ;
+    \item la date d'émission et la période concernée ;
+    \item l'identifiant du client et celui de la consommation ;
+    \item les quantités d'eau et d'électricité facturées ;
+    \item le montant HT ;
+    \item le taux et le montant de la TVA ;
+    \item le montant TTC ;
+    \item l'état de paiement ;
+    \item la date de paiement, lorsqu'elle est renseignée.
+\end{itemize}
+
+La facture contient également des informations complémentaires affichées lors de sa consultation : le nom du client, son CIN, son adresse, son adresse électronique, le numéro du contrat et le quartier associé.
+
 \section{Photos des compteurs}
+
+Les photos des compteurs sont récupérées à partir de l'identifiant de la consommation associée à la facture.
+
+La méthode \texttt{photosDe()} de la classe \texttt{ConsommationBD} permet de récupérer les chemins des fichiers enregistrés pour les compteurs d'eau et d'électricité.
+
+La vue \texttt{IHM/facture/show.php} affiche les photos disponibles dans une section intitulée « Photos des compteurs ». Chaque image est accompagnée de son type afin de distinguer le compteur d'eau de celui d'électricité.
+
+L'affichage est conditionnel : seules les photos disponibles sont présentées.
+
 \section{Consultation et contrôle d'accès}
+
+La consultation des factures est réservée aux utilisateurs authentifiés ayant le rôle client ou fournisseur.
+
+Le contrôleur \texttt{Traitement/Facture.php} adapte les opérations au rôle de l'utilisateur :
+\begin{itemize}
+    \item le client consulte uniquement ses propres factures ;
+    \item le fournisseur consulte les factures des clients qui lui sont rattachés.
+\end{itemize}
+
+La liste des factures est affichée dans la vue \texttt{IHM/facture/index.php}. Elle présente le numéro, la date, la période, le contrat, le quartier, les consommations, le montant TTC et l'état de paiement.
+
+Le fournisseur dispose également des informations d'identification du client, notamment son nom et son CIN.
+
+La vue détaillée \texttt{IHM/facture/show.php} présente les informations complètes de la facture, les montants calculés et les photos disponibles.
+
+\section{Enregistrement des paiements}
+
+Le fournisseur peut enregistrer le paiement intégral d'une facture dont l'état est \texttt{IMPAYEE}.
+
+Cette opération est réalisée par la méthode \texttt{payerParFournisseur()} de la classe \texttt{FactureBD}. Elle vérifie que la facture appartient bien à un client rattaché au fournisseur connecté et que son état est encore impayé.
+
+Après un enregistrement réussi :
+\begin{itemize}
+    \item l'état de la facture devient \texttt{PAYEE} ;
+    \item la date du paiement est renseignée avec la date et l'heure courantes ;
+    \item une notification est envoyée au client pour l'informer du règlement.
+\end{itemize}
+
+Le paiement est enregistré comme un règlement intégral du montant TTC. Le module ne gère pas de paiement partiel.
+
 \section{Exemples de calcul}
+
+Pour illustrer le fonctionnement de la tarification progressive, considérons une consommation de 10\,m\textsuperscript{3} d'eau et de 40\,kWh d'électricité.
+
+Ces quantités correspondent à celles de la facture de démonstration \texttt{FAC-202603-101}.
+
+\subsection*{Calcul du montant de l'eau}
+
+Les 10\,m\textsuperscript{3} sont répartis sur les deux premières tranches :
+\begin{itemize}
+    \item les 6 premiers mètres cubes sont facturés à 2,37 DH ;
+    \item les 4 mètres cubes suivants sont facturés à 7,39 DH.
+\end{itemize}
+
+Le montant de l'eau est donc :
+
+\[
+\begin{aligned}
+M_{\text{eau}} & = (6 \times 2,37) + (4 \times 7,39) \\
+               & = 14,22 + 29,56 \\
+               & = 43,78\ \text{DH}
+\end{aligned}
+\]
+
+\subsection*{Calcul du montant de l'électricité}
+
+La consommation électrique de 40\,kWh appartient entièrement à la première tranche :
+
+\[
+\begin{aligned}
+M_{\text{électricité}} & = 40 \times 0,82 \\
+                       & = 32,80\ \text{DH}
+\end{aligned}
+\]
+
+\subsection*{Calcul des montants HT, TVA et TTC}
+
+Le montant hors taxes est :
+
+\[
+HT = 43,78 + 32,80 = 76,58\ \text{DH}
+\]
+
+Le montant de la TVA est :
+
+\[
+TVA = 76,58 \times \frac{18}{100}
+     = 13,78\ \text{DH}
+\]
+
+Le montant toutes taxes comprises est :
+
+\[
+TTC = 76,58 + 13,78 = 90,36\ \text{DH}
+\]
+
+Le résultat correspond aux montants enregistrés dans la facture de démonstration \texttt{FAC-202603-101}.
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif de l'exemple de facturation}
+\begin{tabular}{lr}
+\toprule
+\textbf{Désignation} & \textbf{Montant} \\
+\midrule
+Consommation d'eau & 10 m\textsuperscript{3} \\
+Consommation d'électricité & 40 kWh \\
+Montant de l'eau & 43,78 DH \\
+Montant de l'électricité & 32,80 DH \\
+Montant HT & 76,58 DH \\
+TVA (18\,\%) & 13,78 DH \\
+\textbf{Montant TTC} & \textbf{90,36 DH} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Tests}
+
+Les scénarios suivants permettent de vérifier le fonctionnement du module de facturation :
+\begin{itemize}
+    \item générer une facture à partir d'une consommation validée ;
+    \item vérifier le calcul progressif des tarifs de l'eau et de l'électricité ;
+    \item vérifier le calcul de la TVA et du montant TTC ;
+    \item vérifier le format et l'unicité du numéro de facture ;
+    \item empêcher la génération d'une facture pour une consommation non validée ;
+    \item empêcher la création de plusieurs factures pour une même consommation ;
+    \item vérifier la cohérence entre la création de la facture et le changement de statut de la consommation ;
+    \item vérifier que le client ne peut consulter que ses propres factures ;
+    \item vérifier que le fournisseur ne peut consulter et régler que les factures de ses clients ;
+    \item vérifier l'enregistrement du paiement intégral et l'envoi de la notification correspondante ;
+    \item vérifier l'affichage des photos des compteurs lorsqu'elles sont disponibles.
+\end{itemize}
+
+Ces scénarios constituent les vérifications fonctionnelles à effectuer pour valider le module.

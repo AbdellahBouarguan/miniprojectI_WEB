@@ -1,24 +1,356 @@
+
 \chapter{Tests et validation}
 \label{chap:tests}
 
-\todo{présenter la stratégie, les tests fonctionnels, d'intégration, de sécurité, responsive, les captures et les résultats.}
-
 \section{Stratégie de test}
+
+Une campagne finale de tests a été réalisée le 17 novembre 2026, après l'intégration des différents modules développés par les membres de l'équipe. Son objectif était de vérifier le fonctionnement global de l'application \projectname{}, la cohérence des échanges entre les modules et l'accessibilité des interfaces selon les rôles des utilisateurs.
+
+La campagne a été effectuée dans l'environnement suivant :
+
+\begin{itemize}
+    \item \textbf{Navigateur :} Brave Headless ;
+    \item \textbf{Résolution desktop :} 1440 $\times$ 900 pixels ;
+    \item \textbf{Résolution tablette :} 1024 $\times$ 768 pixels ;
+    \item \textbf{Résolution mobile :} 390 $\times$ 844 pixels ;
+    \item \textbf{Langage côté serveur :} PHP 8.4.27 ;
+    \item \textbf{Système de gestion de base de données :} MariaDB 11.8.
+\end{itemize}
+
+La stratégie repose principalement sur des tests fonctionnels des parcours utilisateurs, des tests d'intégration entre les modules, des vérifications de sécurité de base et des contrôles visuels sur différentes tailles d'écran.
+
+Les scénarios ont été regroupés selon les trois rôles principaux de l'application : Agent, Client et Fournisseur. Les critères de validation comprennent notamment l'absence d'erreurs serveur pendant les parcours testés, le respect des autorisations, la cohérence des données enregistrées et le bon fonctionnement des notifications.
+
 \section{Tests fonctionnels}
+
+Les tests fonctionnels ont permis de vérifier les principales fonctionnalités de chaque module à travers les interfaces de l'application.
+
 \subsection{Authentification}
+
+Les parcours d'authentification des trois catégories d'utilisateurs ont été vérifiés :
+\begin{itemize}
+    \item connexion d'un Agent ;
+    \item connexion d'un Client ;
+    \item connexion d'un Fournisseur ;
+    \item accès aux fonctionnalités correspondant au rôle connecté ;
+    \item refus d'accès aux modules non autorisés.
+\end{itemize}
+
+Les résultats de la campagne indiquent que l'authentification et les contrôles d'accès par rôle fonctionnent correctement.
+
 \subsection{Clients et contrats}
+
+Les fonctionnalités liées aux clients, aux quartiers et aux contrats ont été intégrées dans la campagne finale.
+
+Les vérifications ont notamment porté sur :
+\begin{itemize}
+    \item l'accès aux fonctionnalités de gestion des clients ;
+    \item la navigation vers les modules des quartiers et des contrats ;
+    \item la prise en compte des contrats dans les parcours de consommation et de vérification annuelle.
+\end{itemize}
+
+Le module Quartiers / Contrats est indiqué comme validé dans le bilan de la campagne finale.
+
 \subsection{Consommation}
+
+Les consommations mensuelles interviennent dans plusieurs fonctionnalités de l'application, notamment la détection des anomalies, la facturation et la vérification annuelle.
+
+La campagne finale a inclus le module des anomalies et celui des factures. La vérification annuelle a également permis de contrôler l'exploitation des consommations mensuelles validées ou facturées, y compris lorsque le client possède plusieurs contrats.
+
 \subsection{Anomalies}
+
+Le module de gestion des anomalies figure parmi les modules validés pendant la campagne finale.
+
+Les vérifications ont été intégrées au parcours global de gestion des consommations et de facturation. Le bilan de la campagne indique un résultat positif pour ce module.
+
 \subsection{Factures}
+
+Les tests ont porté sur la consultation des factures et leur prise en compte dans le parcours fournisseur.
+
+Les résultats indiquent que :
+\begin{itemize}
+    \item la liste des factures est accessible au Fournisseur ;
+    \item une facture impayée peut être consultée ;
+    \item le paiement enregistré met à jour l'état de la facture ;
+    \item les informations de paiement sont visibles après l'opération.
+\end{itemize}
+
+Le module de facturation est indiqué comme validé dans le rapport de résultats.
+
 \subsection{Réclamations}
+
+Le parcours des réclamations a été vérifié du dépôt par le Client jusqu'au traitement par le Fournisseur.
+
+Les scénarios réalisés comprennent :
+\begin{itemize}
+    \item le dépôt d'une réclamation de type \texttt{FUITE\_EXTERNE} ;
+    \item l'acceptation du type \texttt{AUTRE} avec une description ;
+    \item l'affichage de la réclamation dans la liste du Client ;
+    \item la consultation de la liste et du détail côté Fournisseur ;
+    \item le traitement de la réclamation avec une réponse et le statut \texttt{RESOLUE} ;
+    \item l'envoi d'une notification au Fournisseur lors du dépôt ;
+    \item l'envoi d'une notification au Client après le traitement.
+\end{itemize}
+
+Les résultats confirment le bon déroulement de ces scénarios.
+
 \subsection{Paiements}
-\subsection{Agent et import}
+
+Le paiement d'une facture a été testé depuis l'espace Fournisseur.
+
+Les vérifications réalisées ont confirmé les points suivants :
+\begin{itemize}
+    \item ouverture d'une facture à l'état \texttt{IMPAYEE} ;
+    \item enregistrement du paiement total par le Fournisseur ;
+    \item passage de l'état de la facture à \texttt{PAYEE} ;
+    \item enregistrement de la date de paiement ;
+    \item notification du Client après le paiement ;
+    \item refus d'une nouvelle tentative de paiement sur une facture déjà payée ;
+    \item mise à jour des indicateurs du tableau de bord.
+\end{itemize}
+
+Le scénario de double paiement a également été vérifié et son refus est confirmé dans les résultats de la campagne.
+
+\subsection{Agent et import annuel}
+
+Le parcours de l'Agent a été testé à partir de la connexion jusqu'à la consultation du rapport d'import.
+
+Les résultats obtenus sont les suivants :
+\begin{itemize}
+    \item connexion de l'Agent avec le compte de test ;
+    \item import d'un fichier annuel valide ;
+    \item insertion de trois lignes dans la table des relevés annuels ;
+    \item réimportation du même fichier : trois lignes ignorées et aucune nouvelle insertion ;
+    \item traitement d'un fichier contenant des erreurs sans provoquer d'erreur serveur HTTP 500 ;
+    \item affichage des lignes rejetées dans le rapport d'import ;
+    \item consultation des relevés importés dans l'historique.
+\end{itemize}
+
+Le réimport du même fichier permet de vérifier que les enregistrements déjà présents ne sont pas insérés une seconde fois pour le même client et la même année.
+
+La campagne confirme également que l'import ne dépend plus de l'extension PHP \texttt{mbstring}, grâce à la correction apportée au traitement de l'encodage du fichier.
+
 \subsection{Vérification annuelle}
+
+La vérification annuelle a fait l'objet d'un contrôle particulier, notamment pour les clients possédant plusieurs contrats.
+
+Les résultats de trois clients de test sont présentés ci-dessous :
+
+\begin{table}[H]
+    \centering
+    \caption{Résultats de la vérification annuelle}
+    \label{tab:resultats-verification-annuelle}
+    \begin{tabular}{|c|r|r|}
+        \hline
+        \textbf{Client} & \textbf{Consommation calculée} & \textbf{Relevé Agent} \\
+        \hline
+        Client 1 & 130 m$^3$ & 120,5 m$^3$ \\
+        \hline
+        Client 2 & 80 m$^3$ & 85 m$^3$ \\
+        \hline
+        Client 3 & 120 m$^3$ & 150,25 m$^3$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Le cas du premier client a notamment permis de vérifier la correction d'un problème d'agrégation : la consommation calculée était auparavant de 30 m$^3$ au lieu de 130 m$^3$. La correction consiste à calculer la consommation de chaque contrat séparément, puis à additionner les résultats.
+
+Les tests ont également confirmé :
+\begin{itemize}
+    \item la récupération des relevés depuis la table \texttt{conso\_annuelle} ;
+    \item la prise en compte de plusieurs contrats appartenant au même client ;
+    \item la validation d'un relevé annuel par le Fournisseur ;
+    \item l'envoi d'une notification au Client après la décision.
+\end{itemize}
+
+Il est important de préciser que l'ouverture de la page de vérification ne déclenche pas automatiquement l'import du fichier annuel. Les données utilisées par cette page proviennent des relevés déjà enregistrés dans la base de données.
+
 \subsection{Notifications}
+
+Les notifications internes ont été vérifiées pour les trois rôles : Client, Fournisseur et Agent.
+
+Les scénarios réalisés ont porté sur :
+\begin{itemize}
+    \item l'affichage de la cloche de notification ;
+    \item le calcul du nombre de notifications non lues ;
+    \item la réception des notifications liées aux factures, aux paiements, aux réclamations et à la vérification annuelle ;
+    \item le marquage d'une notification comme lue ;
+    \item le marquage de toutes les notifications comme lues.
+\end{itemize}
+
+Les résultats indiquent que ces fonctionnalités sont opérationnelles.
+
 \section{Tests d'intégration}
+
+Les tests d'intégration ont permis de vérifier la coordination entre plusieurs modules au cours d'un même parcours utilisateur.
+
+Le parcours Agent -- Client -- Fournisseur constitue un scénario représentatif de cette intégration :
+\begin{enumerate}
+    \item L'Agent importe les relevés annuels dans l'application.
+    \item Les relevés sont enregistrés dans la base de données.
+    \item Le Fournisseur consulte les données et effectue la vérification annuelle.
+    \item Le Fournisseur prend une décision de validation ou de rejet.
+    \item Le Client reçoit une notification correspondant à cette décision.
+\end{enumerate}
+
+D'autres interactions ont également été vérifiées :
+\begin{itemize}
+    \item dépôt d'une réclamation par le Client, traitement par le Fournisseur et notification du Client ;
+    \item paiement d'une facture par le Fournisseur et actualisation du tableau de bord ;
+    \item mise à jour des notifications après les opérations de facturation et de paiement.
+\end{itemize}
+
+Les résultats de la campagne confirment le bon fonctionnement des parcours intégrés testés.
+
 \section{Tests de sécurité}
+
+Une vérification de sécurité de base a été réalisée sur les contrôles d'accès et les opérations sensibles.
+
+Les résultats consignés dans le rapport de tests comprennent :
+\begin{itemize}
+    \item refus d'accès d'un Client à la facture d'un autre Client, avec une réponse HTTP 404 ;
+    \item contrôle de l'accès aux pages selon le rôle de l'utilisateur connecté ;
+    \item vérification de la protection CSRF sur les opérations de réclamation, de contrat et de notification ;
+    \item contrôle du type MIME des images téléversées ;
+    \item restriction de l'opération de paiement au rôle Fournisseur.
+\end{itemize}
+
+Ces vérifications sont cohérentes avec les mécanismes présents dans l'application, notamment le hachage des mots de passe, les jetons CSRF, les requêtes préparées et l'échappement des données affichées.
+
+Il s'agit toutefois de contrôles de sécurité de base réalisés dans le cadre de la campagne fonctionnelle. Ils ne constituent pas un audit de sécurité exhaustif ni un test d'intrusion complet.
+
 \section{Tests responsive}
+
+L'affichage des principales interfaces a été vérifié sur trois formats d'écran :
+\begin{itemize}
+    \item \textbf{Desktop :} 1440 $\times$ 900 pixels ;
+    \item \textbf{Tablette :} 1024 $\times$ 768 pixels ;
+    \item \textbf{Mobile :} 390 $\times$ 844 pixels.
+\end{itemize}
+
+Neuf interfaces ont été capturées pour chaque format :
+\begin{itemize}
+    \item import annuel de l'Agent ;
+    \item tableau de bord du Fournisseur ;
+    \item vérification annuelle ;
+    \item réclamations du Fournisseur ;
+    \item liste des factures ;
+    \item tableau de bord du Client ;
+    \item réclamations du Client ;
+    \item formulaire d'ajout d'une réclamation ;
+    \item notifications.
+\end{itemize}
+
+Les captures montrent que les principales pages ont été vérifiées sur les trois résolutions. Sur mobile, les tableaux contenant de nombreuses colonnes restent consultables grâce au défilement horizontal.
+
 \section{Captures d'écran}
+
+La campagne finale a produit un ensemble de 48 images réparties comme suit :
+\begin{itemize}
+    \item 19 captures des interfaces en version desktop ;
+    \item 27 captures responsive, réparties entre desktop, tablette et mobile ;
+    \item 2 planches contact regroupant les principales captures.
+\end{itemize}
+
+Les captures desktop documentent notamment l'import annuel, les rapports d'import, les réclamations, les tableaux de bord, la vérification annuelle, les factures, les paiements et les notifications.
+
+Les captures responsive permettent de comparer l'affichage des principales interfaces sur les trois formats d'écran retenus.
+
+Les fichiers sont classés dans le dossier \texttt{tests/final/}. Ils constituent les éléments visuels de référence de la campagne finale et peuvent être consultés dans les annexes du projet.
+
 \section{Résultats}
+
+La synthèse de la campagne finale est présentée dans le tableau suivant.
+
+\begin{table}[H]
+    \centering
+    \caption{Synthèse des résultats des tests}
+    \label{tab:synthese-tests}
+    \begin{tabular}{|p{0.65\textwidth}|c|}
+        \hline
+        \textbf{Module testé} & \textbf{Résultat} \\
+        \hline
+        Authentification Client / Fournisseur / Agent & PASS \\
+        \hline
+        Import annuel Agent & PASS \\
+        \hline
+        Tableau de bord Fournisseur & PASS \\
+        \hline
+        Vérification annuelle & PASS \\
+        \hline
+        Réclamations & PASS \\
+        \hline
+        Paiement Fournisseur & PASS \\
+        \hline
+        Notifications & PASS \\
+        \hline
+        Quartiers et contrats & PASS \\
+        \hline
+        Anomalies & PASS \\
+        \hline
+        Factures & PASS \\
+        \hline
+        Affichage responsive & PASS \\
+        \hline
+        Sécurité de base & PASS \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Les résultats montrent que les modules intégrés ont satisfait les critères de validation définis pour la campagne finale. Les parcours principaux entre l'Agent, le Client et le Fournisseur ont également été vérifiés.
+
 \section{Bugs corrigés}
+
+La campagne d'intégration a permis d'identifier plusieurs anomalies qui ont été corrigées avant la validation finale.
+
+\subsection{Erreur d'import en l'absence de mbstring}
+
+L'import annuel provoquait une erreur serveur lorsque l'extension PHP \texttt{mbstring} n'était pas disponible. La cause était l'utilisation de fonctions de cette extension sans vérifier sa présence.
+
+La correction consiste à détecter l'encodage UTF-8 avec une expression régulière et à utiliser \texttt{iconv} comme solution de remplacement. Le scénario d'import a ensuite été retesté avec succès.
+
+\subsection{Erreur de calcul pour les clients possédant plusieurs contrats}
+
+La vérification annuelle ne prenait initialement en compte qu'un seul index de consommation, ce qui produisait un résultat incorrect pour les clients possédant plusieurs contrats.
+
+La méthode \texttt{VerificationBD::saisieAnnuelleClient()} a été corrigée afin de calculer la consommation de chaque contrat séparément, puis d'additionner les résultats. Le cas du Client 1 a ainsi été corrigé : la valeur affichée est passée de 30 m$^3$ à 130 m$^3$.
+
+\subsection{Paiement réservé au rôle Client}
+
+Une première version du paiement utilisait le rôle Client, ce qui empêchait le Fournisseur d'enregistrer le règlement.
+
+La correction a consisté à mettre en place la méthode \texttt{payerParFournisseur()}, à vérifier l'appartenance de la facture au Fournisseur et à déplacer le formulaire de paiement dans l'interface correspondante. Le paiement et le refus d'un double paiement ont ensuite été testés.
+
+\subsection{Module de réclamation incomplet}
+
+La première intégration du module de réclamation ne comportait pas l'ensemble des éléments nécessaires à son utilisation.
+
+La correction a consisté à ajouter la couche d'accès aux données, le traitement des requêtes, les vues destinées au Client et au Fournisseur, les protections CSRF et les notifications associées. Le dépôt et le traitement des réclamations ont ensuite été vérifiés.
+
+\subsection{Liens de navigation non activés}
+
+Certains liens du menu étaient initialement désactivés ou indiquaient que les fonctionnalités seraient disponibles ultérieurement.
+
+Après l'intégration des modules, les liens vers les réclamations, les paiements et la vérification annuelle ont été activés. Le contrôle final du header n'a relevé aucun lien restant sous la forme \texttt{href="\#"} ou désactivé.
+
 \section{Limites des tests}
+
+Malgré les résultats positifs de la campagne, certaines limites restent présentes dans la version finale :
+\begin{itemize}
+    \item les données de démonstration ne contiennent pas de photos de compteurs ;
+    \item les données de démonstration ne contiennent pas de relevés pour octobre 2026 ;
+    \item l'ajout de pièces jointes aux réclamations n'est pas encore implémenté ;
+    \item les tableaux larges nécessitent un défilement horizontal sur les petits écrans ;
+    \item les listes longues ne disposent pas encore d'un système de pagination ;
+    \item les tests réalisés ne remplacent pas une campagne exhaustive de tests de charge ou un audit de sécurité.
+\end{itemize}
+
+Ces limites constituent des axes d'amélioration pour les versions futures de l'application.
+
+\section{Conclusion des tests}
+
+La campagne finale du 17 novembre 2026 a permis de valider les principaux modules de \projectname{} après leur intégration. Les tests fonctionnels, les parcours d'intégration, les vérifications de sécurité de base et les contrôles responsive ont donné des résultats positifs sur le périmètre testé.
+
+Les cinq problèmes documentés pendant l'intégration ont été corrigés et retestés. Aucun bug de sévérité P0 ne reste signalé dans le bilan de la campagne, et les bugs P1 détectés ont été corrigés.
+
+Cette campagne confirme que l'application permet de réaliser les principaux parcours prévus entre les différents rôles, depuis l'import des relevés annuels jusqu'à leur vérification, ainsi que le traitement des réclamations, le paiement des factures et la gestion des notifications.

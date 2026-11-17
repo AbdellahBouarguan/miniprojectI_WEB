@@ -1,14 +1,140 @@
+
 \chapter{Gestion des clients}
 \label{chap:clients}
 
-\todo{décrire le modèle ClientBD, le contrôleur, les vues, la validation, la recherche et la suppression conditionnelle.}
+Le module de gestion des clients permet au fournisseur d'administrer les informations des abonnés de sa régie. Il assure les opérations d'ajout, de consultation, de modification, de recherche et de suppression conditionnelle des clients. Il permet également de consulter les contrats associés à chaque client et de suivre le nombre de consommations enregistrées.
 
 \section{Objectifs}
+
+L'objectif principal de ce module est de centraliser les informations relatives aux clients et de faciliter leur gestion par le fournisseur.
+
+Les principales fonctionnalités sont :
+\begin{itemize}[leftmargin=*]
+    \item afficher la liste des clients associés au fournisseur connecté ;
+    \item ajouter un nouveau client ;
+    \item consulter les informations détaillées d'un client ;
+    \item modifier les informations d'un client ;
+    \item rechercher un client à partir de son CIN, de son nom, de son prénom ou de son adresse e-mail ;
+    \item vérifier l'unicité du CIN et de l'adresse e-mail ;
+    \item empêcher la suppression d'un client possédant déjà des consommations ;
+    \item consulter les contrats associés à un client.
+\end{itemize}
+
 \section{Modèle ClientBD}
+
+La classe \texttt{ClientBD}, située dans le dossier \texttt{BD/}, constitue la couche d'accès aux données du module. Elle utilise \texttt{mysqli} pour communiquer avec la base de données.
+
+Elle regroupe les principales méthodes suivantes :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{lister()} : récupère les clients associés à un fournisseur et permet d'appliquer un filtre de recherche ;
+    \item \texttt{trouver()} : recherche un client à partir de son identifiant et de celui du fournisseur ;
+    \item \texttt{emailExiste()} et \texttt{cinExiste()} : vérifient l'existence d'une adresse e-mail ou d'un CIN ;
+    \item \texttt{creer()} : insère un nouveau client dans la base de données ;
+    \item \texttt{mettreAJour()} : modifie les informations d'un client ;
+    \item \texttt{supprimer()} : supprime un client appartenant au fournisseur concerné ;
+    \item \texttt{nbConsommations()} : calcule le nombre de consommations enregistrées pour un client.
+\end{itemize}
+
+Les opérations SQL utilisent des requêtes préparées avec \texttt{mysqli\_prepare()} et des paramètres liés. Cette approche permet de séparer les instructions SQL des données transmises par les utilisateurs.
+
 \section{Contrôleur Client}
+
+Le fichier \texttt{Traitement/Client.php} contient les fonctions qui assurent le traitement des opérations du module. Il fait le lien entre les interfaces et la couche d'accès aux données.
+
+Les principales fonctions sont :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{client\_all()} : affiche la liste des clients et traite le paramètre de recherche ;
+    \item \texttt{client\_one()} : récupère et affiche les informations détaillées d'un client ;
+    \item \texttt{client\_add()} : vérifie les données et traite l'ajout d'un client ;
+    \item \texttt{client\_update()} : vérifie et enregistre les modifications d'un client ;
+    \item \texttt{client\_delete()} : contrôle les conditions de suppression avant d'effectuer l'opération ;
+    \item \texttt{client\_lire\_formulaire()} : récupère les données envoyées et effectue leur validation ;
+    \item \texttt{client\_exiger\_fournisseur()} : vérifie que l'utilisateur connecté possède le rôle fournisseur.
+\end{itemize}
+
+L'accès aux fonctions de gestion est réservé au fournisseur authentifié. Le contrôleur récupère son identifiant depuis la session afin de limiter les opérations aux clients qui lui sont associés.
+
 \section{Vues et formulaires}
+
+Les interfaces du module sont regroupées dans le dossier \texttt{IHM/client/}. Elles comprennent les fichiers suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item \texttt{index.php} : présente la liste des clients sous forme de tableau, avec les actions de consultation, de modification et de suppression ;
+    \item \texttt{add.php} : affiche l'interface d'ajout d'un nouveau client ;
+    \item \texttt{update.php} : affiche l'interface de modification des informations d'un client ;
+    \item \texttt{one.php} : présente la fiche détaillée du client, ses consommations et ses contrats ;
+    \item \texttt{form.php} : contient le formulaire partagé entre les interfaces d'ajout et de modification.
+\end{itemize}
+
+Le formulaire partagé contient les champs suivants : CIN, nom, prénom, adresse, adresse e-mail, téléphone, mot de passe et confirmation du mot de passe. Le numéro de téléphone est facultatif.
+
+La fiche détaillée présente également les contrats du client, avec leur numéro, le quartier associé, le type d'activité, les dates de début et de fin ainsi que leur statut. Elle permet d'ajouter un contrat et de résilier un contrat actif.
+
 \section{Validation des données}
+
+La validation des données est réalisée côté serveur dans la fonction \texttt{client\_lire\_formulaire()}.
+
+Les contrôles appliqués sont les suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item le CIN doit contenir entre 4 et 20 caractères alphanumériques ou tirets ;
+    \item le nom, le prénom et l'adresse sont obligatoires ;
+    \item l'adresse e-mail doit respecter le format attendu, vérifié avec \texttt{filter\_var()} et \texttt{FILTER\_VALIDATE\_EMAIL} ;
+    \item le numéro de téléphone, lorsqu'il est renseigné, doit respecter un format autorisé ;
+    \item lors de la création, le mot de passe doit contenir au moins 6 caractères et sa confirmation doit correspondre ;
+    \item lors de la modification, le mot de passe peut rester vide pour conserver celui qui est déjà enregistré.
+\end{itemize}
+
+En cas d'erreur, les messages correspondants sont transmis au formulaire afin d'informer l'utilisateur et de lui permettre de corriger les informations saisies.
+
 \section{Recherche}
+
+La recherche est accessible depuis la liste des clients à travers un formulaire utilisant la méthode HTTP GET.
+
+Le fournisseur peut rechercher un client à partir de son CIN, de son nom, de son prénom ou de son adresse e-mail. Le contrôleur récupère le terme de recherche dans le paramètre \texttt{q}, puis le transmet à la méthode \texttt{lister()} de la classe \texttt{ClientBD}.
+
+La requête SQL utilise l'opérateur \texttt{LIKE} avec des paramètres préparés afin de rechercher les correspondances dans les champs concernés. Les résultats sont classés par nom et par prénom.
+
 \section{Unicité CIN et email}
+
+Afin d'éviter les doublons, le module vérifie l'existence du CIN et de l'adresse e-mail avant l'enregistrement d'un client.
+
+Les méthodes \texttt{cinExiste()} et \texttt{emailExiste()} effectuent ces vérifications dans la table \texttt{client}. Lors d'une modification, l'identifiant du client concerné est exclu de la recherche afin de permettre la conservation de ses propres informations.
+
+Si l'une de ces valeurs est déjà utilisée par un autre client, un message d'erreur est affiché et l'enregistrement est interrompu.
+
 \section{Suppression conditionnelle}
+
+La suppression d'un client est soumise à une condition : celui-ci ne doit posséder aucune consommation enregistrée.
+
+Avant de procéder à la suppression, la fonction \texttt{client\_delete()} vérifie :
+\begin{enumerate}[leftmargin=*]
+    \item que la requête utilise la méthode POST ;
+    \item que le jeton CSRF transmis est valide ;
+    \item que le client existe et appartient au fournisseur connecté ;
+    \item que le nombre de consommations associées au client est égal à zéro.
+\end{enumerate}
+
+Si le client possède au moins une consommation, la suppression est refusée et un message explicatif est affiché. Cette règle est également visible dans l'interface : le bouton de suppression n'est proposé que lorsque le nombre de consommations est nul.
+
+Cette vérification protège les données historiques liées aux consommations et évite la suppression d'un client dont les informations sont encore utilisées.
+
 \section{Tests du module}
+
+Les principaux scénarios de test du module peuvent être regroupés comme suit :
+
+\begin{itemize}[leftmargin=*]
+    \item affichage de la liste des clients du fournisseur connecté ;
+    \item recherche par CIN, nom, prénom et adresse e-mail ;
+    \item ajout d'un client avec des informations valides ;
+    \item rejet d'un formulaire contenant des champs obligatoires manquants ou des données invalides ;
+    \item rejet d'un CIN ou d'une adresse e-mail déjà utilisé ;
+    \item modification des informations d'un client avec ou sans changement de mot de passe ;
+    \item consultation de la fiche détaillée et des contrats associés ;
+    \item refus de suppression lorsqu'un client possède des consommations ;
+    \item vérification du refus d'une requête de suppression contenant un jeton CSRF invalide.
+\end{itemize}
+
+Ces scénarios permettent de vérifier les principales opérations du module ainsi que les contrôles appliqués aux données et aux accès.

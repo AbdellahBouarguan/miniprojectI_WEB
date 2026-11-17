@@ -1,18 +1,192 @@
+
 \chapter{Réclamations}
 \label{chap:reclamations}
 
-\todo{décrire les types, le dépôt client, le traitement fournisseur, les statuts et les notifications.}
-
 \section{Objectifs}
+
+Le module de gestion des réclamations permet aux clients de signaler les problèmes rencontrés dans le cadre de l'utilisation des services d'eau et d'électricité.
+
+Il offre au client la possibilité de déposer une réclamation, de consulter son état d'avancement et de prendre connaissance de la réponse du fournisseur.
+
+Du côté du fournisseur, ce module permet de consulter les réclamations déposées par ses clients, de modifier leur statut et de leur apporter une réponse.
+
 \section{Types de réclamation}
+
+L'application propose quatre types de réclamation, définis dans la classe \texttt{ReclamationBD}.
+
 \subsection{Fuite externe}
+
+Ce type permet au client de signaler une fuite d'eau située à l'extérieur de son habitation ou de son installation privée.
+
 \subsection{Fuite interne}
+
+Ce type concerne les problèmes de fuite d'eau constatés à l'intérieur de l'habitation ou de l'installation du client.
+
 \subsection{Facture}
+
+Ce type permet au client de signaler un problème concernant une facture. Lors du dépôt, il doit sélectionner la facture concernée parmi celles qui lui appartiennent.
+
 \subsection{Autre}
+
+Cette catégorie permet au client de signaler un problème qui ne correspond pas aux trois types précédents. Une description détaillée est nécessaire pour expliquer la situation.
+
 \section{Dépôt par le client}
+
+Le dépôt d'une réclamation est réservé aux clients authentifiés.
+
+Depuis son espace personnel, le client accède à la rubrique des réclamations et sélectionne l'action « Nouvelle réclamation ».
+
+Le formulaire proposé dans la vue \texttt{IHM/reclamation/add.php} contient les champs suivants :
+\begin{itemize}
+    \item le type de réclamation, sélectionné parmi les quatre catégories disponibles ;
+    \item la facture concernée, lorsqu'il s'agit d'une réclamation de type \texttt{FACTURE} ;
+    \item une description obligatoire permettant au client d'expliquer son problème.
+\end{itemize}
+
+La description est limitée à 2000 caractères dans le formulaire HTML.
+
+Lors de la soumission, le contrôleur \texttt{Traitement/Reclamation.php} vérifie les données reçues :
+\begin{itemize}
+    \item le type doit appartenir à la liste des types autorisés ;
+    \item la description ne doit pas être vide ;
+    \item une facture doit être sélectionnée pour le type \texttt{FACTURE} ;
+    \item la facture sélectionnée doit appartenir au client connecté.
+\end{itemize}
+
+Après validation, la méthode \texttt{creer()} de la classe \texttt{ReclamationBD} enregistre la réclamation dans la base de données.
+
+Un numéro unique est généré automatiquement selon le format suivant :
+
+\[
+\texttt{REC-AAAAMMJJHHMMSS-XXXX}
+\]
+
+Les quatre derniers caractères sont générés aléatoirement.
+
+Toute nouvelle réclamation reçoit initialement le statut \texttt{OUVERTE}.
+
 \section{Liste des réclamations}
+
+La liste des réclamations est accessible aux clients et aux fournisseurs, avec un affichage adapté à chaque rôle.
+
+Pour le client, la page présente ses propres réclamations et lui permet d'en consulter les détails ou d'en déposer une nouvelle.
+
+Pour le fournisseur, la liste regroupe les réclamations déposées par ses clients. Elle affiche également leurs noms et leurs numéros CIN afin de faciliter leur identification.
+
+La vue \texttt{IHM/reclamation/index.php} présente les informations suivantes :
+\begin{itemize}
+    \item le numéro de la réclamation ;
+    \item la date de création ;
+    \item le client concerné, dans l'espace fournisseur ;
+    \item le type de réclamation ;
+    \item le numéro de la facture associée, lorsqu'il existe ;
+    \item le statut actuel ;
+    \item un lien permettant d'accéder aux détails.
+\end{itemize}
+
+Les réclamations du fournisseur sont classées selon leur statut, en donnant la priorité aux réclamations ouvertes et en cours de traitement.
+
 \section{Traitement par le fournisseur}
+
+Le fournisseur peut accéder à une réclamation déposée par l'un de ses clients et consulter ses informations détaillées.
+
+La vue \texttt{IHM/reclamation/one.php} présente notamment le type de réclamation, la facture éventuellement concernée, sa description et son statut actuel.
+
+Le fournisseur dispose ensuite d'un formulaire de traitement comprenant :
+\begin{itemize}
+    \item un champ permettant de choisir le nouveau statut ;
+    \item un champ de réponse destiné au client.
+\end{itemize}
+
+La réponse est obligatoire et peut contenir jusqu'à 2000 caractères dans le formulaire.
+
+Après soumission, le contrôleur vérifie le jeton CSRF, la validité du statut et la présence d'une réponse.
+
+La méthode \texttt{traiter()} de la classe \texttt{ReclamationBD} met ensuite à jour le statut et la réponse dans la base de données.
+
+La réclamation doit appartenir à un client rattaché au fournisseur connecté.
+
 \section{Statuts}
+
+Chaque réclamation possède un statut permettant de suivre son évolution.
+
+Les quatre statuts utilisés dans l'application sont :
+\begin{itemize}
+    \item \texttt{OUVERTE} : la réclamation vient d'être déposée par le client ;
+    \item \texttt{EN\_COURS} : le fournisseur a commencé son traitement ;
+    \item \texttt{RESOLUE} : le problème signalé est considéré comme résolu ;
+    \item \texttt{REJETEE} : la réclamation est rejetée par le fournisseur.
+\end{itemize}
+
+Lorsqu'une réclamation passe à l'état \texttt{RESOLUE} ou \texttt{REJETEE}, la date de résolution est enregistrée dans le champ \texttt{date\_resolution}.
+
+Pour les autres statuts, ce champ est laissé à \texttt{NULL}.
+
+L'état de chaque réclamation est présenté dans l'interface à l'aide d'un badge visuel afin de faciliter son identification.
+
 \section{Notifications}
+
+Le module utilise le système de notifications internes de l'application afin d'informer les utilisateurs des événements liés aux réclamations.
+
+Deux situations principales déclenchent une notification :
+
+\begin{itemize}
+    \item \textbf{Dépôt d'une réclamation :} après l'enregistrement, le fournisseur associé au client reçoit une notification indiquant qu'une nouvelle réclamation a été déposée.
+    \item \textbf{Mise à jour d'une réclamation :} après le traitement par le fournisseur, le client reçoit une notification contenant le nouveau statut de sa réclamation.
+\end{itemize}
+
+Les notifications sont créées à l'aide de la fonction \texttt{notification\_creer()}.
+
+Elles contiennent un titre, un message, un type et un lien permettant d'accéder à la rubrique concernée.
+
+En cas d'échec de création d'une notification, l'erreur est enregistrée dans les journaux de l'application. Cet échec n'annule pas l'enregistrement de la réclamation ou la modification de son statut.
+
 \section{Contrôle d'accès}
+
+L'accès au module est réservé aux utilisateurs authentifiés possédant le rôle \texttt{client} ou \texttt{fournisseur}.
+
+Le contrôle d'accès est assuré par la fonction \texttt{reclamation\_utilisateur()} du contrôleur.
+
+Les règles appliquées sont les suivantes :
+\begin{itemize}
+    \item un client peut créer une réclamation et consulter uniquement celles qui lui appartiennent ;
+    \item un fournisseur peut consulter et traiter uniquement les réclamations des clients qui lui sont rattachés ;
+    \item un fournisseur ne peut pas déposer une réclamation en utilisant le formulaire réservé au client ;
+    \item les opérations de dépôt et de traitement utilisent une protection CSRF.
+\end{itemize}
+
+Les méthodes de la classe \texttt{ReclamationBD} utilisent des requêtes préparées avec PDO afin de limiter les risques d'injection SQL.
+
+Les formulaires utilisent également un jeton CSRF vérifié avec la fonction \texttt{hash\_equals()}.
+
+Enfin, les données affichées dans les vues sont échappées avec la fonction \texttt{e()} afin de limiter les risques d'injection de contenu HTML ou JavaScript.
+
+\section{Limites et améliorations possibles}
+
+Le schéma de la base de données prévoit un champ \texttt{piece\_jointe} permettant éventuellement d'associer un fichier à une réclamation.
+
+Cependant, le formulaire et le contrôleur actuellement étudiés ne proposent pas de téléversement de pièces jointes. Cette fonctionnalité constitue donc une amélioration possible.
+
+D'autres évolutions pourraient être envisagées, notamment l'ajout d'un historique des changements de statut et l'amélioration du suivi des délais de traitement.
+
 \section{Tests}
+
+Les scénarios suivants permettent de vérifier le fonctionnement du module :
+\begin{itemize}
+    \item déposer une réclamation de type fuite externe ;
+    \item déposer une réclamation de type fuite interne ;
+    \item déposer une réclamation concernant une facture appartenant au client ;
+    \item empêcher le dépôt d'une réclamation de type facture sans sélection de facture ;
+    \item empêcher l'association d'une facture appartenant à un autre client ;
+    \item empêcher l'enregistrement d'une description vide ;
+    \item vérifier l'attribution automatique du numéro et du statut initial ;
+    \item vérifier l'affichage des réclamations dans les espaces client et fournisseur ;
+    \item modifier le statut d'une réclamation et enregistrer une réponse ;
+    \item vérifier l'enregistrement de la date de résolution pour les statuts terminaux ;
+    \item vérifier l'envoi des notifications lors du dépôt et du traitement ;
+    \item vérifier qu'un client ne peut pas consulter les réclamations d'un autre client ;
+    \item vérifier qu'un fournisseur ne peut traiter que les réclamations de ses propres clients ;
+    \item vérifier le rejet des formulaires contenant un jeton CSRF invalide.
+\end{itemize}
+
+Ces scénarios constituent les vérifications fonctionnelles à effectuer pour valider le module.
