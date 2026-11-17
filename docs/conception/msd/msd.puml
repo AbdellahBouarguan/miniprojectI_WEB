@@ -32,6 +32,26 @@ entity "CLIENT" as client {
   date_creation : DATETIME
 }
 
+entity "QUARTIER" as quartier {
+  * id_quartier : INT <<PK>>
+  --
+  nom : VARCHAR(100)
+  type_activite : ENUM
+  date_creation : DATETIME
+}
+
+entity "CONTRAT" as contrat {
+  * id_contrat : INT <<PK>>
+  --
+  id_client : INT <<FK>>
+  id_quartier : INT <<FK>>
+  numero_contrat : VARCHAR(50) <<UNIQUE>>
+  date_debut : DATE
+  date_fin : DATE NULL
+  statut : ENUM
+  date_creation : DATETIME
+}
+
 entity "TARIF" as tarif {
   * id_tarif : INT <<PK>>
   --
@@ -46,6 +66,7 @@ entity "CONSOMMATION" as consommation {
   * id_conso : INT <<PK>>
   --
   id_client : INT <<FK>>
+  id_contrat : INT <<FK>>
   periode_mois : TINYINT
   periode_annee : SMALLINT
   index_eau : DECIMAL(12,2)
@@ -99,7 +120,9 @@ entity "FACTURE" as facture {
 fournisseur ||--o{ client : "gere"
 fournisseur ||--o{ tarif : "definit"
 fournisseur ||--o{ anomalie : "suit"
-client ||--o{ consommation : "saisit"
+client ||--o{ contrat : "possede"
+quartier ||--o{ contrat : "regroupe"
+contrat ||--o{ consommation : "concerne"
 client ||--o{ facture : "recoit"
 consommation ||--o{ anomalie : "presente"
 consommation ||--o| facture : "genere"

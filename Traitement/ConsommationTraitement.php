@@ -42,7 +42,12 @@ final class ConsommationTraitement
                 'periode_annee' => $conso['periode_annee'],
                 'index_eau' => $conso['index_eau'],
                 'index_elec' => $conso['index_elec'],
+                'id_contrat' => $conso['id_contrat'],
             ];
+        } elseif ($this->bd->contratsClient($idClient) === []) {
+            $this->rediriger('conso.historique', [
+                'erreur' => 'Aucun contrat actif. Contactez le fournisseur.',
+            ]);
         }
 
         $this->rendreFormulaire([], $anciennes, $conso);
@@ -68,9 +73,26 @@ final class ConsommationTraitement
             }
         }
 
+        $contrats = $this->bd->contratsClient($idClient, $consoExistante === null);
+        $idContrat = $consoExistante !== null
+            ? (int) $consoExistante['id_contrat']
+            : (int) ($_POST['id_contrat'] ?? 0);
+
         $mois = (int) ($_POST['periode_mois'] ?? 0);
         $annee = (int) ($_POST['periode_annee'] ?? 0);
         $erreurs = [];
+
+        if ($consoExistante === null) {
+            if ($contrats === []) {
+                $erreurs['id_contrat'] = 'Aucun contrat actif. Contactez le fournisseur.';
+            } elseif (count($contrats) === 1) {
+                $idContrat = (int) $contrats[0]['id_contrat'];
+            } elseif ($idContrat <= 0) {
+                $erreurs['id_contrat'] = 'Sélectionnez un contrat.';
+            } elseif (!$this->bd->contratAppartientClient($idContrat, $idClient)) {
+                $erreurs['id_contrat'] = 'Contrat invalide.';
+            }
+        }
 
         if ($consoExistante === null) {
             $erreurPeriode = $this->verifierPeriode($mois, $annee);
@@ -114,16 +136,17 @@ final class ConsommationTraitement
 
         if (
             $consoExistante === null
-            && $this->bd->existePourPeriode($idClient, $mois, $annee)
+            && $erreurs === []
+            && $this->bd->existePourPeriode($idContrat, $mois, $annee)
         ) {
-            $erreurs['periode'] = 'Une consommation existe déjà pour cette période.';
+            $erreurs['periode'] = 'Une consommation existe déjà pour ce contrat et cette période.';
             $this->rendreFormulaire($erreurs, $_POST, null);
             return;
         }
 
-        if ($consoExistante === null && $this->bd->aAnomalieEnAttente($idClient)) {
+        if ($consoExistante === null && $this->bd->aAnomalieEnAttente($idContrat)) {
             $this->rediriger('conso.historique', [
-                'erreur' => 'Résolvez d’abord l’anomalie en attente.',
+                'erreur' => 'Résolvez d’abord l’anomalie en attente sur ce contrat.',
             ]);
         }
 
@@ -133,7 +156,7 @@ final class ConsommationTraitement
             erreur_page(403, 'Client inconnu', 'Impossible de retrouver le client associé à cette session.');
         }
 
-        $precedent = $this->bd->derniereConsommationValidee($idClient, $mois, $annee);
+        $precedent = $this->bd->derniereConsommationValidee($idContrat, $mois, $annee);
 
         $anomalies = Anomalie::detecter(
             $precedent,
@@ -154,6 +177,7 @@ final class ConsommationTraitement
             if ($consoExistante === null) {
                 $idConso = $this->bd->creer(
                     $idClient,
+                    $idContrat,
                     (int) $infos['id_fournisseur'],
                     $mois,
                     $annee,
@@ -349,7 +373,16 @@ final class ConsommationTraitement
         $mois = is_scalar($moisBrut) ? (int) $moisBrut : (int) date('n');
         $annee = is_scalar($anneeBrut) ? (int) $anneeBrut : (int) date('Y');
 
-        $precedent = $this->bd->derniereConsommationValidee($idClient, $mois, $annee);
+        $contrats = $this->bd->contratsClient($idClient, $conso === null);
+        $contratSelectionne = (int) (
+            $anciennes['id_contrat']
+            ?? $conso['id_contrat']
+            ?? (count($contrats) === 1 ? $contrats[0]['id_contrat'] : 0)
+        );
+
+        $precedent = $contratSelectionne > 0
+            ? $this->bd->derniereConsommationValidee($contratSelectionne, $mois, $annee)
+            : null;
         $photosPrecedentes = $precedent !== null
             ? $this->bd->photosDe((int) $precedent['id_conso'])
             : [];

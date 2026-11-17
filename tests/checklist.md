@@ -26,6 +26,17 @@
 - [ ] Modification d'un client.
 - [ ] Recherche d'un client.
 
+## Quartiers et contrats
+
+- [ ] Creer un quartier avec un type d'activite.
+- [ ] Ajouter un contrat a un client.
+- [ ] Un client peut avoir deux contrats dans deux quartiers differents.
+- [ ] Un client ne peut pas utiliser le contrat d'un autre client.
+- [ ] Resilier un contrat.
+- [ ] La consommation est rattachee au contrat selectionne.
+- [ ] Deux consommations du meme mois pour deux contrats sont acceptees.
+- [ ] La facture affiche le contrat, le quartier et le type d'activite.
+
 ## Consommations
 
 - [ ] Formulaire de saisie accessible au client.

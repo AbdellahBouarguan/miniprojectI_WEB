@@ -37,6 +37,17 @@ $role = $_SESSION['role'] ?? null;
             <td><?= e($facture['email']) ?></td>
         </tr>
         <tr>
+            <th>Contrat</th>
+            <td><?= e($facture['numero_contrat'] ?? '—') ?></td>
+        </tr>
+        <tr>
+            <th>Quartier</th>
+            <td>
+                <?= e($facture['quartier_nom'] ?? '—') ?>
+                (<?= e($facture['type_activite'] ?? '—') ?>)
+            </td>
+        </tr>
+        <tr>
             <th>État</th>
             <td>
                 <span class="badge <?= e(statut_badge($facture['etat'])) ?>">

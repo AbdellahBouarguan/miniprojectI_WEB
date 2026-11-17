@@ -9,7 +9,7 @@ final class AnomalieBD
     {
         $sql = "SELECT a.id_anomalie, a.id_conso, a.type_anomalie, a.champ,
                        a.valeur_saisie, a.valeur_reference, a.date_detection,
-                       co.id_client, co.periode_mois, co.periode_annee,
+                       co.id_client, co.id_contrat, co.periode_mois, co.periode_annee,
                        co.index_eau, co.index_elec, co.statut AS conso_statut,
                        c.nom, c.prenom, c.cin,
                        f.seuil_eau, f.seuil_elec
@@ -40,7 +40,7 @@ final class AnomalieBD
         $sql = "SELECT a.id_anomalie, a.id_conso, a.type_anomalie, a.champ,
                        a.valeur_saisie, a.valeur_reference, a.date_detection,
                        a.statut,
-                       co.id_client, co.periode_mois, co.periode_annee,
+                       co.id_client, co.id_contrat, co.periode_mois, co.periode_annee,
                        co.index_eau, co.index_elec, co.statut AS conso_statut,
                        c.nom, c.prenom, c.cin,
                        f.seuil_eau, f.seuil_elec
@@ -166,7 +166,7 @@ final class AnomalieBD
     {
         $champ = $ligne['champ'];
         $indexPrecedent = $this->indexPrecedent(
-            (int) $ligne['id_client'],
+            (int) $ligne['id_contrat'],
             (int) $ligne['periode_mois'],
             (int) $ligne['periode_annee'],
             $champ
@@ -186,7 +186,7 @@ final class AnomalieBD
     }
 
     private function indexPrecedent(
-        int $idClient,
+        int $idContrat,
         int $mois,
         int $annee,
         string $champ
@@ -195,13 +195,13 @@ final class AnomalieBD
             $this->db,
             "SELECT index_eau, index_elec
              FROM consommation
-             WHERE id_client = ?
+             WHERE id_contrat = ?
                AND statut IN ('VALIDEE', 'FACTUREE')
                AND (periode_annee < ? OR (periode_annee = ? AND periode_mois < ?))
              ORDER BY periode_annee DESC, periode_mois DESC
              LIMIT 1"
         );
-        mysqli_stmt_bind_param($stmt, 'iiii', $idClient, $annee, $annee, $mois);
+        mysqli_stmt_bind_param($stmt, 'iiii', $idContrat, $annee, $annee, $mois);
         mysqli_stmt_execute($stmt);
 
         $resultat = mysqli_stmt_get_result($stmt);

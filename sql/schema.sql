@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS facture;
 DROP TABLE IF EXISTS anomalie;
 DROP TABLE IF EXISTS photo_capteur;
 DROP TABLE IF EXISTS consommation;
+DROP TABLE IF EXISTS contrat;
+DROP TABLE IF EXISTS quartier;
 DROP TABLE IF EXISTS tarif;
 DROP TABLE IF EXISTS client;
 DROP TABLE IF EXISTS fournisseur;
@@ -40,6 +42,17 @@ CREATE TABLE fournisseur (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
+-- QUARTIER
+-- ------------------------------------------------------------
+CREATE TABLE quartier (
+  id_quartier INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nom VARCHAR(100) NOT NULL,
+  type_activite ENUM('RESIDENTIEL', 'COMMERCIAL', 'INDUSTRIEL') NOT NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_quartier),
+  UNIQUE KEY uk_quartier_nom_activite (nom, type_activite)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- CLIENT
 -- ------------------------------------------------------------
 CREATE TABLE client (
@@ -60,6 +73,34 @@ CREATE TABLE client (
   CONSTRAINT fk_client_fournisseur
     FOREIGN KEY (id_fournisseur) REFERENCES fournisseur (id_fournisseur)
     ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- CONTRAT
+-- Un client peut avoir plusieurs contrats dans des quartiers
+-- différents. Chaque contrat porte un numéro unique.
+-- ------------------------------------------------------------
+CREATE TABLE contrat (
+  id_contrat INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_client INT UNSIGNED NOT NULL,
+  id_quartier INT UNSIGNED NOT NULL,
+  numero_contrat VARCHAR(50) NOT NULL,
+  date_debut DATE NOT NULL,
+  date_fin DATE NULL,
+  statut ENUM('ACTIF','RESILIE') NOT NULL DEFAULT 'ACTIF',
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_contrat),
+  UNIQUE KEY uk_contrat_numero (numero_contrat),
+  KEY idx_contrat_client (id_client),
+  KEY idx_contrat_quartier (id_quartier),
+  CONSTRAINT fk_contrat_client
+    FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_contrat_quartier
+    FOREIGN KEY (id_quartier) REFERENCES quartier (id_quartier)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT chk_contrat_dates
+    CHECK (date_fin IS NULL OR date_fin >= date_debut)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
@@ -92,6 +133,7 @@ CREATE TABLE tarif (
 CREATE TABLE consommation (
   id_conso INT UNSIGNED NOT NULL AUTO_INCREMENT,
   id_client INT UNSIGNED NOT NULL,
+  id_contrat INT UNSIGNED NOT NULL,
   periode_mois TINYINT UNSIGNED NOT NULL,
   periode_annee SMALLINT UNSIGNED NOT NULL,
   index_eau DECIMAL(12,2) NOT NULL,
@@ -99,10 +141,14 @@ CREATE TABLE consommation (
   date_saisie DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   statut ENUM('EN_ATTENTE','ANOMALIE','VALIDEE','FACTUREE') NOT NULL DEFAULT 'EN_ATTENTE',
   PRIMARY KEY (id_conso),
-  UNIQUE KEY uk_conso_client_periode (id_client, periode_mois, periode_annee),
+  UNIQUE KEY uk_conso_contrat_periode (id_contrat, periode_mois, periode_annee),
   KEY idx_conso_client (id_client),
+  KEY idx_conso_contrat (id_contrat),
   CONSTRAINT fk_conso_client
     FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_conso_contrat
+    FOREIGN KEY (id_contrat) REFERENCES contrat (id_contrat)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT chk_conso_mois CHECK (periode_mois BETWEEN 1 AND 12),
   CONSTRAINT chk_conso_index CHECK (index_eau >= 0 AND index_elec >= 0)

@@ -18,13 +18,49 @@ final class ConsommationBD
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    /** Contrats d'un client, avec leur quartier. */
+    public function contratsClient(int $idClient, bool $actifsSeulement = true): array
+    {
+        $sql = "SELECT ct.id_contrat, ct.numero_contrat, ct.id_quartier,
+                       ct.date_debut, ct.date_fin, ct.statut,
+                       q.nom AS quartier_nom, q.type_activite
+                FROM contrat ct
+                JOIN quartier q ON q.id_quartier = ct.id_quartier
+                WHERE ct.id_client = :client";
+
+        if ($actifsSeulement) {
+            $sql .= " AND ct.statut = 'ACTIF'";
+        }
+
+        $sql .= ' ORDER BY ct.statut, ct.numero_contrat';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['client' => $idClient]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function contratAppartientClient(int $idContrat, int $idClient): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT 1 FROM contrat
+             WHERE id_contrat = :contrat
+               AND id_client = :client
+               AND statut = 'ACTIF'
+             LIMIT 1"
+        );
+        $stmt->execute(['contrat' => $idContrat, 'client' => $idClient]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     /** Dernier relevé VALIDEE/FACTUREE strictement avant la période donnée */
-    public function derniereConsommationValidee(int $idClient, int $mois, int $annee): ?array
+    public function derniereConsommationValidee(int $idContrat, int $mois, int $annee): ?array
     {
         $stmt = $this->pdo->prepare(
             "SELECT *
              FROM consommation
-             WHERE id_client = :id
+             WHERE id_contrat = :id
                AND statut IN ('VALIDEE', 'FACTUREE')
                AND (periode_annee < :annee_lt
                     OR (periode_annee = :annee_eq AND periode_mois < :mois))
@@ -32,7 +68,7 @@ final class ConsommationBD
              LIMIT 1"
         );
         $stmt->execute([
-            'id' => $idClient,
+            'id' => $idContrat,
             'annee_lt' => $annee,
             'annee_eq' => $annee,
             'mois' => $mois,
@@ -40,11 +76,11 @@ final class ConsommationBD
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public function existePourPeriode(int $idClient, int $mois, int $annee, ?int $saufId = null): bool
+    public function existePourPeriode(int $idContrat, int $mois, int $annee, ?int $saufId = null): bool
     {
         $sql = 'SELECT 1 FROM consommation
-                WHERE id_client = :id AND periode_mois = :mois AND periode_annee = :annee';
-        $params = ['id' => $idClient, 'mois' => $mois, 'annee' => $annee];
+                WHERE id_contrat = :id AND periode_mois = :mois AND periode_annee = :annee';
+        $params = ['id' => $idContrat, 'mois' => $mois, 'annee' => $annee];
 
         if ($saufId !== null) {
             $sql .= ' AND id_conso <> :sauf';
@@ -56,24 +92,28 @@ final class ConsommationBD
         return (bool) $stmt->fetchColumn();
     }
 
-    /** Empêche une nouvelle saisie tant qu'une anomalie n'est pas résolue */
-    public function aAnomalieEnAttente(int $idClient): bool
+    /** Empêche une nouvelle saisie sur ce contrat tant qu'une anomalie n'est pas résolue */
+    public function aAnomalieEnAttente(int $idContrat): bool
     {
         $stmt = $this->pdo->prepare(
             "SELECT 1
              FROM anomalie a
              JOIN consommation c ON c.id_conso = a.id_conso
-             WHERE c.id_client = :id AND a.statut = 'EN_ATTENTE'
+             WHERE c.id_contrat = :id AND a.statut = 'EN_ATTENTE'
              LIMIT 1"
         );
-        $stmt->execute(['id' => $idClient]);
+        $stmt->execute(['id' => $idContrat]);
         return (bool) $stmt->fetchColumn();
     }
 
     public function trouver(int $idConso, int $idClient): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM consommation WHERE id_conso = :id AND id_client = :client'
+            'SELECT c.*, ct.numero_contrat, q.nom AS quartier_nom, q.type_activite
+             FROM consommation c
+             JOIN contrat ct ON ct.id_contrat = c.id_contrat
+             JOIN quartier q ON q.id_quartier = ct.id_quartier
+             WHERE c.id_conso = :id AND c.id_client = :client'
         );
         $stmt->execute(['id' => $idConso, 'client' => $idClient]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
@@ -82,7 +122,11 @@ final class ConsommationBD
     public function trouverParId(int $idConso): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM consommation WHERE id_conso = :id'
+            'SELECT c.*, ct.numero_contrat, q.nom AS quartier_nom, q.type_activite
+             FROM consommation c
+             JOIN contrat ct ON ct.id_contrat = c.id_contrat
+             JOIN quartier q ON q.id_quartier = ct.id_quartier
+             WHERE c.id_conso = :id'
         );
         $stmt->execute(['id' => $idConso]);
 
@@ -119,11 +163,14 @@ final class ConsommationBD
     {
         $stmt = $this->pdo->prepare(
             "SELECT c.*,
+                    ct.numero_contrat, q.nom AS quartier_nom, q.type_activite,
                     f.id_facture, f.numero AS facture_numero, f.etat AS facture_etat
              FROM consommation c
+             JOIN contrat ct ON ct.id_contrat = c.id_contrat
+             JOIN quartier q ON q.id_quartier = ct.id_quartier
              LEFT JOIN facture f ON f.id_conso = c.id_conso
              WHERE c.id_client = :id
-             ORDER BY c.periode_annee DESC, c.periode_mois DESC"
+             ORDER BY c.periode_annee DESC, c.periode_mois DESC, ct.numero_contrat"
         );
         $stmt->execute(['id' => $idClient]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -165,7 +212,7 @@ final class ConsommationBD
     public function consommationsCalculees(array $conso): array
     {
         $prec = $this->derniereConsommationValidee(
-            (int) $conso['id_client'],
+            (int) $conso['id_contrat'],
             (int) $conso['periode_mois'],
             (int) $conso['periode_annee']
         );
@@ -182,6 +229,7 @@ final class ConsommationBD
 
     public function creer(
         int $idClient,
+        int $idContrat,
         int $idFournisseur,
         int $mois,
         int $annee,
@@ -196,12 +244,13 @@ final class ConsommationBD
         try {
             $stmt = $this->pdo->prepare(
                 'INSERT INTO consommation
-                    (id_client, periode_mois, periode_annee, index_eau, index_elec, statut)
+                    (id_client, id_contrat, periode_mois, periode_annee, index_eau, index_elec, statut)
                  VALUES
-                    (:client, :mois, :annee, :eau, :elec, :statut)'
+                    (:client, :contrat, :mois, :annee, :eau, :elec, :statut)'
             );
             $stmt->execute([
                 'client' => $idClient,
+                'contrat' => $idContrat,
                 'mois' => $mois,
                 'annee' => $annee,
                 'eau' => $indexEau,

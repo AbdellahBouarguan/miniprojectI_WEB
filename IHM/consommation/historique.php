@@ -36,6 +36,7 @@
             <thead>
                 <tr>
                     <th>Période</th>
+                    <th>Contrat / Quartier</th>
                     <th>Index eau</th>
                     <th>Index élec</th>
                     <th>Statut</th>
@@ -47,6 +48,10 @@
             <?php foreach ($consommations as $c): ?>
                 <tr>
                     <td><?= (int) $c['periode_mois'] ?>/<?= (int) $c['periode_annee'] ?></td>
+                    <td>
+                        <strong><?= e($c['numero_contrat'] ?? '—') ?></strong>
+                        <small><?= e($c['quartier_nom'] ?? '—') ?> · <?= e($c['type_activite'] ?? '—') ?></small>
+                    </td>
                     <td><?= e(number_format((float) $c['index_eau'], 2, ',', ' ')) ?></td>
                     <td><?= e(number_format((float) $c['index_elec'], 2, ',', ' ')) ?></td>
                     <td>

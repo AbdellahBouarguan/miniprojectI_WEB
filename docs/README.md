@@ -11,6 +11,7 @@ docs/
 ├── latex/               Rapport LaTeX du projet
 ├── presentation/        Presentation du sprint final (Markdown, HTML, PDF)
 ├── notifications.md     Documentation du module notifications internes
+├── quartiers_contrats.md Documentation des quartiers et contrats
 └── reunions/            Comptes rendus des reunions
 ```
 

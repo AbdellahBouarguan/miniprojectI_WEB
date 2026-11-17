@@ -1,16 +1,19 @@
-# Modele de donnees - Version Alpha
+# Modele de donnees - Version Alpha + quartiers/contrats
 
 ## Tables retenues
 
 - `fournisseur`
 - `client`
+- `quartier`
+- `contrat`
 - `tarif`
 - `consommation`
 - `photo_capteur`
 - `anomalie`
 - `facture`
+- `notification`
 
-Les tables `agent`, `conso_annuelle` et `reclamation` sont exclues de la version Alpha.
+Les tables `agent`, `conso_annuelle` et `reclamation` sont ajoutees par leurs branches dediees.
 
 ## Cles et relations
 
@@ -19,7 +22,9 @@ Les tables `agent`, `conso_annuelle` et `reclamation` sont exclues de la version
 | Fournisseur - Client | 1..1 - 0..n | `client.id_fournisseur` |
 | Fournisseur - Tarif | 1..1 - 0..n | `tarif.id_fournisseur` |
 | Fournisseur - Anomalie | 1..1 - 0..n | `anomalie.id_fournisseur` |
-| Client - Consommation | 1..1 - 0..n | `consommation.id_client` |
+| Client - Contrat | 1..1 - 0..n | `contrat.id_client` |
+| Quartier - Contrat | 1..1 - 0..n | `contrat.id_quartier` |
+| Contrat - Consommation | 1..1 - 0..n | `consommation.id_contrat` |
 | Client - Facture | 1..1 - 0..n | `facture.id_client` |
 | Consommation - Anomalie | 1..1 - 0..n | `anomalie.id_conso` |
 | Consommation - Facture | 1..1 - 0..1 | `facture.id_conso` UNIQUE |
@@ -30,8 +35,10 @@ Les tables `agent`, `conso_annuelle` et `reclamation` sont exclues de la version
 - Chaque table possede une cle primaire technique `id_*`.
 - Le CIN du client est conserve comme attribut UNIQUE, mais n'est pas utilise comme cle primaire.
 - Un client appartient a un fournisseur.
+- Un client peut avoir plusieurs contrats dans des quartiers differents.
+- Un quartier est associe a un type d'activite.
 - Un tarif est defini par un fournisseur.
-- Une consommation appartient a un client.
+- Une consommation appartient a un contrat, donc a un client et a un quartier.
 - Une consommation peut avoir plusieurs anomalies.
 - Une consommation genere au plus une facture.
 - Une consommation possede exactement deux photos : une pour l'eau et une pour l'electricite.

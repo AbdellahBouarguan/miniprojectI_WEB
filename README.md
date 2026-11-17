@@ -11,6 +11,7 @@ Branche Alpha : `aymane`
 - Detection et confirmation des anomalies
 - Generation automatique et consultation des factures
 - Notifications internes client / fournisseur
+- Quartiers, contrats clients et rattachement des consommations
 
 ## Pre-requis
 
@@ -85,6 +86,13 @@ GET      /Consommation/one/{id}
 GET      /Consommation/confirmation/{id}
 POST     /Consommation/confirmer
 POST     /Consommation/facturer
+
+GET      /Contrat/all
+POST     /Contrat/add/{idClient}
+POST     /Contrat/resilier/{id}
+
+GET      /Quartier/all
+POST     /Quartier/add
 
 GET      /Facture/all
 GET      /Facture/one/{id}

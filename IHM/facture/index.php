@@ -30,6 +30,7 @@ $role = $_SESSION['role'] ?? null;
                     <th>Numéro</th>
                     <th>Date</th>
                     <th>Période</th>
+                    <th>Contrat / Quartier</th>
                     <?php if ($role === 'fournisseur'): ?>
                         <th>Client</th>
                     <?php endif; ?>
@@ -46,6 +47,10 @@ $role = $_SESSION['role'] ?? null;
                     <td><?= e($f['numero']) ?></td>
                     <td><?= e(format_date_fr($f['date_facture'])) ?></td>
                     <td><?= (int) $f['periode_mois'] ?>/<?= (int) $f['periode_annee'] ?></td>
+                    <td>
+                        <strong><?= e($f['numero_contrat'] ?? '—') ?></strong>
+                        <small><?= e($f['quartier_nom'] ?? '—') ?> · <?= e($f['type_activite'] ?? '—') ?></small>
+                    </td>
                     <?php if ($role === 'fournisseur'): ?>
                         <td>
                             <?= e($f['nom'] . ' ' . $f['prenom']) ?>
