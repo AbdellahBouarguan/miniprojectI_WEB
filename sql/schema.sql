@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS facture;
+DROP TABLE IF EXISTS reclamation;
 DROP TABLE IF EXISTS anomalie;
 DROP TABLE IF EXISTS photo_capteur;
 DROP TABLE IF EXISTS conso_annuelle;
@@ -276,6 +277,9 @@ CREATE TABLE facture (
   montant_tva DECIMAL(12,2) NOT NULL,
   montant_ttc DECIMAL(12,2) NOT NULL,
   etat ENUM('IMPAYEE','PAYEE') NOT NULL DEFAULT 'IMPAYEE',
+  date_paiement DATETIME NULL,
+  mode_paiement VARCHAR(30) NULL,
+  reference_paiement VARCHAR(100) NULL,
   PRIMARY KEY (id_facture),
   UNIQUE KEY uk_facture_numero (numero),
   UNIQUE KEY uk_facture_conso (id_conso),
@@ -290,6 +294,31 @@ CREATE TABLE facture (
   CONSTRAINT chk_facture_montants
     CHECK (conso_eau >= 0 AND conso_elec >= 0
            AND montant_ht >= 0 AND montant_tva >= 0 AND montant_ttc >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- RECLAMATION CLIENT
+-- ------------------------------------------------------------
+CREATE TABLE reclamation (
+  id_reclamation INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  numero VARCHAR(30) NOT NULL,
+  id_client INT UNSIGNED NOT NULL,
+  id_facture INT UNSIGNED NULL,
+  type ENUM('FUITE_EXTERNE','FUITE_INTERNE','FACTURE','AUTRE') NOT NULL,
+  description TEXT NOT NULL,
+  piece_jointe VARCHAR(255) NULL,
+  statut ENUM('OUVERTE','EN_COURS','RESOLUE','REJETEE') NOT NULL DEFAULT 'OUVERTE',
+  reponse TEXT NULL,
+  date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_resolution DATETIME NULL,
+  PRIMARY KEY (id_reclamation),
+  UNIQUE KEY uk_reclamation_numero (numero),
+  KEY idx_reclamation_client (id_client),
+  KEY idx_reclamation_facture (id_facture),
+  CONSTRAINT fk_reclamation_client FOREIGN KEY (id_client) REFERENCES client (id_client)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_reclamation_facture FOREIGN KEY (id_facture) REFERENCES facture (id_facture)
+    ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------

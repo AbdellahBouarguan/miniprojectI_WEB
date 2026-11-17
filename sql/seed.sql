@@ -1,6 +1,6 @@
 -- ============================================================
 -- Mini Projet 1 - Version Alpha
--- Donnees de depart : fournisseur, clients, tarifs
+-- Donnees de depart : fournisseurs, clients, tarifs
 -- Mots de passe :
 --   fournisseur@example.ma / fournisseur123
 --   client1@example.ma     / client123
@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM notification;
 DELETE FROM facture;
+DELETE FROM reclamation;
 DELETE FROM anomalie;
 DELETE FROM photo_capteur;
 DELETE FROM conso_annuelle;
@@ -27,6 +28,7 @@ DELETE FROM fournisseur;
 
 ALTER TABLE notification AUTO_INCREMENT = 1;
 ALTER TABLE facture AUTO_INCREMENT = 1;
+ALTER TABLE reclamation AUTO_INCREMENT = 1;
 ALTER TABLE anomalie AUTO_INCREMENT = 1;
 ALTER TABLE photo_capteur AUTO_INCREMENT = 1;
 ALTER TABLE conso_annuelle AUTO_INCREMENT = 1;

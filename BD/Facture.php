@@ -5,6 +5,21 @@ final class FactureBD
 {
     public function __construct(private PDO $pdo) {}
 
+    public function payerParFournisseur(int $idFacture, int $idFournisseur): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE facture f
+             JOIN client c ON c.id_client = f.id_client
+             SET f.etat = 'PAYEE', f.date_paiement = NOW()
+             WHERE f.id_facture = :facture
+               AND c.id_fournisseur = :fournisseur
+               AND f.etat = 'IMPAYEE'"
+        );
+        $stmt->execute(['facture' => $idFacture, 'fournisseur' => $idFournisseur]);
+
+        return $stmt->rowCount() === 1;
+    }
+
     public function findByConso(int $idConso): ?array
     {
         $stmt = $this->pdo->prepare('SELECT * FROM facture WHERE id_conso = :id LIMIT 1');

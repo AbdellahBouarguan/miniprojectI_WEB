@@ -7,7 +7,6 @@ require_once __DIR__ . '/../BD/ConsommationBD.php';
 
 final class ConsommationTraitement
 {
-    private const JOUR_DEBUT = 18;
     private const MAX_PHOTO = 5 * 1024 * 1024; // 5 Mo
 
     private const MIMES = [
@@ -396,7 +395,7 @@ final class ConsommationTraitement
             || (
                 (int) $aujourdhui->format('n') === $mois
                 && (int) $aujourdhui->format('Y') === $annee
-                && (int) $aujourdhui->format('j') >= self::JOUR_DEBUT
+                && (int) $aujourdhui->format('j') >= CONSUMPTION_OPEN_DAY
             );
 
         $csrf = csrf_token();
@@ -423,8 +422,8 @@ final class ConsommationTraitement
             return 'La saisie concerne uniquement le mois en cours.';
         }
 
-        if ((int) $aujourdhui->format('j') < self::JOUR_DEBUT) {
-            return 'La saisie est ouverte du 18 au dernier jour du mois.';
+        if ((int) $aujourdhui->format('j') < CONSUMPTION_OPEN_DAY) {
+            return 'La saisie est ouverte du ' . CONSUMPTION_OPEN_DAY . ' au dernier jour du mois.';
         }
 
         return null;

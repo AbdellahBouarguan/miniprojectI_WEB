@@ -70,8 +70,8 @@ $compteurs = [
             </strong>
             <span>
                 <?= $periodeOuverte
-                    ? 'Ouverte du 18 du mois jusqu’à la fin du mois.'
-                    : 'La saisie ouvre le 18 du mois.' ?>
+                    ? 'Ouverte du ' . CONSUMPTION_OPEN_DAY . ' du mois jusqu’à la fin du mois.'
+                    : 'La saisie ouvre le ' . CONSUMPTION_OPEN_DAY . ' du mois.' ?>
             </span>
         </div>
         <span class="badge <?= $periodeOuverte ? 'badge-open' : 'badge-warning' ?>">

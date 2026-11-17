@@ -100,6 +100,11 @@ POST     /Quartier/add
 
 GET      /Facture/all
 GET      /Facture/one/{id}
+POST     /Facture/payer/{id}
+
+GET      /Reclamation/index
+POST     /Reclamation/soumettre
+POST     /Reclamation/traiter/{id}
 
 GET      /Anomalie/index
 
@@ -110,6 +115,9 @@ POST     /Notification/lire_tout
 GET/POST /Import/index
 POST     /Import/upload
 ```
+
+Le paiement intégral marque la facture comme payée et enregistre la date dans l'application. Il ne s'agit pas d'un paiement bancaire en ligne.
+Pour une base déjà installée, appliquer une seule fois `sql/migration_paiement_reclamation.sql`.
 
 Flux des anomalies :
 
